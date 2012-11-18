@@ -19,10 +19,11 @@
 #include <string.h>
 
 #include "Http.h"
-#include "happyhttp.h"
-using namespace happyhttp;
+//#include "happyhttp.h"
+//using namespace happyhttp;
 
 
+#if 0
 
 static void http_begin_cb( const Response* r, void* userdata )
 {
@@ -87,10 +88,13 @@ static bool parseUri( const char * uri,
   //        outHost,*outPort,outPath);
   return true;
 }
+#endif
 
 bool Http::get( const char* uri,
 		const char* file )
 {
+    return false;
+#if 0
   char host[256];
   char path[256];
   int port;
@@ -115,12 +119,15 @@ bool Http::get( const char* uri,
 
   fclose ( m_file );
   return m_size > 0;
+#endif
 }
 
 
 bool Http::post( const char* uri, const char*putname, const char* putfile,
 		 const char* otherargs )
 {
+    return false;
+#if 0
   char host[256];
   char path[256];
   char data[64*1024];
@@ -174,17 +181,20 @@ bool Http::post( const char* uri, const char*putname, const char* putfile,
       fprintf(stderr,"http_get wobbly: %s\n",w.what());
     }
   }
+#endif
 }
 
 
 // response
 std::string Http::errorMessage()
 {
-  return m_err;
+    return "";
+//  return m_err;
 }
 
 std::string Http::getHeader( const char* name )
 {
-  return m_npid;
+    return "";
+//  return m_npid;
 }
 

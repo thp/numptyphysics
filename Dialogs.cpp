@@ -24,10 +24,12 @@
 
 
 /* See Swipe.h */
+#if 0
 class Swipe {
     public:
         static void lock(bool locked);
 };
+#endif
 
 
 #include "help_text_html.h"
@@ -262,13 +264,13 @@ public:
       m_game(game),
       m_chosenLevel(game->m_level)
   {
-    Swipe::lock(false);
+    //Swipe::lock(false);
     content()->add(new FrontPage());
     m_targetPos = Vec2( 0, 0 );
     sizeTo(Vec2(SCREEN_WIDTH,SCREEN_HEIGHT));
   }
   ~MainMenu() {
-    Swipe::lock(true);
+    //Swipe::lock(true);
   }
   bool onEvent( Event& ev )
   {

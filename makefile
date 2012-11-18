@@ -2,7 +2,7 @@
 APP = numptyphysics
 
 DESTDIR ?=
-PREFIX = /opt/numptyphysics
+PREFIX = app/native
 
 CXXFLAGS += -DINSTALL_BASE_PATH=\"$(PREFIX)/data\"
 
@@ -13,22 +13,26 @@ all: $(APP)
 # Required modules (uses pkg-config)
 PKGS = sdl SDL_image
 
-CXXFLAGS += $(shell pkg-config --cflags $(PKGS))
-LIBS += $(shell pkg-config --libs $(PKGS))
+CXXFLAGS += -I/home/thp/pkg/bb/SDL/playbook_prefix/include
+CXXFLAGS += -I/home/thp/pkg/bb/SDL/playbook_prefix/include/SDL
+LIBS += -L/home/thp/pkg/bb/SDL/playbook_prefix/lib
 
-# There's no pkg-config module for SDL_ttf?
-LIBS += -lSDL_ttf
+CXXFLAGS += -I/home/thp/pkg/bb/SDL_image-1.2.12/playbook_prefix/include
+LIBS += -L/home/thp/pkg/bb/SDL_image-1.2.12/playbook_prefix/lib
 
+CXXFLAGS += -I/home/thp/pkg/bb/SDL_ttf-2.0.11/playbook_prefix/include
+LIBS += -L/home/thp/pkg/bb/SDL_ttf-2.0.11/playbook_prefix/lib
+
+LIBS += -lSDL -lSDL_image -lSDL_ttf -lfreetype -Wl,-rpath,'./app/native/lib'
+CXXFLAGS += -D_GNU_SOURCE=1
+
+CXX = arm-unknown-nto-qnx6.5.0eabi-c++
 
 # Box2D Library
 CXXFLAGS += -IBox2D/Include
 BOX2D_SOURCE := Box2D/Source
 BOX2D_LIBRARY := Gen/float/libbox2d.a
 LIBS += $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
-
-$(BOX2D_SOURCE)/$(BOX2D_LIBRARY):
-	$(MAKE) -C $(BOX2D_SOURCE) $(BOX2D_LIBRARY)
-
 
 # Pick the right OS-specific module here
 SOURCES += os/OsFreeDesktop.cpp

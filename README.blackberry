@@ -1,0 +1,33 @@
+
+                   Numpty Physics for the Blackberry Playbook
+                   ==========================================
+
+This is a quick'n'dirty port of Numpty Physics to the Blackberry Playbook. It's
+based on the MeeGo Harmattan port of Numpty Physics, with some things ripped
+out (e.g. X11- and Swipe-related stuff) and some other clean-ups (e.g. parts of
+the build system assumed that the C++ compiler is called "g++").
+
+I did the port two months ago, and haven't touched it since, so I'm not sure if
+the dependencies listed here cover everything, but you'll probably need:
+
+    - SDL (https://github.com/blackberry/SDL)
+    - SDL_Image (take the upstream release, build it like the BB SDL)
+    - SDL_TTF (same for this - you should be able to use BB's freetype)
+    - The Blackberry Native SDK
+
+I've done the building under Linux, but it probably also works on other OSes.
+You will need to build SDL yourself. Make sure to fix the paths to SDL and
+stuff in the "makefile" - right now, they are hardcoded to where I installed
+them for me, and this is very likely not going to be the place where you put
+your installation.
+
+To package it, you'll need the usual debug token stuff and you can use the
+packit.sh script (or use the native packager manually) to build a .bar to
+deploy to your Playbook.
+
+Here's a video of the port in action:
+
+    http://www.youtube.com/watch?v=hvRgYCb-wU4 (2012-09-17)
+
+-- thp <thp.io/about>; 2012-11-18
+

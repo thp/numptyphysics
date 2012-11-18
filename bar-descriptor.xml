@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<qnx >
+    <id>com.thpinfo.numptyphysics</id>
+    <filename>numptyphysics</filename>
+    <name>Numpty Physics</name>
+    <versionNumber>1.0.0</versionNumber>
+    <buildId>1</buildId>
+    <description>Physics Drawing Stuff.</description>
+    <copyright>2012</copyright>
+
+    <initialWindow>
+        <systemChrome>none</systemChrome>
+        <transparent>false</transparent>
+        <autoOrients>true</autoOrients>
+        <aspectRatio>landscape</aspectRatio>
+    </initialWindow>
+
+    <publisher>Thomas Perl</publisher>
+    <permission system="true">run_native</permission>
+    <env var="LD_LIBRARY_PATH" value="app/native/lib"/>
+    <category>core.games</category>
+    <icon><image>res/icon.png</image></icon>
+</qnx>
+

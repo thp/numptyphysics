@@ -73,8 +73,8 @@ b2BroadPhase::b2BroadPhase(const b2AABB& worldAABB, b2PairCallback* callback)
 	m_proxyCount = 0;
 
 	b2Vec2 d = worldAABB.upperBound - worldAABB.lowerBound;
-	m_quantizationFactor.x = float32(B2BROADPHASE_MAX) / d.x;
-	m_quantizationFactor.y = float32(B2BROADPHASE_MAX) / d.y;
+	m_quantizationFactor.x = (float32((int)B2BROADPHASE_MAX) / d.x);
+	m_quantizationFactor.y = (float32((int)B2BROADPHASE_MAX) / d.y);
 
 	for (uint16 i = 0; i < b2_maxProxies - 1; ++i)
 	{
