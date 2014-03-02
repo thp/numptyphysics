@@ -396,7 +396,7 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
 }
 
 
-void Window::update( const Rect& r )
+void Window::update()
 {
     SDL_RenderPresent(m_renderer);
     clear();

@@ -65,7 +65,7 @@ void Widget::sizeTo( const Vec2& size )
   onResize();
 }
 
-bool Widget::processEvent( SDL_Event& ev )
+bool Widget::processEvent(ToolkitEvent &ev)
 {
   if (m_eventMap) { 
     Event e = m_eventMap->process(ev);
@@ -518,7 +518,7 @@ Draggable::Draggable()
   setEventMap(UI_DRAGGABLE_MAP);
 }
 
-bool Draggable::processEvent( SDL_Event& ev )
+bool Draggable::processEvent(ToolkitEvent &ev)
 {
   // get in before our children
   if (!m_internalEvent && m_eventMap) { 
@@ -561,15 +561,13 @@ bool Draggable::onPreEvent( Event& ev )
       return true;
     } else {
       //translate into a raw click
-      SDL_Event sdlEv;
-      sdlEv.type = SDL_MOUSEBUTTONDOWN;
-      sdlEv.button.button = SDL_BUTTON_LEFT;
-      sdlEv.button.x = ev.x;
-      sdlEv.button.y = ev.y;
+      int finger = 0; // primary finger
+      int button = 1; // left button
+      ToolkitEvent e(ToolkitEvent::PRESS, ev.x, ev.y, finger, button);
       m_internalEvent = true;
-      processEvent(sdlEv);
-      sdlEv.type = SDL_MOUSEBUTTONUP;
-      bool result = processEvent(sdlEv);
+      processEvent(e);
+      e.type = ToolkitEvent::RELEASE;
+      bool result = processEvent(e);
       m_internalEvent = false;
       return result;
     }
@@ -730,12 +728,12 @@ void Container::draw( Canvas& screen, const Rect& area )
   }
 }
 
-bool Container::processEvent( SDL_Event& ev )
+bool Container::processEvent(ToolkitEvent &ev)
 {
-  if (ev.type == SDL_MOUSEBUTTONUP ||
-          ev.type == SDL_MOUSEBUTTONDOWN ||
-          ev.type == SDL_MOUSEMOTION) {
-    if (ev.button.which != 0) {
+  if (ev.type == ToolkitEvent::PRESS ||
+          ev.type == ToolkitEvent::RELEASE ||
+          ev.type == ToolkitEvent::MOVE) {
+    if (ev.finger != 0) {
         /**
          * Ignore button events for multi-touch fingers if it
          * isn't the first finger (which == 0). This prevents
@@ -748,27 +746,26 @@ bool Container::processEvent( SDL_Event& ev )
     }
   }
 
-  switch( ev.type ) {      
-  case SDL_MOUSEBUTTONDOWN:
-  case SDL_MOUSEBUTTONUP:
-    for (int i=m_children.size()-1; i>=0; --i) {
-      Widget *c = m_children[i];
-      if (c->greedyMouse()
-	  || c->position().contains(Vec2(ev.button.x,ev.button.y))) {
-	if ( c->processEvent(ev) ) {
-	  return true;
-	}
-      }
-    }
-    break;
-  default:
-    for (int i=m_children.size()-1; i>=0; --i) {
-      //fprintf(stderr," ev to: %s\n",m_children[i]->toString().c_str());
-      if (m_children[i]->processEvent(ev)) {
-	return true;
-      }
-    }
-    break;
+  switch (ev.type) {
+      case ToolkitEvent::PRESS:
+      case ToolkitEvent::RELEASE:
+          for (int i=m_children.size()-1; i>=0; --i) {
+              Widget *c = m_children[i];
+              if (c->greedyMouse() || c->position().contains(ev.pos())) {
+                  if (c->processEvent(ev)) {
+                      return true;
+                  }
+              }
+          }
+          break;
+      default:
+          for (int i=m_children.size()-1; i>=0; --i) {
+              //fprintf(stderr," ev to: %s\n",m_children[i]->toString().c_str());
+              if (m_children[i]->processEvent(ev)) {
+                  return true;
+              }
+          }
+          break;
   }
   return Widget::processEvent(ev);
 }
@@ -1017,10 +1014,10 @@ void Dialog::onTick( int tick )
   Panel::onTick(tick);
 }
 
-bool Dialog::processEvent( SDL_Event& ev )
+bool Dialog::processEvent(ToolkitEvent &ev)
 {
-  if (ev.type == SDL_MOUSEBUTTONUP
-      && !m_pos.contains(Vec2(ev.button.x,ev.button.y))) {
+  if (ev.type == ToolkitEvent::RELEASE
+      && !m_pos.contains(ev.pos())) {
     // click outside the dialog to close
     Event closeEvent(Event::CLOSE);
     return onEvent(closeEvent);

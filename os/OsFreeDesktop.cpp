@@ -77,6 +77,70 @@ class OsFreeDesktop : public Os
     }
   }
 
+  virtual bool nextEvent(ToolkitEvent &ev)
+  {
+      SDL_Event e;
+      if (!SDL_PollEvent(&e)) {
+          return false;
+      }
+
+      switch (e.type) {
+          case SDL_MOUSEBUTTONDOWN:
+              ev.type = ToolkitEvent::PRESS;
+              ev.x = e.button.x;
+              ev.y = e.button.y;
+              ev.finger = e.button.which;
+              ev.key = e.button.button;
+              break;
+          case SDL_MOUSEBUTTONUP:
+              ev.type = ToolkitEvent::RELEASE;
+              ev.x = e.button.x;
+              ev.y = e.button.y;
+              ev.finger = e.button.which;
+              ev.key = e.button.button;
+              break;
+          case SDL_MOUSEMOTION:
+              ev.type = ToolkitEvent::MOVE;
+              ev.x = e.motion.x;
+              ev.y = e.motion.y;
+              ev.finger = e.motion.which;
+              ev.key = e.motion.state;
+              break;
+          case SDL_KEYDOWN:
+              ev.type = ToolkitEvent::KEYDOWN;
+              ev.x = ev.y = ev.finger = 0;
+              ev.key = e.key.keysym.sym;
+              break;
+          case SDL_QUIT:
+              ev.type = ToolkitEvent::QUIT;
+              break;
+          default:
+              ev.type = ToolkitEvent::NONE;
+              break;
+      }
+
+      //printf("Got event: %d (%d, %d - %d, %d [%c])\n", ev.type, ev.x, ev.y,
+      //        ev.finger, ev.key, (ev.key > 30) ? ev.key : '?');
+      return true;
+  }
+
+  virtual long ticks()
+  {
+      return SDL_GetTicks();
+  }
+
+  virtual void delay(int ms)
+  {
+      SDL_Delay(ms);
+  }
+
+  virtual void init()
+  {
+    if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0) {
+      throw "Couldn't initialize SDL";
+    }
+  }
+
   virtual char *getLaunchFile() 
   {
     poll();

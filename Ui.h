@@ -22,7 +22,6 @@
 #include "Event.h"
 
 #include <string>
-#include <SDL.h>
 
 class Canvas;
 class Widget;
@@ -43,7 +42,7 @@ class Widget
   virtual const Rect& position() const { return m_pos; }
   virtual void onTick( int tick ) {}
   virtual void draw( Canvas& screen, const Rect& area );
-  virtual bool processEvent( SDL_Event& ev );
+  virtual bool processEvent(ToolkitEvent &ev);
   bool dispatchEvent( Event& ev );
 
   virtual void onResize() {}
@@ -185,7 +184,7 @@ class Container : public WidgetParent
   virtual void move( const Vec2& by );
   virtual void onTick( int tick );
   virtual void draw( Canvas& screen, const Rect& area );
-  virtual bool processEvent( SDL_Event& ev );
+  virtual bool processEvent(ToolkitEvent &ev);
   virtual void onResize();
 
   virtual void add( Widget* w, int x=-9999, int y=-9999 );
@@ -235,7 +234,7 @@ class Draggable : public Panel
  public:
   Draggable();
   const char* name() {return "Draggable";}
-  bool processEvent( SDL_Event& ev );
+  bool processEvent(ToolkitEvent &ev);
   bool onPreEvent( Event& ev );
   bool onEvent( Event& ev );
   void onTick( int tick );
@@ -312,7 +311,7 @@ class Dialog : public Panel
   Dialog( const std::string &title="", Event left=Event::NOP, Event right=Event::NOP );
   const char* name() {return "Dialog";}
   void onTick( int tick );
-  bool processEvent( SDL_Event& ev );
+  bool processEvent(ToolkitEvent &ev);
   bool onEvent( Event& ev );
   bool close();
   virtual Container* content() { return m_content; }

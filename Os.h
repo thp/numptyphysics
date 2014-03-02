@@ -29,6 +29,10 @@ class Os
  public:  
   virtual ~Os() {}
   virtual void  poll() {};
+  virtual bool nextEvent(ToolkitEvent &ev) = 0;
+  virtual long ticks() = 0;
+  virtual void delay(int ms) = 0;
+  virtual void init() = 0;
   virtual char* getLaunchFile() { return NULL; }
   virtual bool  openBrowser( const char* url ) = 0;
   virtual char* saveDialog( const char* path ) { return NULL; }

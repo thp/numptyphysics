@@ -15,61 +15,71 @@
  */
 #include "Event.h"
 
-char Event::g_mods = 0;
-
 BasicEventMap::BasicEventMap( const KeyPair* keys, const ButtonPair* buttons )
   : m_keys(keys), m_buttons(buttons)
 {}
 
-Event BasicEventMap::process(const SDL_Event& ev)
+Event BasicEventMap::process(const ToolkitEvent& ev)
 {
-  Event ret;
+  const ButtonPair *inf = 0;
+  const KeyPair *key = 0;
+
   switch (ev.type) {
-  case SDL_MOUSEBUTTONDOWN: {
-    Event::g_mods |= SDL_BUTTON(ev.button.button);
-    const ButtonPair* inf = lookupButton(ev.button.button);
-    if (inf) ret = Event(inf->down, ev.button.x, ev.button.y);;
-    break; }
-  case SDL_MOUSEBUTTONUP: {
-    Event::g_mods &= ~SDL_BUTTON(ev.button.button);
-    const ButtonPair* inf = lookupButton(ev.button.button);
-    if (inf) ret = Event(inf->up, ev.button.x, ev.button.y);
-    break; }
-  case SDL_MOUSEMOTION: {
-    const ButtonPair* inf = lookupButton(ev.button.button);
-    if (inf) ret = Event(inf->move, ev.button.x, ev.button.y);
-    break; }
-  case SDL_KEYDOWN: {
-    //const KeyPair* inf = lookupKey(ev.key.keysym.sym);
-    //const KeyPair* inf = 0;
-    //if (inf) ret = Event(inf->ev, (char)ev.key.keysym.unicode);
-    break; }
+      case ToolkitEvent::PRESS:
+          inf = lookupButton(ev.key);
+          if (inf) {
+              return Event(inf->down, ev.x, ev.y);
+          }
+          break;
+      case ToolkitEvent::RELEASE:
+          inf = lookupButton(ev.key);
+          if (inf) {
+              return Event(inf->up, ev.x, ev.y);
+          }
+          break;
+      case ToolkitEvent::MOVE:
+          inf = lookupButton(ev.key);
+          if (inf) {
+              return Event(inf->move, ev.x, ev.y);
+          }
+          break;
+      case ToolkitEvent::KEYDOWN:
+          key = lookupKey(ev.key);
+          if (key) {
+              return Event(key->ev, (char)ev.key);
+          }
+          break;
+      default:
+          break;
   }
-  return ret;
+
+  return Event();
 }
 
-#if 0
 const BasicEventMap::KeyPair*
-BasicEventMap::lookupKey(SDLKey sym)
+BasicEventMap::lookupKey(int key)
 {
   const KeyPair* p = m_keys;
   while (p && p->sym) {
-    if (p->sym == sym) return p;
-    p++;
+      if (p->sym == key) {
+          return p;
+      }
+      p++;
   }
   return NULL;
 }
-#endif
 
 const BasicEventMap::ButtonPair*
 BasicEventMap::lookupButton(unsigned char button)
 {
-  const ButtonPair* p = m_buttons;
-  while (p && p->button) {
-    if (p->button == button) return p;
-    p++;
-  }
-  return NULL;
+    const ButtonPair* p = m_buttons;
+    while (p && p->button) {
+        if (p->button == button) {
+            return p;
+        }
+        p++;
+    }
+    return NULL;
 }
 
 

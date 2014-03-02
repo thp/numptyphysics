@@ -29,8 +29,6 @@
 #include "Dialogs.h"
 #include "Ui.h"
 
-#include <SDL.h>
-
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -118,7 +116,7 @@ public:
       m_refresh = true;
       m_level = level;
       if (!m_replaying) {
-	m_stats.reset(SDL_GetTicks());
+	m_stats.reset(OS->ticks());
       }
     }
   }
@@ -293,7 +291,7 @@ public:
       if ( m_isCompleted ) {
 	if (m_stats.endTime==0) {
 	  //don't overwrite time after replay
-	  m_stats.endTime = SDL_GetTicks();
+	  m_stats.endTime = OS->ticks();
 	}
 	fprintf(stderr,"STATS:\ttime=%dms\n\t"
 		"strokes=%d (%d paused, %d undone)\n",
@@ -346,18 +344,16 @@ public:
     Container::draw(screen,area);
   }
 
-  virtual bool processEvent( SDL_Event& ev )
+  virtual bool processEvent(ToolkitEvent &ev)
   {
     Event opt1Event(Event::OPTION,1);
     Event opt2Event(Event::OPTION,2);
-    if (ev.type==SDL_MOUSEBUTTONDOWN) {
-      if (ev.button.x < 10
-	  && dispatchEvent(opt1Event)) {
-	return true;
-      } else if (ev.button.x > SCREEN_WIDTH-10
-		 && dispatchEvent(opt2Event)) {
-	return true;
-      }
+    if (ev.type == ToolkitEvent::PRESS) {
+        if (ev.x < 10 && dispatchEvent(opt1Event)) {
+            return true;
+        } else if (ev.x > SCREEN_WIDTH-10 && dispatchEvent(opt2Event)) {
+            return true;
+        }
     }
     return Container::processEvent(ev);
   }

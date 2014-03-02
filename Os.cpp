@@ -47,17 +47,17 @@ static const BasicEventMap::KeyPair game_keymap[] = {
 };
 
 static const BasicEventMap::ButtonPair game_mousemap[] = {
-  { SDL_BUTTON_LEFT, Event::DRAWBEGIN, Event::DRAWMORE, Event::DRAWEND },
+  { 1, Event::DRAWBEGIN, Event::DRAWMORE, Event::DRAWEND },
   {}
 };
 
 static const BasicEventMap::ButtonPair game_move_mousemap[] = {
-  { SDL_BUTTON_LEFT, Event::MOVEBEGIN, Event::MOVEMORE, Event::MOVEEND },
+  { 1, Event::MOVEBEGIN, Event::MOVEMORE, Event::MOVEEND },
   {}
 };
 
 static const BasicEventMap::ButtonPair game_erase_mousemap[] = {
-  { SDL_BUTTON_LEFT, Event::NOP, Event::NOP, Event::DELETE },
+  { 1, Event::NOP, Event::NOP, Event::DELETE },
   {}
 };
 
@@ -68,19 +68,19 @@ static const BasicEventMap::KeyPair app_keymap[] = {
 
 
 static const BasicEventMap::ButtonPair edit_mousemap[] = {
-  { SDL_BUTTON_LEFT, Event::DRAWBEGIN, Event::DRAWMORE, Event::DRAWEND },
-  { SDL_BUTTON_RIGHT, Event::MOVEBEGIN, Event::MOVEMORE, Event::MOVEEND },
-  { SDL_BUTTON_MIDDLE, Event::DELETE },
+  { 1, Event::DRAWBEGIN, Event::DRAWMORE, Event::DRAWEND },
+  { 2, Event::MOVEBEGIN, Event::MOVEMORE, Event::MOVEEND },
+  { 3, Event::DELETE },
   {}
 };
 
 static const BasicEventMap::ButtonPair ui_button_mousemap[] = {
-  { SDL_BUTTON_LEFT, Event::FOCUS, Event::FOCUS, Event::SELECT },
+  { 1, Event::FOCUS, Event::FOCUS, Event::SELECT },
   {}
 };
 
 static const BasicEventMap::ButtonPair ui_draggable_mousemap[] = {
-  { SDL_BUTTON_LEFT, Event::MOVEBEGIN, Event::MOVEMORE, Event::MOVEEND },
+  { 1, Event::MOVEBEGIN, Event::MOVEMORE, Event::MOVEEND },
   {}
 };
 
@@ -102,12 +102,13 @@ class AppMap : public BasicEventMap
 {
 public:
   AppMap() : BasicEventMap( app_keymap, NULL ) {}
-  Event process(const SDL_Event& ev)
+  Event process(const ToolkitEvent& ev)
   {
-    if (ev.type==SDL_QUIT) {
-      return Event(Event::QUIT);
-    }
-    return BasicEventMap::process(ev);
+      if (ev.type == ToolkitEvent::QUIT) {
+          return Event(Event::QUIT);
+      } else {
+          return BasicEventMap::process(ev);
+      }
   }
 
 };
