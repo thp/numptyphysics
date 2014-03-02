@@ -65,7 +65,6 @@ public:
 
   void step( bool isPaused=false );
   bool isCompleted();
-  Rect dirtyArea();
   void draw( Canvas& canvas, const Rect& area );
   void reset( Stroke* s=NULL,  bool purgeUnprotected=false );
   Stroke* strokeAtPoint( const Vec2 pt, float32 max );
@@ -89,7 +88,6 @@ private:
   void activateAll();
   void createJoints( Stroke *s );
   bool parseLine( const std::string& line );
-  void calcDirtyArea();
 
   // b2ContactListener callback when a new contact is detected
   virtual void Add(const b2ContactPoint* point) ;
@@ -109,7 +107,6 @@ private:
   b2Vec2          m_currentGravity;
   bool            m_dynamicGravity;
   Accelerometer  *m_accelerometer;
-  Rect            m_dirtyArea;
 };
 
 

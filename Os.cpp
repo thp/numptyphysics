@@ -15,7 +15,7 @@
  */
 
 #include "Os.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #include <sys/stat.h>
 #include <unistd.h>

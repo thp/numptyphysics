@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <SDL/SDL_syswm.h>
+#include <SDL_syswm.h>
 #include <windows.h>
 
 

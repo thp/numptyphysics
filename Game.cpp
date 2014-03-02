@@ -29,8 +29,7 @@
 #include "Dialogs.h"
 #include "Ui.h"
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL.h>
 
 #include <cstdio>
 #include <iostream>
@@ -271,39 +270,6 @@ public:
   ////////////////////////////////////////////////////////////////
   // layer interface
   ////////////////////////////////////////////////////////////////
-
-  virtual bool isDirty()
-  {
-    //TODO this can be a bit heavyweight
-    return Container::isDirty() || !dirtyArea().isEmpty();
-  }
-
-  virtual Rect dirtyArea() 
-  {
-    //todo include dirt  for old joint candidates
-    m_jointCandidates.empty();
-    if ( m_refresh  ) {
-      if ( m_createStroke ) {
-	//this messes up dirty calc so do _after_ dirty area eval.
-	m_scene.getJointCandidates( m_createStroke, m_jointCandidates );
-      }
-      return FULLSCREEN_RECT;
-    } else {
-      Rect r = m_scene.dirtyArea();
-      if ( m_createStroke ) {
-	//this messes up dirty calc so do _after_ dirty area eval.
-	m_scene.getJointCandidates( m_createStroke, m_jointCandidates );
-	if ( m_jointCandidates.size() ) {
-	  Rect jr = m_jointCandidates.bbox();
-	  jr.grow( 8 );
-	  r.expand( jr );
-	}
-      }
-      r.grow(8);
-      r.expand(Container::dirtyArea());
-      return r;
-    }
-  }
 
   void remove( Widget* w )
   {

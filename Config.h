@@ -56,7 +56,6 @@
 
 #define HIDE_STEPS (AVG_RENDER_RATE*4)
 
-
 #ifndef INSTALL_BASE_PATH
 # if MAEMO_VERSION >= 5
 #  define INSTALL_BASE_PATH "/opt/numptyphysics"

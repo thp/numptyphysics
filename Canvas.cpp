@@ -20,24 +20,12 @@
 #include "Canvas.h"
 #include "Path.h"
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-
-#define Window X11Window //oops
-#define Font X11Font //oops
-#include "Swipe.h"
-#include <SDL/SDL_syswm.h>
-#ifndef WIN32
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#endif
-#undef Window
+#include <SDL.h>
+#include <SDL_image.h>
 
 //#define FORCE_16BPP
 
-// zoomer.cpp
-extern SDL_Surface *zoomSurface(SDL_Surface * src, double zoomx, double zoomy);
-
+static SDL_Renderer *g_renderer = NULL;
 
 // extract RGB colour components as 8bit values from RGB888
 #define R32(p) (((p)>>16)&0xff)
@@ -152,104 +140,21 @@ struct AlphaBrush<PIX,3>
 
 
 
-template <typename PIX, unsigned THICK> 
-inline void renderLine( void *buf,
-			int byteStride,
-			int x1, int y1, int x2, int y2,
-			PIX color )
-{  
-  PIX *pix = (PIX*)((char*)buf+byteStride*y1) + x1;
-  int lg_delta, sh_delta, cycle, lg_step, sh_step;
-  int alpha, alpha_step, alpha_reset;
-  int pixStride = byteStride/sizeof(PIX);
-  AlphaBrush<PIX,THICK> brush( color );
-
-  lg_delta = x2 - x1;
-  sh_delta = y2 - y1;
-  lg_step = Sgn(lg_delta);
-  lg_delta = Abs(lg_delta);
-  sh_step = Sgn(sh_delta);
-  sh_delta = Abs(sh_delta);
-  if ( sh_step < 0 )  pixStride = -pixStride;
-
-  // in theory should be able to do this with just a single step
-  // variable - ie: combine cycle and alpha as in wu algorithm
-  if (sh_delta < lg_delta) {
-    cycle = lg_delta >> 1;
-    alpha = ALPHA_MAX >> 1;
-    alpha_step = -(ALPHA_MAX * sh_delta/(lg_delta+1));
-    alpha_reset = alpha_step < 0 ? ALPHA_MAX : 0;
-    int count = lg_step>0 ? x2-x1 : x1-x2;
-    while ( count-- ) {
-      brush.ink( pix, pixStride, alpha );
-      cycle += sh_delta;
-      alpha += alpha_step;
-      pix += lg_step;
-      if (cycle > lg_delta) {
-	cycle -= lg_delta;
-	alpha = alpha_reset;
-	pix += pixStride;
-      }
-    }
-  } else {
-    cycle = sh_delta >> 1;
-    alpha = ALPHA_MAX >> 1;
-    alpha_step = -lg_step * Abs(ALPHA_MAX * lg_delta/(sh_delta+1));
-    alpha_reset = alpha_step < 0 ? ALPHA_MAX : 0;
-    int count = sh_step>0 ? y2-y1 : y1-y2;
-    while ( count-- ) {
-      brush.ink( pix, 1, alpha );
-      cycle += lg_delta;
-      alpha += alpha_step;
-      pix += pixStride;
-      if (cycle > sh_delta) {
-	cycle -= sh_delta;
-	alpha = alpha_reset;
-	pix += lg_step;
-      }
-    }
-  }
-}
-
-
 #define SURFACE(cANVASpTR) ((SDL_Surface*)((cANVASpTR)->m_state))
 
 Canvas::Canvas( int w, int h )
   : m_state(NULL),
-    m_bgColour(0),
     m_bgImage(NULL)
 {
-  switch (SDL_GetVideoInfo()->vfmt->BitsPerPixel) {
-  case 16:
-  case 32:
-#ifdef FORCE_16BPP
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 16,
-				    0xF100, 0x07e0, 0x001F, 0x0 );
-#else
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 
-				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
-				    SDL_GetVideoInfo()->vfmt->Rmask,
-				    SDL_GetVideoInfo()->vfmt->Gmask,
-				    SDL_GetVideoInfo()->vfmt->Bmask,
-				    SDL_GetVideoInfo()->vfmt->Amask );
-#endif
-    break;
-  default:
-    // eg: dummy vid driver reports 8bpp
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, w, h, 32,
-				    0xFF0000, 0x00FF00, 0x0000FF, 0xFF000000 );
-    break;
-  }
-  resetClip();
+    m_state = SDL_CreateRGBSurface(0, w, h, 32,
+            0xff0000, 0x00ff00, 0x0000ff, 0xff000000);
 }
 
 
 Canvas::Canvas( State state )
   : m_state(state),
-    m_bgColour(0),
     m_bgImage(NULL)
 {
-  resetClip();
 }
 
 Canvas::~Canvas()
@@ -261,108 +166,46 @@ Canvas::~Canvas()
 
 int Canvas::width() const
 {
-  return SURFACE(this)->w;
+    return m_width;
 }
 
 int Canvas::height() const
 {
-  return SURFACE(this)->h;
+    return m_height;
 }
 
 int Canvas::makeColour( int r, int g, int b ) const
 {
-  return SDL_MapRGB( SURFACE(this)->format, r, g, b );
+    return (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
 }
 
 int Canvas::makeColour( int c ) const
 {
-  return SDL_MapRGB( SURFACE(this)->format,
-		     (c>>16)&0xff, (c>>8)&0xff, (c>>0)&0xff );
+    return c;
 }
 
-void Canvas::resetClip()
-{
-  if ( m_state ) {
-    setClip( 0, 0, width(), height() );
-  } else {
-    setClip( 0, 0, 0, 0 );
-  }
-}
-
-void Canvas::setClip( int x, int y, int w, int h )
-{
-  //fprintf(stderr,"setclip %d,%d+%d+%d\n",x,y,w,h);
-  m_clip = Rect(x,y,x+w-1,y+h-1);
-}
-
-void Canvas::setBackground( int c )
-{
-  m_bgColour = c;
-}
-
-void Canvas::setBackground( Canvas* bg )
+void Canvas::setBackground( Image* bg )
 {
   m_bgImage = bg;
 }
 
 void Canvas::clear()
 {
-  if ( m_bgImage ) {
-    SDL_BlitSurface( SURFACE(m_bgImage), NULL, SURFACE(this), NULL );
-  } else {
-    SDL_FillRect( SURFACE(this), NULL, m_bgColour );
-  }
+    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 128);
+    SDL_RenderClear(m_renderer);
+    if (m_bgImage) {
+        SDL_RenderCopy(m_renderer, m_bgImage->m_texture, NULL, NULL);
+    }
 }
 
 void Canvas::fade( const Rect& rr ) 
 {
-  Uint32 bpp;
-  Rect r = rr;
-  r.clipTo( m_clip );
-  bpp = SURFACE(this)->format->BytesPerPixel;
-  char* row = (char*)SURFACE(this)->pixels;
-  int pixStride = width();
-  int w = r.br.x - r.tl.x;
-  int h = r.br.y - r.tl.y;
-  row += (r.tl.x + r.tl.y * pixStride) * bpp;
-
-  SDL_LockSurface(SURFACE(this));
-  switch ( bpp ) {
-  case 2: 
-    for ( int r=h; r>0; r-- ) {
-      for ( int i=0;i<w;i++) {
-	((Uint16*)row)[i] = (((Uint16*)row)[i]>>1) & 0x7bef;
-      }
-      row += pixStride * bpp;
-    }
-    break;
-  case 4:
-    for ( int r=h; r>0; r-- ) {
-      for ( int i=0;i<w;i++) {
-	((Uint32*)row)[i] = (((Uint32*)row)[i]>>1) & 0x7f7f7f;
-      }
-      row += pixStride * bpp;
-    }
-    break;
-  }
-  SDL_UnlockSurface(SURFACE(this));
+    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 128);
+    int w = rr.br.x - rr.tl.x;
+    int h = rr.br.y - rr.tl.y;
+    SDL_Rect r = { rr.tl.x, rr.tl.y, w, h };
+    SDL_RenderFillRect(m_renderer, &r);
 }
-
-#if 0
-inline uint32 avg2Pixels565(uint32 a, uint32 b)
-{
-  return (((a^b)&0xf7def7de)>>1) + (a&b);
-}
-
-inline uint16 avgPixels565(uint32 ab)
-{
-  uint16 a = ab >> 16;
-  uint16 v = ab & 0xffff;
-  
-  return (((a^b)&0xf7def7de)>>1) + (a&b);
-}
-#endif
-
 
 Canvas* Canvas::scale( int factor ) const
 {
@@ -437,44 +280,21 @@ Canvas* Canvas::scale( int factor ) const
   return c;
 }
 
-
-void Canvas::scale( int w, int h )
-{
-  if ( w!=width() && h!=height() ) {
-    SDL_Surface *s = zoomSurface( SURFACE(this),
-				  (double)w/(double)width(),
-				  (double)h/(double)height() );
-    if ( s ) {
-      SDL_FreeSurface( SURFACE(this) );
-      m_state = s;
-    }
-  }
-}
-
-
 void Canvas::clear( const Rect& r )
 {
-  if ( m_bgImage ) {
-    SDL_Rect srcRect = { r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1 };
-    SDL_BlitSurface( SURFACE(m_bgImage), &srcRect, SURFACE(this), &srcRect );
-  } else {
-    drawRect( r, m_bgColour );
-  }
 }
 
 void Canvas::drawImage( Canvas *canvas, int x, int y )
 {
-  Rect dest(x,y,x+canvas->width(),y+canvas->height());
-  dest.clipTo(m_clip);
-//   if (dest.tl.y != y) {
-//     fprintf(stderr,"clipped (%d,%d-%d,%d) to (%d,%d)-(%d,%d)\n",
-// 	    x,y,x+canvas->width(),y+canvas->height(),
-// 	    dest.tl.x, dest.tl.y, dest.br.x, dest.br.y);
-//   }
+    int w = canvas->width();
+    int h = canvas->height();
 
-  SDL_Rect sdlsrc = { dest.tl.x-x, dest.tl.y-y, dest.width(), dest.height() };
-  SDL_Rect sdldst = { dest.tl.x, dest.tl.y, 0, 0 };
-  SDL_BlitSurface( SURFACE(canvas), &sdlsrc, SURFACE(this), &sdldst );
+    SDL_Rect sdlsrc = { 0, 0, w, h };
+    SDL_Rect sdldst = { x, y, w, h };
+
+    if (SDL_RenderCopy(m_renderer, ((Image *)canvas)->m_texture, &sdlsrc, &sdldst) != 0) {
+        printf("Could not render: %s\n", SDL_GetError());
+    }
 }
 
 void Canvas::drawPixel( int x, int y, int c )
@@ -512,116 +332,35 @@ int Canvas::readPixel( int x, int y ) const
   return c;
 }
 
-void Canvas::drawLine( int x1, int y1, int x2, int y2, int color )
-{  
-  int lg_delta, sh_delta, cycle, lg_step, sh_step;
-  lg_delta = x2 - x1;
-  sh_delta = y2 - y1;
-  lg_step = Sgn(lg_delta);
-  lg_delta = Abs(lg_delta);
-  sh_step = Sgn(sh_delta);
-  sh_delta = Abs(sh_delta);
-  if (sh_delta < lg_delta) {
-    cycle = lg_delta >> 1;
-    while (x1 != x2) {
-      drawPixel( x1, y1, color);
-      cycle += sh_delta;
-      if (cycle > lg_delta) {
-	cycle -= lg_delta;
-	y1 += sh_step;
-      }
-      x1 += lg_step;
-    }
-    drawPixel( x1, y1, color);
-  }
-  cycle = sh_delta >> 1;
-  while (y1 != y2) {
-    drawPixel( x1, y1, color);
-    cycle += lg_delta;
-    if (cycle > sh_delta) {
-      cycle -= sh_delta;
-      x1 += lg_step;
-    }
-    y1 += sh_step;
-  }
-  drawPixel( x1, y1, color);
-}
-
 void Canvas::drawPath( const Path& path, int color, bool thick )
 {
-  // allow for thick lines in clipping
-  Rect clip = m_clip;
-  clip.tl.x++; clip.tl.y++;
-  clip.br.x--; clip.br.y--;
+    int r = (color & 0xff0000) >> 16;
+    int g = (color & 0x00ff00) >> 8;
+    int b = (color & 0x0000ff);
+    SDL_SetRenderDrawColor(m_renderer, r, g, b, 255);
 
-  int i=0;
-  const int n = path.numPoints();
- 
-  for ( ; i<n && !clip.contains( path.point(i) ); i++ ) {
-    //skip clipped start pt
-  }
-  i++;
-  SDL_LockSurface(SURFACE(this));
-  for ( ; i<n; i++ ) {
-    // pt i-1 is guranteed to be inside clipping    
-    const Vec2& p2 = path.point(i);
-    if ( clip.contains( p2 ) ) {
-      const Vec2& p1 = path.point(i-1);
-      switch ( SURFACE(this)->format->BytesPerPixel ) {
-      case 2:      
-	if ( thick ) {
-	  renderLine<Uint16,3>( SURFACE(this)->pixels,
-				SURFACE(this)->pitch,
-				p1.x, p1.y, p2.x, p2.y, color );
-	} else {
-	  renderLine<Uint16,1>( SURFACE(this)->pixels,
-				SURFACE(this)->pitch,
-				p1.x, p1.y, p2.x, p2.y, color );
-	}
-	break;
-      case 4:
-	if ( thick ) {
-	  renderLine<Uint32,3>( SURFACE(this)->pixels,
-				SURFACE(this)->pitch,
-				p1.x, p1.y, p2.x, p2.y, color );
-	} else {
-	  renderLine<Uint32,1>( SURFACE(this)->pixels,
-				SURFACE(this)->pitch,
-				p1.x, p1.y, p2.x, p2.y, color );
-	}
-	break;
-      }
-    } else {
-      for ( ; i<n && !clip.contains( path.point(i) ); i++ ) {
-	//skip until we find a unclipped pt - this will be p1 next
-	//time around
-      }
-    }
-  }
-  SDL_UnlockSurface(SURFACE(this));
-  
+    // This assumes that Vec2 == int[2] and items in path are tightly packed
+    SDL_RenderDrawLines(m_renderer, (SDL_Point *)&path[0], path.numPoints());
 }
 
 void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill )
 {
-  if ( fill ) {
-    Rect dest(x,y,x+w,y+h);
-    dest.clipTo(m_clip);
-    SDL_Rect r = { dest.tl.x, dest.tl.y, dest.width(), dest.height() };
-    SDL_FillRect( SURFACE(this), &r, c );
-  } else {
-    SDL_Rect f = { x, y, w, h };
-    SDL_Rect r;
-    r=f; r.h=1; SDL_FillRect( SURFACE(this), &r, c );
-    r.y+=f.h-1; SDL_FillRect( SURFACE(this), &r, c );
-    r=f; r.w=1; SDL_FillRect( SURFACE(this), &r, c );
-    r.x+=f.w-1; SDL_FillRect( SURFACE(this), &r, c );
-  }
+    int r = (c & 0xff0000) >> 16;
+    int g = (c & 0x00ff00) >> 8;
+    int b = (c & 0x0000ff);
+    SDL_Rect rect = { x, y, w, h };
+
+    SDL_SetRenderDrawColor(m_renderer, r, g, b, 255);
+    if (fill) {
+        SDL_RenderDrawRect(m_renderer, &rect);
+    } else {
+        SDL_RenderFillRect(m_renderer, &rect);
+    }
 }
 
 void Canvas::drawRect( const Rect& r, int c, bool fill )
 {
-  drawRect( r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1, c, fill );
+    drawRect( r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1, c, fill );
 }
 
 
@@ -634,151 +373,38 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
     snprintf(s,80,"SDL_VIDEO_X11_WMCLASS=%s",winclass);
     putenv(s);
   }
-#ifdef USE_HILDON
-#if 0
-  m_state = SDL_SetVideoMode( w, h, 16, SDL_SWSURFACE);//SDL_FULLSCREEN);
-  SDL_WM_ToggleFullScreen( SURFACE(this) );
-#else //n900
-  m_state = SDL_SetVideoMode( w, h, 0, SDL_SWSURFACE|SDL_FULLSCREEN);
-#endif
-  SDL_ShowCursor( SDL_DISABLE );
-#else
-# ifdef FORCE_16BPP
-  m_state = SDL_SetVideoMode( w, h, 16, SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
-# else
-  m_state = SDL_SetVideoMode( w, h, 32, SDL_SWSURFACE | ((fullscreen==true)?(SDL_FULLSCREEN):(0)));
-# endif
-#endif
-  if ( SURFACE(this) == NULL ) {
-    throw "Unable to set video mode";
+
+  if (SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN, &m_window, &m_renderer) != 0) {
+      printf("Could not create window and renderer: %s\n", SDL_GetError());
+      exit(1);
   }
-  resetClip();
+
+  g_renderer = m_renderer;
+  SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+  SDL_GetWindowSize(m_window, &m_width, &m_height);
+
+  // TODO
+  m_state = NULL;
+
+  //if ( SURFACE(this) == NULL ) {
+  //  throw "Unable to set video mode";
+  //}
 
   if ( title ) {
-    SDL_WM_SetCaption( title, title );
+    //SDL_WM_SetCaption( title, title );
   }
-
-  memset(&(Swipe::m_syswminfo), 0, sizeof(SDL_SysWMinfo));
-  SDL_VERSION(&(Swipe::m_syswminfo.version));
-  SDL_GetWMInfo(&(Swipe::m_syswminfo));
-  Swipe::lock(true);
-
-#ifdef USE_HILDON
-  SDL_SysWMinfo sys;
-  SDL_VERSION( &sys.version );
-  SDL_GetWMInfo( &sys );
-  printf("X11 window =%08x\n",sys.info.x11.window);
-  printf("X11 fswindow =%08x\n",sys.info.x11.fswindow);
-  printf("X11 wmwindow =%08x\n",sys.info.x11.wmwindow);
-
-  uint32_t pid = getpid();
-  XChangeProperty( sys.info.x11.display,
-		   sys.info.x11.wmwindow,
-		   XInternAtom (sys.info.x11.display,
-				"_NET_WM_PID", False),
-		   XA_CARDINAL, 32, PropModeReplace,
-		   (unsigned char*)&pid, 1 );
-
-  // SDL_WM_SetCaption is broken on maemo4
-  XStoreName( sys.info.x11.display,
-	      sys.info.x11.wmwindow,
-	      title );
-  XStoreName( sys.info.x11.display,
-	      sys.info.x11.fswindow,
-	      title );
-		  
-#if 0
-  /* Fremantle: tell maemo-status-volume daemon to ungrab keys */
-  unsigned long val = 1; /* ungrab, use 0 to grab */
-  XChangeProperty( sys.info.x11.display,
-		   sys.info.x11.wmwindow,
-		   XInternAtom(sys.info.x11.display,
-			       "_HILDON_ZOOM_KEY_ATOM", False),
-		   XA_INTEGER, 32,
-		   PropModeReplace,
-		   (unsigned char*)&val, 1);
-#endif //0
-
-  
-#endif
 }
 
 
 void Window::update( const Rect& r )
 {
-  if ( r.tl.x < width() && r.tl.y < height() ) {
-    int x1 = Max( 0, r.tl.x );
-    int y1 = Max( 0, r.tl.y );
-    int x2 = Min( width()-1, r.br.x );
-    int y2 = Min( height()-1, r.br.y );
-    int w  = Max( 0, x2-x1 );
-    int h  = Max( 0, y2-y1 );
-    if ( w > 0 && h > 0 ) {
-      SDL_UpdateRect( SURFACE(this), x1, y1, w, h );
-#ifdef USE_HILDON
-#if MAEMO_VERSION >= 5
-      static bool captured = false;
-      if (!captured) {
-	SDL_SysWMinfo sys;
-	SDL_VERSION( &sys.version );
-	SDL_GetWMInfo( &sys );
-
-	// setup hildon pre-load screenshot
-	XEvent xev = { 0 };
-	xev.xclient.type = ClientMessage;
-	xev.xclient.serial = 0;
-	xev.xclient.send_event = True;
-	xev.xclient.display = sys.info.x11.display;
-	xev.xclient.window = XDefaultRootWindow(xev.xclient.display);
-	xev.xclient.message_type = XInternAtom (xev.xclient.display,
-						"_HILDON_LOADING_SCREENSHOT",
-						False);
-	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = 0;
-	//xev.xclient.data.l[1] = sys.info.x11.fswindow;
-	//xev.xclient.data.l[1] = sys.info.x11.wmwindow;
-	xev.xclient.data.l[1] = sys.info.x11.window;
-	XSendEvent (xev.xclient.display,
-		    xev.xclient.window,
-		    False,
-		    SubstructureRedirectMask | SubstructureNotifyMask,
-		    &xev);
-	XFlush (xev.xclient.display);
-	XSync (xev.xclient.display, False);
-	captured = true;
-      }
-#endif
-#endif
-    }
-  }
+    SDL_RenderPresent(m_renderer);
+    clear();
 }
 
 void Window::raise()
 {
-  SDL_SysWMinfo sys;
-  SDL_VERSION( &sys.version );
-  SDL_GetWMInfo( &sys );
-
-#if !defined(WIN32) && !(defined(__APPLE__) && defined(__MACH__))
-  /* No X11 stuff on Windows and Mac OS X */
-
-  // take focus...
-  XEvent ev = { 0 };
-  ev.xclient.type         = ClientMessage;
-  ev.xclient.window       = sys.info.x11.wmwindow;
-  ev.xclient.message_type = XInternAtom (sys.info.x11.display,
-					 "_NET_ACTIVE_WINDOW", False);
-  ev.xclient.format       = 32;
-  //all xewv.xclient.data==0 -> older spec?
-  
-  XSendEvent (sys.info.x11.display,
-	      DefaultRootWindow(sys.info.x11.display),
-	      False,
-	      NoEventMask, //SubstructureRedirectMask,
-	      &ev);    
-  XSync( sys.info.x11.display, False );
-#endif
-  //XRaiseWindow( sys.info.x11.display, sys.info.x11.window );
+    // TODO
 }
 
 
@@ -806,40 +432,47 @@ void Window::setSubName( const char *sub )
 
 Image::Image( const char* file, bool alpha )
 {
-  //alpha = false;
   std::string f( "data/" );
   SDL_Surface* img = IMG_Load((f+file).c_str());
   if ( !img ) {
     f = std::string( DEFAULT_RESOURCE_PATH "/" );
     img = IMG_Load((f+file).c_str());
   }
+
   if ( img ) {
-    printf("loaded image %s\n",(f+file).c_str());
-    if ( alpha ) {
-      SDL_SetColorKey( img,
- 		       SDL_SRCCOLORKEY|SDL_RLEACCEL,
- 		       img->format->colorkey );
-      m_state = SDL_DisplayFormatAlpha( img );
-    } else {
-      m_state = SDL_DisplayFormat( img );
-    }
-    if ( m_state ) {
-      SDL_FreeSurface( img );
-    } else {
-      printf("warning image %s not converted to display format\n",(f+file).c_str());
+      m_width = img->w;
+      m_height = img->h;
+      printf("loaded image %s\n",(f+file).c_str());
       m_state = img;
-    }
   } else {
-    fprintf(stderr,"failed to load image %s\n",(f+file).c_str());
-    m_state = SDL_CreateRGBSurface( SDL_SWSURFACE, 32, 32, 
-				    SDL_GetVideoInfo()->vfmt->BitsPerPixel,
-				    SDL_GetVideoInfo()->vfmt->Rmask,
-				    SDL_GetVideoInfo()->vfmt->Gmask,
-				    SDL_GetVideoInfo()->vfmt->Bmask,
-				    SDL_GetVideoInfo()->vfmt->Amask );
-    drawRect(0,0,32,32,0xff0000);
+      fprintf(stderr,"failed to load image %s\n",(f+file).c_str());
+      exit(1);
   }
-  resetClip();
+
+  m_texture = SDL_CreateTextureFromSurface(g_renderer, (SDL_Surface *)m_state);
+}
+
+Image::Image(SDL_Surface *surface)
+{
+    m_width = surface->w;
+    m_height = surface->h;
+    m_state = surface;
+    m_texture = SDL_CreateTextureFromSurface(g_renderer, (SDL_Surface *)m_state);
+}
+
+Image::Image(Canvas *c)
+{
+    SDL_Surface *s = (SDL_Surface*)c->m_state;
+    m_state = SDL_ConvertSurface(s, s->format, s->flags);
+    m_width = ((SDL_Surface *)m_state)->w;
+    m_height = ((SDL_Surface *)m_state)->h;
+    m_texture = SDL_CreateTextureFromSurface(g_renderer, (SDL_Surface *)m_state);
+    printf("Texture: %p (state=%p, w=%d, h=%d)\n", m_texture, m_state, m_width, m_height);
+}
+
+Image::~Image()
+{
+    SDL_DestroyTexture(m_texture);
 }
 
 

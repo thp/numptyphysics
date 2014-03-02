@@ -30,7 +30,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 
 class App : private Container
@@ -43,7 +43,6 @@ class App : private Container
   std::string m_testOp;
   bool  m_quit;
   bool  m_drawFps;
-  bool  m_drawDirty;
   int   m_renderRate;
   Array<const char*> m_files;
   Window            *m_window;
@@ -56,7 +55,6 @@ public:
       m_videoMode(false),
       m_quit(false),
       m_drawFps(false),
-      m_drawDirty(false),
       m_window(NULL)
   {
     for ( int i=1; i<argc; i++ ) {
@@ -192,17 +190,7 @@ private:
 
   void render()
   {
-    if (isDirty()) {
-      
-      Rect area = dirtyArea();
-      //fprintf(stderr,"render %d,%d-%d,%d!\n",area.tl.x,area.tl.y,area.br.x,area.br.y);
-      m_window->setClip(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
-      draw(*m_window, area);
-
-      if ( m_drawDirty ) {
-	Rect b = area; b.br.x--; b.br.y--;
-	m_window->drawRect( b, m_window->makeColour(0x00af00), false );
-      }
+      draw(*m_window, FULLSCREEN_RECT);
 
       if ( m_drawFps ) {
 	m_window->drawRect( Rect(0,0,50,50), m_window->makeColour(0xbfbf8f), true );
@@ -212,8 +200,7 @@ private:
 	m_window->update( Rect(0,0,50,50) );
       }
 
-      m_window->update( area );
-    }
+      m_window->update(FULLSCREEN_RECT);
   }
 
 
@@ -226,11 +213,13 @@ private:
       case SDL_QUIT:
 	m_quit = true;
 	return;
+#if 0
       case SDL_ACTIVEEVENT:
 	if (ev.active.gain > 0) {
 	  return;
 	}
 	break;
+#endif
       }
     }
   }
@@ -241,12 +230,14 @@ private:
     case SDL_QUIT:
       m_quit = true;
       return true;
+#if 0
     case SDL_ACTIVEEVENT:
       printf("active: %d\n",ev.active.gain);
       if (ev.active.gain == 0) {
 	waitActive();
       }
       break;
+#endif
     case SDL_MOUSEBUTTONDOWN:
       if (ev.button.x < 10) 
 	printf("clicky: %d,%d\n",ev.button.x,ev.button.y);
@@ -256,10 +247,6 @@ private:
       case SDLK_1:
       case SDLK_f:
 	m_drawFps = !m_drawFps;
-	return true;
-      case SDLK_2:
-      case SDLK_d:
-	m_drawDirty = !m_drawDirty;
 	return true;
       case SDLK_q:
 	m_quit = true;

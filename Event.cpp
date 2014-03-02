@@ -40,13 +40,15 @@ Event BasicEventMap::process(const SDL_Event& ev)
     if (inf) ret = Event(inf->move, ev.button.x, ev.button.y);
     break; }
   case SDL_KEYDOWN: {
-    const KeyPair* inf = lookupKey(ev.key.keysym.sym);
-    if (inf) ret = Event(inf->ev, (char)ev.key.keysym.unicode);
+    //const KeyPair* inf = lookupKey(ev.key.keysym.sym);
+    //const KeyPair* inf = 0;
+    //if (inf) ret = Event(inf->ev, (char)ev.key.keysym.unicode);
     break; }
   }
   return ret;
 }
 
+#if 0
 const BasicEventMap::KeyPair*
 BasicEventMap::lookupKey(SDLKey sym)
 {
@@ -57,6 +59,7 @@ BasicEventMap::lookupKey(SDLKey sym)
   }
   return NULL;
 }
+#endif
 
 const BasicEventMap::ButtonPair*
 BasicEventMap::lookupButton(unsigned char button)

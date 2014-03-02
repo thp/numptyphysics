@@ -22,7 +22,7 @@
 #include "Event.h"
 
 #include <string>
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 class Canvas;
 class Widget;
@@ -41,8 +41,6 @@ class Widget
   virtual void moveTo( const Vec2& to ) {move(to-m_pos.tl);}
   virtual void sizeTo( const Vec2& size );
   virtual const Rect& position() const { return m_pos; }
-  virtual bool isDirty() {return m_dirty;}
-  virtual Rect dirtyArea() {return m_dirty?m_pos:Rect(false);};
   virtual void onTick( int tick ) {}
   virtual void draw( Canvas& screen, const Rect& area );
   virtual bool processEvent( SDL_Event& ev );
@@ -57,8 +55,6 @@ class Widget
   void setEventMap(EventMap* em) {m_eventMap = em;}
   void setEventMap(EventMapType map);
 
-  virtual void dirty(bool dirt=true) { m_dirty=dirt; }
-  virtual void dirty( const Rect& r ) {}
   Rect& position() { return m_pos; }
   void setBg(int bg) {m_bg=bg;}
   void setFg(int fg) {m_fg=fg;}
@@ -73,7 +69,6 @@ class Widget
   WidgetParent* m_parent;
   EventMap*     m_eventMap;
   Rect          m_pos;
-  bool          m_dirty;
   bool          m_focussed;
   int           m_alpha;
   bool          m_fitToParent;
@@ -144,7 +139,6 @@ class IconButton : public Button
   void align(int dir) { m_vertical=(dir==0); }
  protected:
   bool m_vertical;
-  bool m_ownIcon;
   Canvas *m_icon;
 };
 
@@ -189,8 +183,6 @@ class Container : public WidgetParent
   const char* name() {return "Container";}
   virtual std::string toString();
   virtual void move( const Vec2& by );
-  virtual bool isDirty();
-  virtual Rect dirtyArea();
   virtual void onTick( int tick );
   virtual void draw( Canvas& screen, const Rect& area );
   virtual bool processEvent( SDL_Event& ev );

@@ -23,13 +23,6 @@
 #include "Scene.h"
 
 
-/* See Swipe.h */
-class Swipe {
-    public:
-        static void lock(bool locked);
-};
-
-
 #include "help_text_html.h"
 
 ////////////////////////////////////////////////////////////////
@@ -176,7 +169,8 @@ public:
       if ( size && scene.load( buf, size ) ) {
 	scene.draw( temp, FULLSCREEN_RECT );
 	m_thumbs[i]->text( m_levels->levelName(level) );
-	m_thumbs[i]->canvas( temp.scale( ICON_SCALE_FACTOR ) );
+	//m_thumbs[i]->canvas( temp.scale( ICON_SCALE_FACTOR ) );
+	m_thumbs[i]->canvas(&temp, false);
 	m_thumbs[i]->transparent(m_dispbase+i!=levelInC);
       }
     }
@@ -262,13 +256,13 @@ public:
       m_game(game),
       m_chosenLevel(game->m_level)
   {
-    Swipe::lock(false);
+    //Swipe::lock(false);
     content()->add(new FrontPage());
     m_targetPos = Vec2( 0, 0 );
     sizeTo(Vec2(SCREEN_WIDTH,SCREEN_HEIGHT));
   }
   ~MainMenu() {
-    Swipe::lock(true);
+    //Swipe::lock(true);
   }
   bool onEvent( Event& ev )
   {

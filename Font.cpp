@@ -16,14 +16,14 @@
 #include "Font.h"
 #include "Canvas.h"
 #include "Config.h"
-#include <SDL/SDL_ttf.h>
+#include <SDL_ttf.h>
 
 #define FONT(fONTpTR) ((TTF_Font*)((fONTpTR)->m_state))
 
-struct FontCanvas : public Canvas
+struct FontCanvas : public Image
 {
   FontCanvas( SDL_Surface* s )
-    : Canvas( s )
+    : Image( s )
   {}
 };
 

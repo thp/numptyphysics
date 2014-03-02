@@ -32,7 +32,7 @@
  *
  * http://www.libsdl.org/faq.php?action=listentries&category=7#55
  **/
-#include "SDL/SDL.h"
+#include <SDL.h>
 
 class OsFreeDesktop : public Os
 {

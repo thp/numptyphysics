@@ -57,15 +57,12 @@ void Widget::move( const Vec2& by )
 {
   m_pos.tl+=by;
   m_pos.br+=by;
-  dirty();
-  if (m_parent) m_parent->dirty();
 }
 
 void Widget::sizeTo( const Vec2& size )
 {
   m_pos.br=m_pos.tl+size;  
   onResize();
-  if (m_parent) m_parent->dirty();
 }
 
 bool Widget::processEvent( SDL_Event& ev )
@@ -115,7 +112,6 @@ void Widget::draw( Canvas& screen, const Rect& area )
   if (m_border) {
     screen.drawRect(m_pos,screen.makeColour(TL_BORDER),false);
   }
-  dirty(false);
 }
 
 WidgetParent* Widget::topLevel()
@@ -144,15 +140,12 @@ Label::Label(const std::string& s, const Font* f)
 void Label::text( const std::string& s )
 {
   m_text = s;
-  dirty();
 }
 
 void Label::draw( Canvas& screen, const Rect& area )
 {
   Widget::draw(screen,area);
-  screen.setClip(area.tl.x,area.tl.y,area.width(),area.height());
   m_font->drawCenter( &screen, m_pos.centroid(), m_text, m_fg);
-  screen.resetClip();
 }
 
 void Label::align( int a )
@@ -190,7 +183,6 @@ bool Button::onEvent( Event& ev )
       // fprintf(stderr,"button press translate %d -> %d/%d,%d\n",
       //    ev.code,m_selEvent.code,m_selEvent.x,m_selEvent.y);
       m_focussed = false;
-      dirty();
       onSelect();
       if (m_parent && m_selEvent.code != Event::NOP) {
 	//fprintf(stderr,"button press event dispatch %d\n",m_selEvent.code);
@@ -203,12 +195,10 @@ bool Button::onEvent( Event& ev )
     if (m_pos.contains(Vec2(ev.x,ev.y))) {
       if (!m_focussed) {
 	m_focussed = true;
-	dirty();
 	return true;
       }
     } else if (m_focussed) {
       m_focussed = false;
-      dirty();
     }
   default: break;
   }
@@ -236,7 +226,6 @@ void Icon::canvas( Canvas *c )
 {
   delete m_canvas;
   m_canvas = c; 
-  dirty();
 }
 
 
@@ -255,40 +244,37 @@ void Icon::draw( Canvas& screen, const Rect& area )
 IconButton::IconButton(const std::string& s, const std::string& icon, const Event& ev)
   : Button(s,ev),
     m_icon(icon.size()==0?NULL:new Image(icon.c_str(),true)),
-    m_ownIcon(true),
     m_vertical(true)
 {
 }
 
 IconButton::~IconButton()
 {
-  if (m_ownIcon) delete m_icon;
+    delete m_icon;
 }
 
 void IconButton::canvas(Canvas *c, bool takeOwnership)
 {
-  if (m_ownIcon) delete m_icon;
-  m_icon = c;
-  m_ownIcon = takeOwnership;
-  dirty();
+    delete m_icon;
+    m_icon = new Image(c);
+    if (takeOwnership) {
+        delete c;
+    }
 }
 
 Canvas* IconButton::canvas()
 {
-  return m_icon;
+    return m_icon;
 }
 
 void IconButton::icon(const std::string& icon)
 {
-  if (m_ownIcon) delete m_icon;
-  m_icon = new Image(icon.c_str(),true);  
-  m_ownIcon = true;
-  dirty();
+    delete m_icon;
+    m_icon = new Image(icon.c_str(),true);  
 }
 
 void IconButton::draw( Canvas& screen, const Rect& area )
 {
-  screen.setClip(area.tl.x,area.tl.y,area.width(),area.height());
   if (m_icon) {
     Widget::draw(screen,area);
     if (m_focussed) {
@@ -315,7 +301,6 @@ void IconButton::draw( Canvas& screen, const Rect& area )
   } else {
     Button::draw(screen,area);
   }
-  screen.resetClip();
 }
 
 
@@ -345,7 +330,6 @@ void RichText::draw( Canvas& screen, const Rect& area )
     layout(m_pos.width()-20);
     m_layoutRequired = false;
   }
-  screen.setClip(area.tl.x,area.tl.y,area.width(),area.height());
   for (int l=0; l<m_snippets.size(); l++) {
     if (m_snippets[l].textlen > 0) {
       Vec2 pos = m_pos.tl + m_snippets[l].pos;
@@ -365,7 +349,6 @@ void RichText::draw( Canvas& screen, const Rect& area )
       }
     }
   }
-  screen.resetClip();
 }
 
 int RichText::layout(int w)
@@ -664,7 +647,6 @@ void ScrollArea::onResize()
 
 void ScrollArea::virtualSize( const Vec2& size )
 {
-  dirty();
   m_contents->sizeTo(size);
 }
 
@@ -677,18 +659,7 @@ void ScrollArea::draw( Canvas& screen, const Rect& area )
   if (cpos.br.y < m_pos.br.y && cpos.height() > m_pos.height()) {
     m_contents->moveTo(Vec2(cpos.tl.x,m_pos.br.y - cpos.size().y));
   }
-#if 1
   Container::draw(screen,area);
-#else
-  screen.drawRect(m_pos, screen.makeColour(0xff,0,0), true);
-  if (m_canvas) {
-    if (m_contents->isDirty()) {
-      Rect relArea = area - m_pos.tl;
-      m_contents->draw(*m_canvas, relArea);
-    }
-    screen.drawImage(m_canvas, m_pos.tl.x, m_pos.tl.y);
-  }
-#endif
 }
 
 void ScrollArea::add( Widget* w, int x, int y )
@@ -740,31 +711,6 @@ void Container::move( const Vec2& by )
   }  
 }
 
-bool Container::isDirty()
-{
-  if (m_dirty) {
-    return true;
-  }
-  for (int i=0; i<m_children.size(); ++i) {
-    if (m_children[i]->isDirty()) {
-      return true;
-    }
-  }
-  return false;
-}
-
-Rect Container::dirtyArea()
-{
-  if (m_dirty) {
-    return m_pos;
-  }
-  Rect r(false);
-  for (int i=0; i<m_children.size(); ++i) {
-    r.expand(m_children[i]->dirtyArea());
-  }
-  return r;
-}
-
 void Container::onTick( int tick )
 {
   for (int i=0; i<m_children.size(); ++i) {
@@ -780,10 +726,8 @@ void Container::draw( Canvas& screen, const Rect& area )
       Rect relArea = area;
       relArea.clipTo(m_children[i]->position());
       m_children[i]->draw(screen, relArea);
-      m_children[i]->dirty(false);
     }
   }
-  dirty(false);
 }
 
 bool Container::processEvent( SDL_Event& ev )
@@ -848,7 +792,6 @@ void Container::add( Widget* w, int x, int y )
   w->setParent(this);
   m_children.append(w);
   onResize();
-  dirty();
 }
 
 void Container::remove( Widget* w )
@@ -857,7 +800,6 @@ void Container::remove( Widget* w )
     if (m_children.indexOf(w) >= 0) {
       w->setParent(NULL);
       m_children.erase(m_children.indexOf(w));
-      dirty();
       delete w;
     }
   }
@@ -1007,7 +949,6 @@ void TabBook::selectTab( int t )
     m_tabs[m_selected]->setBg(DEFAULT_BG);
     m_children.erase(m_children.indexOf(m_contents));
     m_contents = NULL;
-    dirty();
   }
   if ( t>=0 && t<m_count ) {
     m_selected = t;
@@ -1015,7 +956,6 @@ void TabBook::selectTab( int t )
     m_contents = m_panels[t];
     Rect area(Vec2(1,TAB_HEIGHT+1),m_pos.size()-Vec2(1,1));
     add(m_contents,area);
-    dirty();
   }
 }
 

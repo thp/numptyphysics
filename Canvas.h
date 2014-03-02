@@ -17,8 +17,11 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
+#include <SDL.h>
+
 #include "Common.h"
 class Path;
+class Image;
 
 class Canvas
 {
@@ -30,19 +33,14 @@ public:
   int height() const;
   int  makeColour( int c ) const;
   int  makeColour( int r, int g, int b ) const;
-  void resetClip();
-  void setClip( int x, int y, int w, int h );
-  void setBackground( int c );
-  void setBackground( Canvas* bg );
+  void setBackground( Image* bg );
   void clear();
   void clear( const Rect& r );
   void fade( const Rect& r );
   Canvas* scale( int factor ) const;
-  void scale( int w, int h );
   void drawImage( Canvas *canvas, int x, int y );
   void drawPixel( int x, int y, int c );
   int  readPixel( int x, int y ) const;
-  void drawLine( int x1, int y1, int x2, int y2, int c );
   void drawPath( const Path& path, int color, bool thick=false );
   void drawRect( int x, int y, int w, int h, int c, bool fill=true );
   void drawRect( const Rect& r, int c, bool fill=true );
@@ -50,9 +48,13 @@ public:
 protected:
   Canvas( State state=NULL );
   State   m_state;
-  int     m_bgColour;
-  Canvas* m_bgImage; 
-  Rect    m_clip;
+  Image* m_bgImage; 
+  SDL_Window *m_window;
+  SDL_Renderer *m_renderer;
+  int m_width;
+  int m_height;
+
+  friend class Image;
 };
 
 class Window : public Canvas
@@ -69,8 +71,13 @@ class Window : public Canvas
 
 class Image : public Canvas
 {
- public:
-  Image( const char* file, bool alpha=false );
+public:
+    Image(const char* file, bool alpha=false);
+    Image(SDL_Surface *s);
+    Image(Canvas *c);
+    ~Image();
+
+    SDL_Texture *m_texture;
 };
 
 

@@ -405,11 +405,6 @@ public:
     return m_xformedPath.bbox();
   }
 
-  bool isDirty()
-  {
-    return (!m_drawn || transform()) && !hasAttribute(ATTRIB_DELETED);
-  }
-
   void hide()
   {
     if ( m_hide==0 ) {
@@ -529,8 +524,7 @@ Scene::Scene( bool noWorld )
     m_protect( 0 ),
     m_gravity(0.0f, 0.0f),
     m_dynamicGravity(false),
-    m_accelerometer(Os::get()->getAccelerometer()),
-    m_dirtyArea(false)
+    m_accelerometer(Os::get()->getAccelerometer())
 {
   if ( !noWorld ) {
     resetWorld();
@@ -712,7 +706,6 @@ void Scene::step( bool isPaused )
       }
     }
   }
-  calcDirtyArea();
 }
 
 // b2ContactListener callback when a new contact is detected
@@ -746,33 +739,6 @@ bool Scene::isCompleted()
   return true;
 }
 
-Rect Scene::dirtyArea()
-{
-  return m_dirtyArea;
-}
-
-void Scene::calcDirtyArea()
-{
-  Rect r(false);
-  for ( int i=0; i<m_strokes.size(); i++ ) {
-    if ( m_strokes[i]->isDirty() ) {
-      // acumulate new areas to draw
-      r.expand( m_strokes[i]->screenBbox() );
-      // plus prev areas to erase
-      r.expand( m_strokes[i]->lastDrawnBbox() );
-    }
-  }
-  for ( int i=0; i<m_deletedStrokes.size(); i++ ) {
-    // acumulate new areas to draw
-    r.expand( m_strokes[i]->lastDrawnBbox() );
-  }
-  if ( !r.isEmpty() ) {
-    // expand to allow for thick lines
-    r.grow(1);
-  }
-  //fprintf(stderr,"scene dirty %d,%d-%d,%d!\n",r.tl.x,r.tl.y,r.br.x,r.br.y);
-  m_dirtyArea = r;
-}
 void Scene::draw( Canvas& canvas, const Rect& area )
 {
   if ( m_bgImage ) {
@@ -781,15 +747,8 @@ void Scene::draw( Canvas& canvas, const Rect& area )
     canvas.setBackground( 0 );
   }
   canvas.clear( area );
-  Rect clipArea = area;
-  clipArea.tl.x--;
-  clipArea.tl.y--;
-  clipArea.br.x++;
-  clipArea.br.y++;
   for ( int i=0; i<m_strokes.size(); i++ ) {
-    if ( area.intersects( m_strokes[i]->screenBbox() ) ) {
 	m_strokes[i]->draw( canvas );
-    }
   }
   while ( m_deletedStrokes.size() ) {
     delete m_deletedStrokes[0];
@@ -891,7 +850,6 @@ bool Scene::load( std::istream& in )
   m_dynamicGravity = false;
   if ( g_bgImage==NULL ) {
     g_bgImage = new Image("paper.png");
-    g_bgImage->scale( SCREEN_WIDTH, SCREEN_HEIGHT );
   }
   m_bgImage = g_bgImage;
   std::string line;
