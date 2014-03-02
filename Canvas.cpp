@@ -29,19 +29,13 @@ static SDL_Renderer *g_renderer = NULL;
 #define SURFACE(cANVASpTR) ((SDL_Surface*)((cANVASpTR)->m_state))
 
 Canvas::Canvas( int w, int h )
-  : m_state(NULL),
-    m_bgImage(NULL)
-{
-    m_state = SDL_CreateRGBSurface(0, w, h, 32,
-            0xff0000, 0x00ff00, 0x0000ff, 0xff000000);
-}
-
-
-Canvas::Canvas( State state )
-  : m_state(state),
-    m_bgImage(NULL)
+  : m_state(NULL)
+  , m_bgImage(NULL)
+  , m_width(w)
+  , m_height(h)
 {
 }
+
 
 Canvas::~Canvas()
 {
@@ -77,10 +71,10 @@ void Canvas::setBackground( Image* bg )
 
 void Canvas::clear()
 {
-    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
-    SDL_RenderClear(m_renderer);
+    SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+    SDL_RenderClear(g_renderer);
     if (m_bgImage) {
-        SDL_RenderCopy(m_renderer, m_bgImage->m_texture, NULL, NULL);
+        SDL_RenderCopy(g_renderer, m_bgImage->m_texture, NULL, NULL);
     }
 }
 
@@ -102,7 +96,7 @@ void Canvas::drawImage( Canvas *canvas, int x, int y )
     SDL_Rect sdlsrc = { 0, 0, w, h };
     SDL_Rect sdldst = { x, y, w, h };
 
-    if (SDL_RenderCopy(m_renderer, ((Image *)canvas)->m_texture, &sdlsrc, &sdldst) != 0) {
+    if (SDL_RenderCopy(g_renderer, ((Image *)canvas)->m_texture, &sdlsrc, &sdldst) != 0) {
         printf("Could not render: %s\n", SDL_GetError());
     }
 }
@@ -112,10 +106,10 @@ void Canvas::drawPath( const Path& path, int color, bool thick )
     int r = (color & 0xff0000) >> 16;
     int g = (color & 0x00ff00) >> 8;
     int b = (color & 0x0000ff);
-    SDL_SetRenderDrawColor(m_renderer, r, g, b, 255);
+    SDL_SetRenderDrawColor(g_renderer, r, g, b, 255);
 
     // This assumes that Vec2 == int[2] and items in path are tightly packed
-    SDL_RenderDrawLines(m_renderer, (SDL_Point *)&path[0], path.numPoints());
+    SDL_RenderDrawLines(g_renderer, (SDL_Point *)&path[0], path.numPoints());
 }
 
 void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill, int a )
@@ -125,11 +119,11 @@ void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill, int a )
     int b = (c & 0x0000ff);
     SDL_Rect rect = { x, y, w, h };
 
-    SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
+    SDL_SetRenderDrawColor(g_renderer, r, g, b, a);
     if (fill) {
-        SDL_RenderFillRect(m_renderer, &rect);
+        SDL_RenderFillRect(g_renderer, &rect);
     } else {
-        SDL_RenderDrawRect(m_renderer, &rect);
+        SDL_RenderDrawRect(g_renderer, &rect);
     }
 }
 
@@ -141,7 +135,10 @@ void Canvas::drawRect( const Rect& r, int c, bool fill, int a )
 
 
 Window::Window( int w, int h, const char* title, const char* winclass, bool fullscreen )
-  : m_title(title)
+  : Canvas(w, h)
+  , m_title(title)
+  , m_window(NULL)
+  , m_renderer(NULL)
 {
   if ( winclass ) {
     char s[80];
@@ -157,8 +154,6 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
   g_renderer = m_renderer;
   SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
   SDL_GetWindowSize(m_window, &m_width, &m_height);
-
-  m_state = NULL;
 }
 
 
@@ -167,45 +162,42 @@ void Window::update()
     SDL_RenderPresent(m_renderer);
 }
 
-
-Image::Image( const char* file, bool alpha )
+Image *
+Image::fromFile(const char *filename)
 {
-  std::string f( "data/" );
-  SDL_Surface* img = IMG_Load((f+file).c_str());
-  if ( !img ) {
-    f = std::string( DEFAULT_RESOURCE_PATH "/" );
-    img = IMG_Load((f+file).c_str());
+  std::string f("data/");
+
+  SDL_Surface* img = IMG_Load((f+filename).c_str());
+  if (!img) {
+      f = std::string(DEFAULT_RESOURCE_PATH "/");
+      img = IMG_Load((f+filename).c_str());
   }
 
-  if ( img ) {
-      m_width = img->w;
-      m_height = img->h;
-      printf("loaded image %s\n",(f+file).c_str());
-      m_state = img;
-  } else {
-      fprintf(stderr,"failed to load image %s\n",(f+file).c_str());
-      exit(1);
-  }
+  return Image::fromMem(img);
+}
 
-  m_texture = SDL_CreateTextureFromSurface(g_renderer, (SDL_Surface *)m_state);
+Image *
+Image::fromMem(SDL_Surface *surface)
+{
+    if (surface) {
+        return new Image(surface);
+    }
+
+    return NULL;
+}
+
+Image *
+Image::fromCanvas(Canvas *canvas)
+{
+    SDL_Surface *s = (SDL_Surface*)canvas->m_state;
+    return new Image(SDL_ConvertSurface(s, s->format, s->flags));
 }
 
 Image::Image(SDL_Surface *surface)
+    : Canvas(surface->w, surface->h)
 {
-    m_width = surface->w;
-    m_height = surface->h;
     m_state = surface;
-    m_texture = SDL_CreateTextureFromSurface(g_renderer, (SDL_Surface *)m_state);
-}
-
-Image::Image(Canvas *c)
-{
-    SDL_Surface *s = (SDL_Surface*)c->m_state;
-    m_state = SDL_ConvertSurface(s, s->format, s->flags);
-    m_width = ((SDL_Surface *)m_state)->w;
-    m_height = ((SDL_Surface *)m_state)->h;
-    m_texture = SDL_CreateTextureFromSurface(g_renderer, (SDL_Surface *)m_state);
-    printf("Texture: %p (state=%p, w=%d, h=%d)\n", m_texture, m_state, m_width, m_height);
+    m_texture = SDL_CreateTextureFromSurface(g_renderer, surface);
 }
 
 Image::~Image()

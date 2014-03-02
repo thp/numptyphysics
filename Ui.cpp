@@ -243,7 +243,7 @@ void Icon::draw( Canvas& screen, const Rect& area )
 
 IconButton::IconButton(const std::string& s, const std::string& icon, const Event& ev)
   : Button(s,ev),
-    m_icon(icon.size()==0?NULL:new Image(icon.c_str(),true)),
+    m_icon(icon.size()==0?NULL:Image::fromFile(icon.c_str())),
     m_vertical(true)
 {
 }
@@ -256,7 +256,7 @@ IconButton::~IconButton()
 void IconButton::canvas(Canvas *c, bool takeOwnership)
 {
     delete m_icon;
-    m_icon = new Image(c);
+    m_icon = Image::fromCanvas(c);
     if (takeOwnership) {
         delete c;
     }
@@ -270,7 +270,7 @@ Canvas* IconButton::canvas()
 void IconButton::icon(const std::string& icon)
 {
     delete m_icon;
-    m_icon = new Image(icon.c_str(),true);  
+    m_icon = Image::fromFile(icon.c_str());
 }
 
 void IconButton::draw( Canvas& screen, const Rect& area )

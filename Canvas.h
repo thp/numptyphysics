@@ -43,11 +43,8 @@ public:
   void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
   int writeBMP( const char* filename ) const;
 protected:
-  Canvas( State state=NULL );
   State   m_state;
   Image* m_bgImage; 
-  SDL_Window *m_window;
-  SDL_Renderer *m_renderer;
   int m_width;
   int m_height;
 
@@ -61,15 +58,22 @@ class Window : public Canvas
   void update();
  protected:
   std::string m_title;
+  SDL_Window *m_window;
+  SDL_Renderer *m_renderer;
 };
 
 
 class Image : public Canvas
 {
 public:
-    Image(const char* file, bool alpha=false);
+    static Image *fromFile(const char *filename);
+    static Image *fromMem(SDL_Surface *surface);
+    static Image *fromCanvas(Canvas *canvas);
+
+private:
     Image(SDL_Surface *s);
-    Image(Canvas *c);
+
+public:
     ~Image();
 
     SDL_Texture *m_texture;

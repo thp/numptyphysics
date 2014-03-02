@@ -848,7 +848,7 @@ bool Scene::load( std::istream& in )
   resetWorld();
   m_dynamicGravity = false;
   if ( g_bgImage==NULL ) {
-    g_bgImage = new Image("paper.png");
+    g_bgImage = Image::fromFile("paper.png");
   }
   m_bgImage = g_bgImage;
   std::string line;

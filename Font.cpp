@@ -41,10 +41,10 @@ void Font::drawLeft( Canvas* canvas, Vec2 pt,
 		     const std::string& text, int colour ) const
 {
   SDL_Color fg = { colour>>16, colour>>8, colour };
-  Image temp( TTF_RenderText_Blended( FONT(this),
-					   text.c_str(),
-					   fg ) );
-  canvas->drawImage( &temp, pt.x, pt.y );
+  Image *temp = Image::fromMem(TTF_RenderText_Blended(FONT(this),
+              text.c_str(), fg));
+  canvas->drawImage(temp, pt.x, pt.y);
+  delete temp;
 }
 
 void Font::drawRight( Canvas* canvas, Vec2 pt,
