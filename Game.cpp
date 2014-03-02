@@ -346,9 +346,9 @@ public:
     Event opt1Event(Event::OPTION,1);
     Event opt2Event(Event::OPTION,2);
     if (ev.type == ToolkitEvent::PRESS) {
-        if (ev.x < 10 && dispatchEvent(opt1Event)) {
+        if (ev.x < SCREEN_WIDTH * 0.05 && dispatchEvent(opt1Event)) {
             return true;
-        } else if (ev.x > SCREEN_WIDTH-10 && dispatchEvent(opt2Event)) {
+        } else if (ev.x > SCREEN_WIDTH* 0.95 && dispatchEvent(opt2Event)) {
             return true;
         }
     }
