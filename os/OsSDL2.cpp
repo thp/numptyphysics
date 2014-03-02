@@ -78,7 +78,6 @@ public:
     virtual void size(int *width, int *height);
 
     virtual NP::Texture load(const char *filename);
-    virtual NP::Texture load(unsigned char *rgba, int width, int height);
 
     virtual void image(const NP::Texture &texture, int x, int y);
     virtual void rectangle(const Rect &r, int rgba, bool fill);
@@ -131,13 +130,6 @@ SDLRenderer::load(const char *filename)
         img = IMG_Load((f+filename).c_str());
     }
 
-    return NP::Texture(new SDLTextureData(m_renderer, img));
-}
-
-NP::Texture
-SDLRenderer::load(unsigned char *rgba, int width, int height)
-{
-    SDL_Surface *img = (SDL_Surface *)rgba;
     return NP::Texture(new SDLTextureData(m_renderer, img));
 }
 

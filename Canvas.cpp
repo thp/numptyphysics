@@ -124,12 +124,6 @@ Image::fromFile(const char *filename)
 }
 
 Image *
-Image::fromMem(unsigned char *rgba, int w, int h)
-{
-    return new Image(RENDERER->load(rgba, w, h));
-}
-
-Image *
 Image::fromImage(Image *image)
 {
     return new Image(image->m_texture);

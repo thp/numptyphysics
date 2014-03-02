@@ -63,7 +63,6 @@ class Image : public Canvas
 {
 public:
     static Image *fromFile(const char *filename);
-    static Image *fromMem(unsigned char *rgba, int w, int h);
     static Image *fromImage(Image *image);
     static Image *fromFont(NP::Font font, const char *text, int rgb);
 

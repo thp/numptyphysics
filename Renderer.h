@@ -34,7 +34,6 @@ public:
     virtual void size(int *width, int *height) = 0;
 
     virtual Texture load(const char *filename) = 0;
-    virtual Texture load(unsigned char *rgba, int width, int height) = 0;
 
     virtual void image(const Texture &texture, int x, int y) = 0;
     virtual void rectangle(const Rect &rect, int rgba, bool fill) = 0;
