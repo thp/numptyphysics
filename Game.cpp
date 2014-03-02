@@ -45,7 +45,8 @@ unsigned char levelbuf[64*1024];
 #define JOINT_IND_PATH "282,39 280,38 282,38 285,39 300,39 301,60 303,66 302,64 301,63 300,48 297,41 296,42 294,43 293,45 291,46 289,48 287,49 286,52 284,53 283,58 281,62 280,66 282,78 284,82 287,84 290,85 294,88 297,88 299,89 302,90 308,90 311,89 314,89 320,85 321,83 323,83 324,81 327,78 328,75 327,63 326,58 325,55 323,54 321,51 320,49 319,48 316,46 314,44 312,43 314,43"
 
 
-
+#define BUTTON_BORDER (SCREEN_WIDTH * 0.02)
+#define BUTTON_SIZE (SCREEN_WIDTH * 0.1)
 
 class Game : public GameControl, public Container
 {
@@ -60,6 +61,9 @@ class Game : public GameControl, public Container
   bool              m_isCompleted;
   Path              m_jointCandidates;
   Path              m_jointInd;
+  Rect              m_left_button;
+  Rect              m_right_button;
+  bool              m_wasStroke;
 public:
   Game( Levels* levels, int width, int height ) 
   : m_createStroke(NULL),
@@ -70,7 +74,9 @@ public:
     m_isCompleted(false),
     m_options( NULL ),
     m_os( Os::get() ),
-    m_jointInd(JOINT_IND_PATH)
+    m_jointInd(JOINT_IND_PATH),
+    m_left_button(BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE, BUTTON_BORDER + BUTTON_SIZE),
+    m_right_button(SCREEN_WIDTH - BUTTON_BORDER - BUTTON_SIZE, BUTTON_BORDER, SCREEN_WIDTH - BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE)
   {
     setEventMap(Os::get()->getEventMap(GAME_MAP));
     sizeTo(Vec2(width,height));
@@ -338,21 +344,34 @@ public:
     if ( m_fade ) {
       screen.fade( area );
     }
+
+    // If we only have the game, show indicators for menus
+    if (inGameScreen()) {
+        screen.drawRect(m_left_button, 0x000000, true, 128);
+        screen.drawRect(m_right_button, 0x000000, true, 128);
+    }
+
     Container::draw(screen,area);
+  }
+
+  bool inGameScreen() {
+      return (m_children.size() == (int)m_paused);
   }
 
   virtual bool processEvent(ToolkitEvent &ev)
   {
     Event opt1Event(Event::OPTION,1);
     Event opt2Event(Event::OPTION,2);
-    if (ev.type == ToolkitEvent::PRESS) {
-        if (ev.x < SCREEN_WIDTH * 0.05 && dispatchEvent(opt1Event)) {
+    m_wasStroke = false;
+    bool result = Container::processEvent(ev);
+    if (ev.type == ToolkitEvent::RELEASE && !m_wasStroke && inGameScreen()) {
+        if (m_left_button.contains(ev.pos()) && dispatchEvent(opt1Event)) {
             return true;
-        } else if (ev.x > SCREEN_WIDTH* 0.95 && dispatchEvent(opt2Event)) {
+        } else if (m_right_button.contains(ev.pos()) && dispatchEvent(opt2Event)) {
             return true;
         }
     }
-    return Container::processEvent(ev);
+    return result;
   }
 
   virtual bool onEvent( Event& ev )
@@ -478,6 +497,7 @@ public:
 	  if ( isPaused() ) {
 	    m_stats.pausedStrokes++; 
 	  }
+          m_wasStroke = true;
 	} else {
 	  m_scene.deleteStroke( m_createStroke );
 	}

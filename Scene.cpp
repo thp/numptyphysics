@@ -607,8 +607,9 @@ void Scene::moveStroke( Stroke* s, const Vec2& origin )
 
 bool Scene::activateStroke( Stroke *s )
 {
-  activate(s);
+  bool result = activate(s);
   m_recorder.activateStroke( m_strokes.indexOf(s) );
+  return result;
 }
 
 void Scene::getJointCandidates( Stroke* s, Path& pts )
