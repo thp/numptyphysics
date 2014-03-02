@@ -41,8 +41,6 @@ public:
   void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
   void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
   int writeBMP( const char* filename ) const;
-
-  static NP::Renderer *renderer();
 protected:
   Image* m_bgImage; 
   int m_width;

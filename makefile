@@ -27,7 +27,7 @@ $(BOX2D_SOURCE)/$(BOX2D_LIBRARY):
 
 
 # Pick the right OS-specific module here
-SOURCES += os/OsFreeDesktop.cpp
+SOURCES += os/OsSDL2.cpp
 CXXFLAGS += -I.
 
 # Dependency tracking

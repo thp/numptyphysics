@@ -21,7 +21,7 @@
 #include "Path.h"
 #include "Renderer.h"
 
-static NP::Renderer *RENDERER = NULL;
+#define RENDERER  (OS->renderer())
 
 Canvas::Canvas( int w, int h )
   : m_bgImage(NULL)
@@ -102,18 +102,12 @@ void Canvas::drawRect( const Rect& r, int c, bool fill, int a )
     RENDERER->rectangle(r, c | (a << 24), fill);
 }
 
-NP::Renderer *
-Canvas::renderer()
-{
-    return RENDERER;
-}
-
 
 Window::Window( int w, int h, const char* title, const char* winclass, bool fullscreen )
     : Canvas(w, h)
     , m_title(title)
 {
-    RENDERER = NP::Renderer::create(w, h);
+    OS->window(w, h);
     RENDERER->size(&m_width, &m_height);
 }
 

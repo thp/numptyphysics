@@ -21,7 +21,7 @@
 Font::Font( const std::string& file, int ptsize )
 {
     std::string fname = Config::findFile(file);
-    m_font = Canvas::renderer()->load(fname.c_str(), ptsize);
+    m_font = OS->renderer()->load(fname.c_str(), ptsize);
     m_height = metrics("M").y;
 }
 
@@ -29,7 +29,7 @@ Font::Font( const std::string& file, int ptsize )
 Vec2 Font::metrics( const std::string& text ) const
 {
     Vec2 m;
-    Canvas::renderer()->metrics(m_font, text.c_str(), &m.x, &m.y);
+    OS->renderer()->metrics(m_font, text.c_str(), &m.x, &m.y);
     return m;
 }
 

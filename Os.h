@@ -17,6 +17,7 @@
 #define OS_H
 
 #include "Event.h"
+#include "Renderer.h"
 #include <stdlib.h>
 #include <string>
 
@@ -33,6 +34,8 @@ class Os
   virtual long ticks() = 0;
   virtual void delay(int ms) = 0;
   virtual void init() = 0;
+  virtual void window(int w, int h) = 0;
+  virtual NP::Renderer *renderer() = 0;
   virtual char* getLaunchFile() { return NULL; }
   virtual bool  openBrowser( const char* url ) = 0;
   virtual char* saveDialog( const char* path ) { return NULL; }
