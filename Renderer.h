@@ -31,6 +31,8 @@ typedef std::shared_ptr<FontData> Font;
 
 class Renderer {
 public:
+    virtual void init() = 0;
+
     virtual void size(int *width, int *height) = 0;
 
     virtual Texture load(const char *filename) = 0;

@@ -11,7 +11,7 @@ SOURCES = $(wildcard *.cpp)
 all: $(APP)
 
 # Required modules (uses pkg-config)
-PKGS = sdl2 SDL2_image SDL2_ttf zlib
+PKGS = sdl2 SDL2_image SDL2_ttf zlib gl
 
 CXXFLAGS += $(shell pkg-config --cflags $(PKGS))
 LIBS += $(shell pkg-config --libs $(PKGS))
