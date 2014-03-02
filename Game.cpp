@@ -108,7 +108,6 @@ public:
     }
 
     if (ok) {
-      //m_window.setSubName( file );
       if ( m_edit ) {
 	m_scene.protect(0);
       } else {
@@ -137,7 +136,6 @@ public:
       if ( l >= 0 ) {
 	fprintf(stderr,"setting level to saved index to %d\n", l);
 	m_level = l;
-	//m_window.setSubName( p.c_str() );
       }
       showMessage(std::string("<P align=center>saved to<BR>")+file);
       return true;
@@ -315,7 +313,6 @@ public:
 	int l = m_levels->findLevel( f );
 	if ( l >= 0 ) {
 	  gotoLevel( l );
-	  //m_window.raise();
 	}
       }    
     }  

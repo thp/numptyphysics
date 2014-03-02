@@ -746,7 +746,6 @@ void Scene::draw( Canvas& canvas, const Rect& area )
   } else {
     canvas.setBackground( 0 );
   }
-  canvas.clear( area );
   for ( int i=0; i<m_strokes.size(); i++ ) {
 	m_strokes[i]->draw( canvas );
   }

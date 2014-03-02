@@ -35,15 +35,12 @@ public:
   int  makeColour( int r, int g, int b ) const;
   void setBackground( Image* bg );
   void clear();
-  void clear( const Rect& r );
   void fade( const Rect& r );
   Canvas* scale( int factor ) const;
   void drawImage( Canvas *canvas, int x, int y );
-  void drawPixel( int x, int y, int c );
-  int  readPixel( int x, int y ) const;
   void drawPath( const Path& path, int color, bool thick=false );
-  void drawRect( int x, int y, int w, int h, int c, bool fill=true );
-  void drawRect( const Rect& r, int c, bool fill=true );
+  void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
+  void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
   int writeBMP( const char* filename ) const;
 protected:
   Canvas( State state=NULL );
@@ -62,8 +59,6 @@ class Window : public Canvas
  public:
   Window( int w, int h, const char* title=NULL, const char* winclass=NULL, bool fullscreen=false );
   void update();
-  void raise();
-  void setSubName( const char *sub );
  protected:
   std::string m_title;
 };

@@ -23,121 +23,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-//#define FORCE_16BPP
-
 static SDL_Renderer *g_renderer = NULL;
-
-// extract RGB colour components as 8bit values from RGB888
-#define R32(p) (((p)>>16)&0xff)
-#define G32(p) (((p)>>8)&0xff)
-#define B32(p) ((p)&0xff)
-
-// extract RGB colour components as 8bit values from RGB565
-#define R16(p) (((p)>>8)&0xf8)
-#define G16(p) (((p)>>3)&0xfc)
-#define B16(p) (((p)<<3)&0xf8)
-
-#define R16G16B16_TO_RGB888(r,g,b) \
-  ((((r)<<8)&0xff0000) | ((g)&0x00ff00) | (((b)>>8)))
-
-#define R16G16B16_TO_RGB565(r,g,b) \
-  ((Uint16)( (((r)&0xf800) | (((g)>>5)&0x07e0) | (((b)>>11))&0x001f) ))
-
-#define RGB888_TO_RGB565(p) \
-  ((Uint16)( (((p)>>8)&0xf800) | (((p)>>5)&0x07e0) | (((p)>>3)&0x001f) ))
-
-
-void ExtractRgb( uint32 c, int& r, int &g, int &b ) 
-{
-  r = R32(c); g = G32(c); b = B32(c);
-}
-
-void ExtractRgb( uint16 c, int& r, int &g, int &b )
-{
-  r = R16(c); g = G16(c); b = B16(c);
-}
-
-
-template <typename PIX> 
-inline void AlphaBlend( PIX& p, int cr, int cg, int cb, int a, int ia )
-{
-  throw "not implemented";
-}
-
-inline void AlphaBlend( Uint16& p, int cr, int cg, int cb, int a, int ia )
-{ //565
-  p = R16G16B16_TO_RGB565( a * cr + ia * R16(p),
-			   a * cg + ia * G16(p),
-			   a * cb + ia * B16(p) );
-}
-
-inline void AlphaBlend( Uint32& p, int cr, int cg, int cb, int a, int ia )
-
-{ //888
-  p = R16G16B16_TO_RGB888( a * cr + ia * R32(p),
-			   a * cg + ia * G32(p),
-			   a * cb + ia * B32(p) );
-}
-
-#define ALPHA_MAX 0xff
-
-template <typename PIX, unsigned W>
-struct AlphaBrush
-{
-  int m_r, m_g, m_b, m_c;
-  inline AlphaBrush( PIX c )
-  {
-    m_c = c;
-    ExtractRgb( c, m_r, m_g, m_b );
-  }
-  inline void ink( PIX* pix, int step, int a ) 
-  {
-    int ia = ALPHA_MAX - a;
-    int o=-W/2;
-    AlphaBlend( *(pix+o*step), m_r, m_g, m_b, a, ia );
-    o++;
-    for ( ; o<=W/2; o++ ) {
-      *(pix+o*step) = m_c;
-    } 
-    AlphaBlend( *(pix+o*step), m_r, m_g, m_b, ia, a );
-  }
-};
-
-template <typename PIX>
-struct AlphaBrush<PIX,1>
-{
-  int m_r, m_g, m_b, m_c;
-  inline AlphaBrush( PIX c )
-  {
-    m_c = c;
-    ExtractRgb( c, m_r, m_g, m_b );
-  }
-  inline void ink( PIX* pix, int step, int a ) 
-  {
-    int ia = ALPHA_MAX - a;
-    AlphaBlend( *(pix-step), m_r, m_g, m_b, a, ia );
-    AlphaBlend( *(pix), m_r, m_g, m_b, ia, a );
-  }
-};
-
-template <typename PIX>
-struct AlphaBrush<PIX,3>
-{
-  int m_r, m_g, m_b, m_c;
-  inline AlphaBrush( PIX c )
-  {
-    m_c = c;
-    ExtractRgb( c, m_r, m_g, m_b );
-  }
-  inline void ink( PIX* pix, int step, int a ) 
-  {
-    int ia = ALPHA_MAX - a;
-    AlphaBlend( *(pix-step), m_r, m_g, m_b, a, ia );
-    *(pix) = m_c;
-    AlphaBlend( *(pix+step), m_r, m_g, m_b, ia, a );
-  }
-};
-
 
 
 #define SURFACE(cANVASpTR) ((SDL_Surface*)((cANVASpTR)->m_state))
@@ -191,7 +77,7 @@ void Canvas::setBackground( Image* bg )
 
 void Canvas::clear()
 {
-    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 128);
+    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
     SDL_RenderClear(m_renderer);
     if (m_bgImage) {
         SDL_RenderCopy(m_renderer, m_bgImage->m_texture, NULL, NULL);
@@ -200,88 +86,12 @@ void Canvas::clear()
 
 void Canvas::fade( const Rect& rr ) 
 {
-    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 128);
-    int w = rr.br.x - rr.tl.x;
-    int h = rr.br.y - rr.tl.y;
-    SDL_Rect r = { rr.tl.x, rr.tl.y, w, h };
-    SDL_RenderFillRect(m_renderer, &r);
+    drawRect(rr, 0x000000, true, 128);
 }
 
 Canvas* Canvas::scale( int factor ) const
 {
-  Canvas *c = new Canvas( width()/factor, height()/factor );  
-  if ( c ) {
-    if ( factor==4 && SURFACE(this)->format->BytesPerPixel==2 ) {
-      const uint16 MASK2LSB = 0xe79c;
-      int dpitch = SURFACE(c)->pitch / sizeof(uint16_t);
-      int spitch = SURFACE(this)->pitch / sizeof(uint16_t);
-      uint16_t *drow = (uint16_t*)SURFACE(c)->pixels;
-      for ( int y=0;y<c->height();y++ ) {
-	for ( int x=0;x<c->width();x++ ) {
-          uint16 p = 0;
-	  uint16_t *srow = (uint16_t*)SURFACE(this)->pixels
-  	                    + (y*spitch+x)*factor;
-	  for ( int yy=0;yy<4;yy++ ) {
-            uint16 q = 0;
-	    for ( int xx=0;xx<4;xx++ ) {
-	      q += (srow[xx]&MASK2LSB)>>2;
-	    }
-            p += (q&MASK2LSB)>>2;
-            srow += spitch;
-	  }
-          drow[x] = p;
-	}
-	drow += dpitch;
-      }
-    } else if (SURFACE(this)->format->BytesPerPixel==2 ) {
-      int dpitch = SURFACE(c)->pitch / sizeof(uint16_t);
-      int spitch = SURFACE(this)->pitch / sizeof(uint16_t);
-      uint16_t *drow = (uint16_t*)SURFACE(c)->pixels;
-      for ( int y=0;y<c->height();y++ ) {
-	for ( int x=0;x<c->width();x++ ) {
-	  uint16_t *srow = (uint16_t*)SURFACE(this)->pixels
-  	                    + (y*spitch+x)*factor;
-	  uint32_t r=0,g=0,b=0;
-	  for ( int yy=0;yy<factor;yy++ ) {
-	    for ( int xx=0;xx<factor;xx++ ) {
-	      r += srow[xx] & 0xF800;
-	      g += srow[xx] & 0x07e0;
-	      b += srow[xx] & 0x001F;
-	    }
-            srow += spitch;
-	  }
-	  r /= factor*factor;
-	  g /= factor*factor;
-	  b /= factor*factor;
-          drow[x] = (r&0xF800)|(g&0x07e0)|(b&0x001F);
-	}
-	drow += dpitch;
-      }
-    } else {
-      for ( int y=0;y<c->height();y++ ) {
-	for ( int x=0;x<c->width();x++ ) {
-	  int r=0,g=0,b=0;
-	  Uint8 rr,gg,bb;
-	  for ( int yy=0;yy<factor;yy++ ) {
-	    for ( int xx=0;xx<factor;xx++ ) {
-	      SDL_GetRGB( readPixel( x*factor+xx, y*factor+yy ),
-			  SURFACE(this)->format, &rr,&gg,&bb );
-	      r += rr;
-	      g += gg;
-	      b += bb;
-	    }
-	  }
-	  int div = factor*factor;
-	  c->drawPixel( x, y, makeColour(r/div,g/div,b/div) );
-	}
-      }
-    }
-  }
-  return c;
-}
-
-void Canvas::clear( const Rect& r )
-{
+    throw "Scale not implemented";
 }
 
 void Canvas::drawImage( Canvas *canvas, int x, int y )
@@ -297,41 +107,6 @@ void Canvas::drawImage( Canvas *canvas, int x, int y )
     }
 }
 
-void Canvas::drawPixel( int x, int y, int c )
-{
-  Uint32 bpp, ofs;
-
-  bpp = SURFACE(this)->format->BytesPerPixel;
-  ofs = SURFACE(this)->pitch*y;
-  char* row = (char*)SURFACE(this)->pixels + ofs;
-
-  SDL_LockSurface(SURFACE(this));
-  switch ( bpp ) {
-  case 2: ((Uint16*)row)[x] = c; break;
-  case 4: ((Uint32*)row)[x] = c; break;
-  }
-  SDL_UnlockSurface(SURFACE(this));
-}
-
-int Canvas::readPixel( int x, int y ) const
-{
-  Uint32 bpp, ofs;
-  int c;
-
-  bpp = SURFACE(this)->format->BytesPerPixel;
-  ofs = SURFACE(this)->pitch*y;
-  char* row = (char*)SURFACE(this)->pixels + ofs;
-
-  SDL_LockSurface(SURFACE(this));
-  switch ( bpp ) {
-  case 2: c = ((Uint16*)row)[x]; break;
-  case 4: c = ((Uint32*)row)[x]; break;
-  default: c=0; break;
-  }
-  SDL_UnlockSurface(SURFACE(this));
-  return c;
-}
-
 void Canvas::drawPath( const Path& path, int color, bool thick )
 {
     int r = (color & 0xff0000) >> 16;
@@ -343,24 +118,24 @@ void Canvas::drawPath( const Path& path, int color, bool thick )
     SDL_RenderDrawLines(m_renderer, (SDL_Point *)&path[0], path.numPoints());
 }
 
-void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill )
+void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill, int a )
 {
     int r = (c & 0xff0000) >> 16;
     int g = (c & 0x00ff00) >> 8;
     int b = (c & 0x0000ff);
     SDL_Rect rect = { x, y, w, h };
 
-    SDL_SetRenderDrawColor(m_renderer, r, g, b, 255);
+    SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
     if (fill) {
-        SDL_RenderDrawRect(m_renderer, &rect);
-    } else {
         SDL_RenderFillRect(m_renderer, &rect);
+    } else {
+        SDL_RenderDrawRect(m_renderer, &rect);
     }
 }
 
-void Canvas::drawRect( const Rect& r, int c, bool fill )
+void Canvas::drawRect( const Rect& r, int c, bool fill, int a )
 {
-    drawRect( r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1, c, fill );
+    drawRect( r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1, c, fill, a );
 }
 
 
@@ -383,16 +158,7 @@ Window::Window( int w, int h, const char* title, const char* winclass, bool full
   SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
   SDL_GetWindowSize(m_window, &m_width, &m_height);
 
-  // TODO
   m_state = NULL;
-
-  //if ( SURFACE(this) == NULL ) {
-  //  throw "Unable to set video mode";
-  //}
-
-  if ( title ) {
-    //SDL_WM_SetCaption( title, title );
-  }
 }
 
 
@@ -400,33 +166,6 @@ void Window::update()
 {
     SDL_RenderPresent(m_renderer);
     clear();
-}
-
-void Window::raise()
-{
-    // TODO
-}
-
-
-void Window::setSubName( const char *sub )
-{
-#ifdef USE_HILDON
-  SDL_SysWMinfo sys;
-  SDL_VERSION( &sys.version );
-  SDL_GetWMInfo( &sys );
-
-  char title[128];
-  snprintf(title,128,"%s - %s\n",m_title.c_str(),sub);
-  title[127] = '\0';
-
-  // SDL_WM_SetCaption is broken on maemo4
-  XStoreName( sys.info.x11.display,
-	      sys.info.x11.wmwindow,
-	      title );
-  XStoreName( sys.info.x11.display,
-	      sys.info.x11.fswindow,
-	      title );
-#endif
 }
 
 
@@ -479,6 +218,7 @@ Image::~Image()
 
 int Canvas::writeBMP( const char* filename ) const
 {
+    throw "writing bmps is broken atm";
 #pragma pack(push,1)
   typedef struct {
     unsigned short int type;         /* Magic identifier */
@@ -516,10 +256,7 @@ int Canvas::writeBMP( const char* filename ) const
     fwrite( &info, 40, 1, f );
     for ( int y=h-1; y>=0; y-- ) {
       for ( int x=0; x<w; x++ ) {
-	int p = readPixel( x, y );
-	if ( bpp==2 ) {
-	  p = R16G16B16_TO_RGB888( R16(p), G16(p), B16(p) );
-	}
+	int p = 0; // FIXME: read pixel at (x, y)
 	fwrite( &p, 3, 1, f );
       }
     }
