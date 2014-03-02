@@ -181,6 +181,8 @@ private:
 
   void render()
   {
+      m_window->clear();
+
       draw(*m_window, FULLSCREEN_RECT);
 
       if (m_drawFps) {
