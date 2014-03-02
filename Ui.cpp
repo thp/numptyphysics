@@ -253,16 +253,18 @@ IconButton::~IconButton()
     delete m_icon;
 }
 
-void IconButton::canvas(Canvas *c, bool takeOwnership)
+void IconButton::image(Image *image, bool takeOwnership)
 {
     delete m_icon;
-    m_icon = Image::fromCanvas(c);
+
     if (takeOwnership) {
-        delete c;
+        m_icon = image;
+    } else {
+        m_icon = Image::fromImage(image);
     }
 }
 
-Canvas* IconButton::canvas()
+Image* IconButton::image()
 {
     return m_icon;
 }

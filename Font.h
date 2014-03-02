@@ -20,6 +20,7 @@
 #include "Common.h"
 #include "Path.h"
 #include "Array.h"
+#include "Renderer.h"
 #include <string>
 
 class Canvas;
@@ -43,8 +44,7 @@ class Font
   static const Font* headingFont();
   static const Font* blurbFont();
  private:
-  typedef void* State;
-  State m_state;
+  NP::Font m_font;
   int m_height;
 };
 

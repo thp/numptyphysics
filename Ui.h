@@ -24,6 +24,7 @@
 #include <string>
 
 class Canvas;
+class Image;
 class Widget;
 class Font;
 
@@ -131,14 +132,14 @@ class IconButton : public Button
   IconButton(const std::string& s, const std::string& icon, const Event& ev);
   ~IconButton();
   const char* name() {return "IconButton";}
-  void canvas(Canvas *c, bool takeOwnership=true);
-  Canvas* canvas();
+  void image(Image *image, bool takeOwnership=true);
+  Image* image();
   void icon(const std::string& icon);
   void draw( Canvas& screen, const Rect& area );
   void align(int dir) { m_vertical=(dir==0); }
  protected:
   bool m_vertical;
-  Canvas *m_icon;
+  Image *m_icon;
 };
 
 

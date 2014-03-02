@@ -19,18 +19,12 @@
 #include "Config.h"
 #include "Canvas.h"
 #include "Path.h"
+#include "Renderer.h"
 
-#include <SDL.h>
-#include <SDL_image.h>
-
-static SDL_Renderer *g_renderer = NULL;
-
-
-#define SURFACE(cANVASpTR) ((SDL_Surface*)((cANVASpTR)->m_state))
+static NP::Renderer *RENDERER = NULL;
 
 Canvas::Canvas( int w, int h )
-  : m_state(NULL)
-  , m_bgImage(NULL)
+  : m_bgImage(NULL)
   , m_width(w)
   , m_height(h)
 {
@@ -39,9 +33,9 @@ Canvas::Canvas( int w, int h )
 
 Canvas::~Canvas()
 {
-  if (SURFACE(this)) {
-    SDL_FreeSurface(SURFACE(this));
-  }
+    if (m_bgImage) {
+        delete m_bgImage;
+    }
 }
 
 int Canvas::width() const
@@ -71,10 +65,9 @@ void Canvas::setBackground( Image* bg )
 
 void Canvas::clear()
 {
-    SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
-    SDL_RenderClear(g_renderer);
+    RENDERER->clear();
     if (m_bgImage) {
-        SDL_RenderCopy(g_renderer, m_bgImage->m_texture, NULL, NULL);
+        RENDERER->image(m_bgImage->m_texture, 0, 0);
     }
 }
 
@@ -90,119 +83,78 @@ Canvas* Canvas::scale( int factor ) const
 
 void Canvas::drawImage( Canvas *canvas, int x, int y )
 {
-    int w = canvas->width();
-    int h = canvas->height();
-
-    SDL_Rect sdlsrc = { 0, 0, w, h };
-    SDL_Rect sdldst = { x, y, w, h };
-
-    if (SDL_RenderCopy(g_renderer, ((Image *)canvas)->m_texture, &sdlsrc, &sdldst) != 0) {
-        printf("Could not render: %s\n", SDL_GetError());
-    }
+    Image *image = (Image *)canvas;
+    RENDERER->image(image->m_texture, x, y);
 }
 
 void Canvas::drawPath( const Path& path, int color, bool thick )
 {
-    int r = (color & 0xff0000) >> 16;
-    int g = (color & 0x00ff00) >> 8;
-    int b = (color & 0x0000ff);
-    SDL_SetRenderDrawColor(g_renderer, r, g, b, 255);
-
-    // This assumes that Vec2 == int[2] and items in path are tightly packed
-    SDL_RenderDrawLines(g_renderer, (SDL_Point *)&path[0], path.numPoints());
+    RENDERER->path(path, color | 0xff000000);
 }
 
 void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill, int a )
 {
-    int r = (c & 0xff0000) >> 16;
-    int g = (c & 0x00ff00) >> 8;
-    int b = (c & 0x0000ff);
-    SDL_Rect rect = { x, y, w, h };
-
-    SDL_SetRenderDrawColor(g_renderer, r, g, b, a);
-    if (fill) {
-        SDL_RenderFillRect(g_renderer, &rect);
-    } else {
-        SDL_RenderDrawRect(g_renderer, &rect);
-    }
+    drawRect(Rect(x, y, x+w, y+h), c, fill, a);
 }
 
 void Canvas::drawRect( const Rect& r, int c, bool fill, int a )
 {
-    drawRect( r.tl.x, r.tl.y, r.br.x-r.tl.x+1, r.br.y-r.tl.y+1, c, fill, a );
+    RENDERER->rectangle(r, c | (a << 24), fill);
+}
+
+NP::Renderer *
+Canvas::renderer()
+{
+    return RENDERER;
 }
 
 
-
 Window::Window( int w, int h, const char* title, const char* winclass, bool fullscreen )
-  : Canvas(w, h)
-  , m_title(title)
-  , m_window(NULL)
-  , m_renderer(NULL)
+    : Canvas(w, h)
+    , m_title(title)
 {
-  if ( winclass ) {
-    char s[80];
-    snprintf(s,80,"SDL_VIDEO_X11_WMCLASS=%s",winclass);
-    putenv(s);
-  }
-
-  if (SDL_CreateWindowAndRenderer(w, h, SDL_WINDOW_SHOWN, &m_window, &m_renderer) != 0) {
-      printf("Could not create window and renderer: %s\n", SDL_GetError());
-      exit(1);
-  }
-
-  g_renderer = m_renderer;
-  SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
-  SDL_GetWindowSize(m_window, &m_width, &m_height);
+    RENDERER = NP::Renderer::create(w, h);
+    RENDERER->size(&m_width, &m_height);
 }
 
 
 void Window::update()
 {
-    SDL_RenderPresent(m_renderer);
+    RENDERER->swap();
 }
 
 Image *
 Image::fromFile(const char *filename)
 {
-  std::string f("data/");
-
-  SDL_Surface* img = IMG_Load((f+filename).c_str());
-  if (!img) {
-      f = std::string(DEFAULT_RESOURCE_PATH "/");
-      img = IMG_Load((f+filename).c_str());
-  }
-
-  return Image::fromMem(img);
+    return new Image(RENDERER->load(filename));
 }
 
 Image *
-Image::fromMem(SDL_Surface *surface)
+Image::fromMem(unsigned char *rgba, int w, int h)
 {
-    if (surface) {
-        return new Image(surface);
-    }
-
-    return NULL;
+    return new Image(RENDERER->load(rgba, w, h));
 }
 
 Image *
-Image::fromCanvas(Canvas *canvas)
+Image::fromImage(Image *image)
 {
-    SDL_Surface *s = (SDL_Surface*)canvas->m_state;
-    return new Image(SDL_ConvertSurface(s, s->format, s->flags));
+    return new Image(image->m_texture);
 }
 
-Image::Image(SDL_Surface *surface)
-    : Canvas(surface->w, surface->h)
+Image *
+Image::fromFont(NP::Font font, const char *text, int rgb)
 {
-    m_state = surface;
-    m_texture = SDL_CreateTextureFromSurface(g_renderer, surface);
+    return new Image(RENDERER->text(font, text, rgb));
+}
+
+Image::Image(NP::Texture texture)
+    : Canvas(texture->w, texture->h)
+    , m_texture(texture)
+{
 }
 
 Image::~Image()
 {
-    SDL_DestroyTexture(m_texture);
 }
 
 
@@ -240,8 +192,8 @@ int Canvas::writeBMP( const char* filename ) const
 
   FILE *f = fopen( filename, "wb" );
   if ( f ) {
-    Uint32 bpp;
-    bpp = SURFACE(this)->format->BytesPerPixel;
+    uint32_t bpp = 32; // FIXME
+    //bpp = SURFACE(this)->format->BytesPerPixel;
 
     fwrite( &head, 14, 1, f );
     fwrite( &info, 40, 1, f );

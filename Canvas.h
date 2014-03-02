@@ -17,15 +17,14 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
-#include <SDL.h>
-
 #include "Common.h"
+#include "Renderer.h"
+
 class Path;
 class Image;
 
 class Canvas
 {
-  typedef void* State;
 public:
   Canvas( int w, int h );
   virtual ~Canvas();
@@ -42,8 +41,9 @@ public:
   void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
   void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
   int writeBMP( const char* filename ) const;
+
+  static NP::Renderer *renderer();
 protected:
-  State   m_state;
   Image* m_bgImage; 
   int m_width;
   int m_height;
@@ -58,8 +58,6 @@ class Window : public Canvas
   void update();
  protected:
   std::string m_title;
-  SDL_Window *m_window;
-  SDL_Renderer *m_renderer;
 };
 
 
@@ -67,16 +65,17 @@ class Image : public Canvas
 {
 public:
     static Image *fromFile(const char *filename);
-    static Image *fromMem(SDL_Surface *surface);
-    static Image *fromCanvas(Canvas *canvas);
+    static Image *fromMem(unsigned char *rgba, int w, int h);
+    static Image *fromImage(Image *image);
+    static Image *fromFont(NP::Font font, const char *text, int rgb);
 
 private:
-    Image(SDL_Surface *s);
+    Image(NP::Texture texture);
 
 public:
     ~Image();
 
-    SDL_Texture *m_texture;
+    NP::Texture m_texture;
 };
 
 

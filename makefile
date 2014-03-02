@@ -4,7 +4,7 @@ APP = numptyphysics
 DESTDIR ?=
 PREFIX = /opt/numptyphysics
 
-CXXFLAGS += -DINSTALL_BASE_PATH=\"$(PREFIX)/data\"
+CXXFLAGS += -std=c++11 -DINSTALL_BASE_PATH=\"$(PREFIX)/data\"
 
 SOURCES = $(wildcard *.cpp)
 

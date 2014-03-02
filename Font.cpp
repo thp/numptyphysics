@@ -16,35 +16,29 @@
 #include "Font.h"
 #include "Canvas.h"
 #include "Config.h"
-#include <SDL_ttf.h>
 
-#define FONT(fONTpTR) ((TTF_Font*)((fONTpTR)->m_state))
 
 Font::Font( const std::string& file, int ptsize )
 {
-  TTF_Init();
-  std::string fname = Config::findFile(file);
-  m_state = TTF_OpenFont( fname.c_str(), ptsize );
-  m_height = metrics("M").y;
+    std::string fname = Config::findFile(file);
+    m_font = Canvas::renderer()->load(fname.c_str(), ptsize);
+    m_height = metrics("M").y;
 }
 
 
 Vec2 Font::metrics( const std::string& text ) const
 {
-  Vec2 m;
-  TTF_SizeText( FONT(this), text.c_str(), &m.x, &m.y );
-  return m;
+    Vec2 m;
+    Canvas::renderer()->metrics(m_font, text.c_str(), &m.x, &m.y);
+    return m;
 }
-
 
 void Font::drawLeft( Canvas* canvas, Vec2 pt,
 		     const std::string& text, int colour ) const
 {
-  SDL_Color fg = { colour>>16, colour>>8, colour };
-  Image *temp = Image::fromMem(TTF_RenderText_Blended(FONT(this),
-              text.c_str(), fg));
-  canvas->drawImage(temp, pt.x, pt.y);
-  delete temp;
+    Image *temp = Image::fromFont(m_font, text.c_str(), colour);
+    canvas->drawImage(temp, pt.x, pt.y);
+    delete temp;
 }
 
 void Font::drawRight( Canvas* canvas, Vec2 pt,
@@ -85,19 +79,28 @@ void Font::drawWrap( Canvas* canvas, Rect area,
 
 const Font* Font::titleFont()
 {
-  static Font* f = new Font("femkeklaver.ttf",48);
+  static Font* f = 0;
+  if (!f) {
+      f = new Font("femkeklaver.ttf",48);
+  }
   return f;
 }
 
 const Font* Font::headingFont()
 {
-  static Font* f = new Font("femkeklaver.ttf",32);
+  static Font* f = 0;
+  if (!f) {
+      f = new Font("femkeklaver.ttf",32);
+  }
   return f;
 }
 
 const Font* Font::blurbFont()
 {
-  static Font* f = new Font("femkeklaver.ttf",24);
+  static Font* f = 0;
+  if (!f) {
+      f = new Font("femkeklaver.ttf",24);
+  }
   return f;
 }
 

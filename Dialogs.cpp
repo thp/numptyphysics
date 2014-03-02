@@ -46,14 +46,14 @@ struct MenuPage : public Panel
 class LevelLauncher : public Dialog
 {
 public:
-  LevelLauncher(int l, Canvas* c)
+  LevelLauncher(int l, Image *image)
   {
     Box *vbox1 = new VBox();
     vbox1->add( new Spacer(),  100, 1 );
     Box *hbox = new HBox();
     hbox->add( new Spacer(),  10, 2 );
     IconButton *icon = new IconButton("level", "", Event::NOP);
-    icon->canvas(c, false);
+    icon->image(image, false);
     hbox->add( icon, 300, 0 );
     hbox->add( new Spacer(),  10, 1 );
     Box *vbox = new VBox();
@@ -170,7 +170,7 @@ public:
 	scene.draw( temp, FULLSCREEN_RECT );
 	m_thumbs[i]->text( m_levels->levelName(level) );
 	//m_thumbs[i]->canvas( temp.scale( ICON_SCALE_FACTOR ) );
-	m_thumbs[i]->canvas(&temp, false);
+	//m_thumbs[i]->canvas(&temp, false);
 	m_thumbs[i]->transparent(m_dispbase+i!=levelInC);
       }
     }
@@ -190,7 +190,7 @@ public:
 //       }
 //       m_thumbs[m_dispbase+ev.x]->transparent(false);
 //       m_game->gotoLevel(m_levels->collectionLevel(m_collection,m_dispbase+ev.x));
-//       add( new LevelLauncher(m_levels->collectionLevel(m_collection,m_dispbase+ev.x), m_thumbs[m_dispbase+ev.x]->canvas()) );
+//       add( new LevelLauncher(m_levels->collectionLevel(m_collection,m_dispbase+ev.x), m_thumbs[m_dispbase+ev.x]->image()) );
 //       //Event closeEvent(Event::CLOSE);
 //       //m_parent->dispatchEvent(closeEvent);
 //       return true;
@@ -294,7 +294,7 @@ public:
       fprintf(stderr,"select level %d\n",ev.x);
       m_chosenLevel = ev.x;
       content()->empty();
-      content()->add(new LevelLauncher(m_chosenLevel,NULL));
+      content()->add(new LevelLauncher(m_chosenLevel, NULL));
       if (rightControl()) {
           rightControl()->text("<--");
           rightControl()->event(Event(Event::MENU,1));
