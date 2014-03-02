@@ -20,14 +20,6 @@
 
 #define FONT(fONTpTR) ((TTF_Font*)((fONTpTR)->m_state))
 
-struct FontCanvas : public Image
-{
-  FontCanvas( SDL_Surface* s )
-    : Image( s )
-  {}
-};
-
-
 Font::Font( const std::string& file, int ptsize )
 {
   TTF_Init();
@@ -49,7 +41,7 @@ void Font::drawLeft( Canvas* canvas, Vec2 pt,
 		     const std::string& text, int colour ) const
 {
   SDL_Color fg = { colour>>16, colour>>8, colour };
-  FontCanvas temp( TTF_RenderText_Blended( FONT(this),
+  Image temp( TTF_RenderText_Blended( FONT(this),
 					   text.c_str(),
 					   fg ) );
   canvas->drawImage( &temp, pt.x, pt.y );
