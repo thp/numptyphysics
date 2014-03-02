@@ -138,23 +138,91 @@ GLRenderer::rectangle(const Rect &rect, int rgba, bool fill)
     // TODO: Handle "fill", draw lines if not fill
 }
 
+static b2Vec2 operator*(b2Vec2 v, float m)
+{
+    b2Vec2 x = v;
+    x *= m;
+    return x;
+}
+
+static float *
+make_segment(b2Vec2 aa, b2Vec2 a, b2Vec2 b, b2Vec2 bb)
+{
+    static b2Vec2 data[9];
+
+    b2Vec2 a_to_b = 0.5 * (b - a) + 0.5 * (a - aa);
+    a_to_b.Normalize();
+    b2Vec2 a_to_b_90(-a_to_b.y, a_to_b.x);
+
+    b2Vec2 b_to_a = 0.5 * (bb - b) + 0.5 * (b - a);
+    b_to_a.Normalize();
+    b2Vec2 b_to_a_90(-b_to_a.y, b_to_a.x);
+
+    float w = 0.9;
+    float e = 1.0;
+
+    int offset = 0;
+    data[offset++] = a + a_to_b_90 * (w + e);
+    data[offset++] = b + b_to_a_90 * (w + e);
+    data[offset++] = a + a_to_b_90 * w;
+    data[offset++] = b + b_to_a_90 * w;
+
+    data[offset++] = a - a_to_b_90 * w;
+    data[offset++] = b - b_to_a_90 * w;
+    data[offset++] = a - a_to_b_90 * (w + e);
+    data[offset++] = b - b_to_a_90 * (w + e);
+
+    data[offset++] = b - b_to_a_90 * (w + e);
+
+    return &(data[0].x);
+}
+
 void
 GLRenderer::path(const Path &path, int rgba)
 {
     float r, g, b, a;
     rgba_split(rgba, r, g, b, a);
     glColor4f(r, g, b, a);
+    int segments = path.numPoints() - 1;
 
-    float *points = new float[2 * path.numPoints()];
-    for (int i=0; i<path.numPoints(); i++) {
-        points[i*2 + 0] = path[i].x;
-        points[i*2 + 1] = path[i].y;
+    float *points = new float[(2 + 4) * 9 * segments];
+    int offset = 0;
+    for (int i=0; i<segments; i++) {
+        // Segment P1 -> P2
+        float *segment = make_segment(
+              (i > 0) ? path[i-1] : path[i],
+              path[i],
+              path[i+1],
+              (i < segments - 1) ? path[i+2] : path[i+1]
+        );
+
+        int soffset = 0;
+        for (int j=0; j<9; j++) {
+            // Vertices
+            points[offset++] = segment[soffset++];
+            points[offset++] = segment[soffset++];
+
+            // Color
+            points[offset++] = r;
+            points[offset++] = g;
+            points[offset++] = b;
+            if ((j < 2 || j > 5)) {
+                // Transparent
+                points[offset++] = 0.f;
+            } else {
+                // Filled
+                points[offset++] = 1.f;
+            }
+        }
     }
-    // TODO: make antialiased lines
-    glVertexPointer(2, GL_FLOAT, 0, points);
+
+    glVertexPointer(2, GL_FLOAT, sizeof(float) * (2 + 4), points);
+    glColorPointer(4, GL_FLOAT, sizeof(float) * (2 + 4), points + 2);
     glEnable(GL_VERTEX_ARRAY);
+    glEnable(GL_COLOR_ARRAY);
     glDisable(GL_TEXTURE_2D);
-    glDrawArrays(GL_LINE_STRIP, 0, path.numPoints());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 9 * (path.numPoints() - 1));
+    glDisable(GL_COLOR_ARRAY);
     glDisable(GL_VERTEX_ARRAY);
 
     delete points;
