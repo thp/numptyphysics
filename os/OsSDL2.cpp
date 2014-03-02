@@ -13,7 +13,6 @@
  * General Public License for more details.
  *
  */
-#if !defined(USE_HILDON) && !defined(WIN32)
 
 #include "Os.h"
 #include "Config.h"
@@ -399,9 +398,14 @@ const char Os::pathSep = '/';
 
 int main(int argc, char** argv)
 {
-  if ( ((OsFreeDesktop*)Os::get())->setupPipe(argc,argv) ) {
-    npmain(argc,argv);
-  }
-}
+    try {
+        if ( ((OsFreeDesktop*)Os::get())->setupPipe(argc,argv) ) {
+            std::shared_ptr<MainLoop> mainloop(npmain(argc, argv));
+            while (mainloop->step());
+        }
+    } catch ( const char* e ) {
+        fprintf(stderr, "*** CAUGHT: %s", e);
+    }
 
-#endif
+    return 0;
+}

@@ -32,7 +32,7 @@
 #include <unistd.h>
 
 
-class App : private Container
+class App : private Container, public MainLoop
 {
   int   m_width;
   int   m_height;
@@ -45,16 +45,22 @@ class App : private Container
   int   m_renderRate;
   Array<const char*> m_files;
   Window            *m_window;
+  int m_iterationRate;
+  int m_iterateCounter;
+  int m_lastTick;
 public:
   App(int argc, char** argv)
-    : m_width(SCREEN_WIDTH),
-      m_height(SCREEN_HEIGHT),
-      m_rotate(false),
-      m_thumbnailMode(false),
-      m_videoMode(false),
-      m_quit(false),
-      m_drawFps(false),
-      m_window(NULL)
+    : m_width(SCREEN_WIDTH)
+    , m_height(SCREEN_HEIGHT)
+    , m_rotate(false)
+    , m_thumbnailMode(false)
+    , m_videoMode(false)
+    , m_quit(false)
+    , m_drawFps(false)
+    , m_window(NULL)
+    , m_iterationRate(ITERATION_RATE)
+    , m_iterateCounter(0)
+    , m_lastTick(OS->ticks())
   {
     for ( int i=1; i<argc; i++ ) {
       if ( strcmp(argv[i],"-test")==0 && i < argc-1) {
@@ -80,6 +86,7 @@ public:
     }
     init();
     setEventMap(APP_MAP);
+    run();
   }
 
   ~App()
@@ -176,7 +183,7 @@ private:
     }
         
     add( createGameLayer( levels, width, height ), 0, 0 );
-    mainLoop();
+    m_renderRate = (MIN_RENDER_RATE+MAX_RENDER_RATE)/2;
   }
 
   void render()
@@ -233,60 +240,51 @@ private:
     }
     return false;
   }
-  
-  void mainLoop()
+
+  virtual bool step()
   {
-    render();
-
-    m_renderRate = (MIN_RENDER_RATE+MAX_RENDER_RATE)/2;
-    int iterationRate = ITERATION_RATE;
-    int iterateCounter = 0;
-    int lastTick = OS->ticks();
-    bool isComplete = false;    
-
-    while ( !m_quit ) {
       OS->poll();
 
       //assumes RENDER_RATE <= ITERATION_RATE
-      while ( iterateCounter < iterationRate ) {
+      while ( m_iterateCounter < m_iterationRate ) {
 
-	onTick( lastTick );
+          onTick( m_lastTick );
 
-        ToolkitEvent ev;
-        while (OS->nextEvent(ev)) {
-            processEvent(ev);
-        }
+          ToolkitEvent ev;
+          while (OS->nextEvent(ev)) {
+              processEvent(ev);
+          }
 
-	if ( m_quit ) return;
-	iterateCounter += m_renderRate;
+          if ( m_quit ) return false;
+          m_iterateCounter += m_renderRate;
       }
-      iterateCounter -= iterationRate;
+      m_iterateCounter -= m_iterationRate;
 
       render();
 
-      int sleepMs = lastTick + 1000/m_renderRate - OS->ticks();
+      int sleepMs = m_lastTick + 1000/m_renderRate - OS->ticks();
 
       if ( sleepMs > 1 && m_renderRate < MAX_RENDER_RATE ) {
-	m_renderRate++;
-	//printf("increasing render rate to %dfps\n",m_renderRate);
-	sleepMs = lastTick + 1000/m_renderRate - OS->ticks();
+          m_renderRate++;
+          //printf("increasing render rate to %dfps\n",m_renderRate);
+          sleepMs = m_lastTick + 1000/m_renderRate - OS->ticks();
       }
 
       if ( sleepMs > 0 ) {
           OS->delay(sleepMs);
       } else {
-	//printf("overrun %dms\n",-sleepMs);
-	if ( m_renderRate > MIN_RENDER_RATE ) {
-	  m_renderRate--;
-	  //printf("decreasing render rate to %dfps\n",m_renderRate);
-	} else if ( iterationRate > 30 ) {
-	  //slow down simulation time to maintain fps??
-	}
+          //printf("overrun %dms\n",-sleepMs);
+          if ( m_renderRate > MIN_RENDER_RATE ) {
+              m_renderRate--;
+              //printf("decreasing render rate to %dfps\n",m_renderRate);
+          } else if ( m_iterationRate > 30 ) {
+              //slow down simulation time to maintain fps??
+          }
       }
-      lastTick = OS->ticks();
-    }
+      m_lastTick = OS->ticks();
+
+      return !m_quit;
   }
-  
 
   void test( std::string op ) 
   {
@@ -307,17 +305,11 @@ private:
       throw "bad test";
     }
   }
-
 };
 
 
-int npmain(int argc, char** argv)
+MainLoop *
+npmain(int argc, char **argv)
 {
-  try {      
-    App app(argc,argv);
-    app.run();
-  } catch ( const char* e ) {
-    fprintf(stderr,"*** CAUGHT: %s",e);
-  } 
-  return 0;
+    return new App(argc, argv);
 }

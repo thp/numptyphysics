@@ -25,6 +25,14 @@
 class Accelerometer;
 class WidgetParent;
 
+class MainLoop {
+public:
+    MainLoop() {}
+    virtual ~MainLoop() {}
+
+    virtual bool step() = 0;
+};
+
 class Os
 {
  public:  
@@ -55,6 +63,6 @@ class OsObj
 };
 extern OsObj OS;
 
-extern int npmain(int argc, char** argv);
+extern MainLoop *npmain(int argc, char** argv);
 
 #endif //OS_H
