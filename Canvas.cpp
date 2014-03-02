@@ -33,9 +33,6 @@ Canvas::Canvas( int w, int h )
 
 Canvas::~Canvas()
 {
-    if (m_bgImage) {
-        delete m_bgImage;
-    }
 }
 
 int Canvas::width() const
