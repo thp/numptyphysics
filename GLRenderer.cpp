@@ -98,14 +98,14 @@ GLRenderer::image(const NP::Texture &texture, int x, int y)
     glColor4f(1.f, 1.f, 1.f, 1.f);
     glVertexPointer(2, GL_FLOAT, 0, vtxcoords);
     glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
-    glEnable(GL_VERTEX_ARRAY);
-    glEnable(GL_TEXTURE_COORD_ARRAY);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, data->m_texture);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_TEXTURE_COORD_ARRAY);
-    glDisable(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 static void rgba_split(int rgba, float &r, float &g, float &b, float &a)
@@ -131,10 +131,10 @@ GLRenderer::rectangle(const Rect &rect, int rgba, bool fill)
     };
 
     glVertexPointer(2, GL_FLOAT, 0, vtxcoords);
-    glEnable(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_VERTEX_ARRAY);
     glDisable(GL_TEXTURE_2D);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glDisable(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
     // TODO: Handle "fill", draw lines if not fill
 }
 
@@ -218,12 +218,12 @@ GLRenderer::path(const Path &path, int rgba)
 
     glVertexPointer(2, GL_FLOAT, sizeof(float) * (2 + 4), points);
     glColorPointer(4, GL_FLOAT, sizeof(float) * (2 + 4), points + 2);
-    glEnable(GL_VERTEX_ARRAY);
-    glEnable(GL_COLOR_ARRAY);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
     glDisable(GL_TEXTURE_2D);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 9 * (path.numPoints() - 1));
-    glDisable(GL_COLOR_ARRAY);
-    glDisable(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
 
     delete points;
 }
