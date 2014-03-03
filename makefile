@@ -51,9 +51,9 @@ $(APP): $(OBJECTS) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
 clean:
 	rm -f $(OBJECTS)
 	rm -f $(DEPENDENCIES)
-	$(MAKE) -C $(BOX2D_SOURCE) clean
 
 distclean: clean
+	$(MAKE) -C $(BOX2D_SOURCE) clean
 	rm -f $(APP)
 
 install: $(APP)

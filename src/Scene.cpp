@@ -18,6 +18,7 @@
 #include "Config.h"
 #include "Scene.h"
 #include "Accelerometer.h"
+#include "Colour.h"
 
 #include <sstream>
 #include <fstream>
@@ -128,7 +129,7 @@ public:
   Stroke( const Path& path )
     : m_rawPath(path)
   {
-    m_colour = brushColours[DEFAULT_BRUSH];
+    m_colour = NP::Colour::DEFAULT;
     m_attributes = 0;
     m_origin = m_rawPath.point(0);
     m_rawPath.translate( -m_origin );
@@ -138,7 +139,7 @@ public:
   Stroke( const std::string& str ) 
   {
     int col = 0;
-    m_colour = brushColours[DEFAULT_BRUSH];
+    m_colour = NP::Colour::DEFAULT;
     m_attributes = 0;
     m_origin = Vec2(400,240);
     reset();
@@ -158,8 +159,8 @@ public:
       }
       s++;
     }
-    if ( col >= 0 && col < NUM_BRUSHES ) {
-      m_colour = brushColours[col];
+    if ( col >= 0 && col < NP::Colour::count ) {
+      m_colour = NP::Colour::values[col];
     }
     if ( *s++ == ':' ) {
       m_rawPath = Path(s);
@@ -197,8 +198,8 @@ public:
     if ( hasAttribute(ATTRIB_GROUND) )   s<<'f';
     if ( hasAttribute(ATTRIB_SLEEPING) ) s<<'s';
     if ( hasAttribute(ATTRIB_DECOR) )    s<<'d';
-    for ( int i=0; i<NUM_BRUSHES; i++ ) {
-      if ( m_colour==brushColours[i] )  s<<i;
+    for ( int i=0; i<NP::Colour::count; i++ ) {
+      if ( m_colour==NP::Colour::values[i] )  s<<i;
     }
     s << ":";
     Path opath = m_rawPath;
@@ -214,8 +215,8 @@ public:
   void setAttribute( Attribute a )
   {
     m_attributes |= a;
-    if ( m_attributes & ATTRIB_TOKEN )     m_colour = brushColours[RED_BRUSH];
-    else if ( m_attributes & ATTRIB_GOAL ) m_colour = brushColours[YELLOW_BRUSH];
+    if ( m_attributes & ATTRIB_TOKEN )     m_colour = NP::Colour::RED;
+    else if ( m_attributes & ATTRIB_GOAL ) m_colour = NP::Colour::YELLOW;
   }
 
   void clearAttribute( Attribute a )
@@ -560,7 +561,7 @@ Stroke* Scene::newStroke( const Path& p, int colour, int attribs ) {
   switch ( colour ) {
   case 0: s->setAttribute( ATTRIB_TOKEN ); break;
   case 1: s->setAttribute( ATTRIB_GOAL ); break;
-  default: s->setColour( brushColours[colour] ); break;
+  default: s->setColour( NP::Colour::values[colour] ); break;
   }
   m_strokes.append( s );
   m_recorder.newStroke( p, colour, attribs );

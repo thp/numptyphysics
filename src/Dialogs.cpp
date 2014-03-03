@@ -21,6 +21,7 @@
 #include "Config.h"
 #include "Game.h"
 #include "Scene.h"
+#include "Colour.h"
 
 
 ////////////////////////////////////////////////////////////////
@@ -148,7 +149,7 @@ public:
       m_thumbs[i] = new IconButton("--","",Event(Event::PLAY, //SELECT,
 						 m_levels->collectionLevel(c,i)));
       m_thumbs[i]->font(Font::blurbFont());
-      m_thumbs[i]->setBg(SELECTED_BG);
+      m_thumbs[i]->setBg(NP::Colour::SELECTED_BG);
       m_thumbs[i]->border(false);
       hbox->add( m_thumbs[i],  SCREEN_WIDTH / ICON_SCALE_FACTOR, 0 );
       hbox->add( new Spacer(), 0, 1 );

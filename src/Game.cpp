@@ -27,6 +27,7 @@
 #include "Script.h"
 #include "Dialogs.h"
 #include "Ui.h"
+#include "Colour.h"
 
 #include <cstdio>
 #include <iostream>
@@ -420,7 +421,7 @@ public:
       case 1:
 	switch (ev.y) {
 	case -1:
-	  add( createColourDialog(this, NUM_BRUSHES, brushColours) ); 
+	  add(createColourDialog(this, NP::Colour::count, NP::Colour::values)); 
 	  break;
 	default:
 	  fprintf(stderr,"SetTool %d\n",ev.y);

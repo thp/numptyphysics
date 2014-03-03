@@ -19,6 +19,7 @@
 #include "Canvas.h"
 #include "Os.h"
 #include "Config.h"
+#include "Colour.h"
 
 
 static int indent = 0;
@@ -34,8 +35,8 @@ Widget::Widget(WidgetParent *p)
     m_alpha(0),
     m_fitToParent(false),
     m_greedyMouse(false),
-    m_bg(DEFAULT_BG),
-    m_fg(DEFAULT_FG),
+    m_bg(NP::Colour::DEFAULT_BG),
+    m_fg(NP::Colour::DEFAULT_FG),
     m_border(0)
 {}
 
@@ -101,14 +102,14 @@ void Widget::draw( Canvas& screen, const Rect& area )
     r.clipTo(area);
     if (!r.isEmpty()) {
       if ( m_focussed ) {
-	screen.drawRect(r,screen.makeColour(SELECTED_BG));
+	screen.drawRect(r,screen.makeColour(NP::Colour::SELECTED_BG));
       } else {
 	screen.drawRect(m_pos,screen.makeColour(m_bg), true, m_alpha);
       }
     }
   }
   if (m_border) {
-    screen.drawRect(m_pos,screen.makeColour(TL_BORDER),false);
+    screen.drawRect(m_pos,screen.makeColour(NP::Colour::TL_BORDER),false);
   }
 }
 
@@ -168,7 +169,7 @@ void Button::draw( Canvas& screen, const Rect& area )
 {
   Label::draw(screen,area);
   if (m_focussed) {
-    screen.drawRect(m_pos,screen.makeColour(TL_BORDER),false);
+    screen.drawRect(m_pos,screen.makeColour(NP::Colour::TL_BORDER),false);
   }
 }
 
@@ -278,7 +279,7 @@ void IconButton::draw( Canvas& screen, const Rect& area )
   if (m_icon) {
     Widget::draw(screen,area);
     if (m_focussed) {
-      screen.drawRect(m_pos,screen.makeColour(SELECTED_BG),true);
+      screen.drawRect(m_pos,screen.makeColour(NP::Colour::SELECTED_BG),true);
     }
     Vec2 textsize = m_font->metrics(m_text);    
     int gap = (m_vertical ?  : m_pos.width()) / 10;
@@ -924,7 +925,7 @@ void TabBook::draw( Canvas& screen, const Rect& area )
   Panel::draw(screen,area);
   Rect border = m_pos;
   border.tl.y += TAB_HEIGHT;
-  screen.drawRect(border,screen.makeColour(TL_BORDER),false);
+  screen.drawRect(border,screen.makeColour(NP::Colour::TL_BORDER),false);
 }
 
 void TabBook::addTab( const std::string &s, Widget* w )
@@ -943,13 +944,13 @@ void TabBook::addTab( const std::string &s, Widget* w )
 void TabBook::selectTab( int t )
 {
   if (m_contents) {
-    m_tabs[m_selected]->setBg(DEFAULT_BG);
+    m_tabs[m_selected]->setBg(NP::Colour::DEFAULT_BG);
     m_children.erase(m_children.indexOf(m_contents));
     m_contents = NULL;
   }
   if ( t>=0 && t<m_count ) {
     m_selected = t;
-    m_tabs[m_selected]->setBg(SELECTED_BG);
+    m_tabs[m_selected]->setBg(NP::Colour::SELECTED_BG);
     m_contents = m_panels[t];
     Rect area(Vec2(1,TAB_HEIGHT+1),m_pos.size()-Vec2(1,1));
     add(m_contents,area);

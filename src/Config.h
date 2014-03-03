@@ -68,19 +68,7 @@ extern Rect FULLSCREEN_RECT;
 extern const Rect BOUNDS_RECT;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
-extern const int brushColours[];
-extern const int NUM_BRUSHES;
-#define RED_BRUSH       0
-#define YELLOW_BRUSH    1
-#define DEFAULT_BRUSH   2
 
-
-#define DEFAULT_BG 0x303030
-#define DEFAULT_FG 0xf8fcf8
-#define BUTTON_BG 0x383c38
-#define SELECTED_BG 0x704040
-#define TL_BORDER 0x909490
-#define BR_BORDER 0x182018
 #define BUTTON_WIDTH 140
 #define BUTTON_HEIGHT 60
 #define BUTTON_SPACING 8
