@@ -121,6 +121,8 @@ struct Rect {
     return r;
   }
   Vec2 tl, br;
+  Vec2 tr() const { return Vec2(br.x, tl.y); }
+  Vec2 bl() const { return Vec2(tl.x, br.y); }
 };
 
 

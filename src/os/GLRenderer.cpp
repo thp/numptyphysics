@@ -123,6 +123,13 @@ static void rgba_split(int rgba, float &r, float &g, float &b, float &a)
 void
 GLRenderer::rectangle(const Rect &rect, int rgba, bool fill)
 {
+    if (!fill) {
+        Vec2 corners[] = { rect.tl, rect.tr(), rect.br, rect.bl(), rect.tl };
+        Path p(5, corners);
+        path(p, rgba);
+        return;
+    }
+
     float r, g, b, a;
     rgba_split(rgba, r, g, b, a);
     glColor4f(r, g, b, a);
@@ -139,7 +146,6 @@ GLRenderer::rectangle(const Rect &rect, int rgba, bool fill)
     glDisable(GL_TEXTURE_2D);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glDisableClientState(GL_VERTEX_ARRAY);
-    // TODO: Handle "fill", draw lines if not fill
 }
 
 static b2Vec2 operator*(b2Vec2 v, float m)
