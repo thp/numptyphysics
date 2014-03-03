@@ -34,7 +34,6 @@ public:
   int  makeColour( int r, int g, int b ) const;
   void setBackground( Image* bg );
   void clear();
-  void fade( const Rect& r );
   Canvas* scale( int factor ) const;
   void drawImage( Canvas *canvas, int x, int y );
   void drawPath( const Path& path, int color, bool thick=false );

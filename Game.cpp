@@ -341,9 +341,6 @@ public:
       }
       drawCount++;
     }
-    if ( m_fade ) {
-      screen.fade( area );
-    }
 
     // If we only have the game, show indicators for menus
     if (inGameScreen()) {

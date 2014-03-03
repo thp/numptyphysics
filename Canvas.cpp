@@ -68,11 +68,6 @@ void Canvas::clear()
     }
 }
 
-void Canvas::fade( const Rect& rr ) 
-{
-    drawRect(rr, 0x000000, true, 128);
-}
-
 Canvas* Canvas::scale( int factor ) const
 {
     throw "Scale not implemented";

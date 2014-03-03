@@ -102,10 +102,8 @@ void Widget::draw( Canvas& screen, const Rect& area )
     if (!r.isEmpty()) {
       if ( m_focussed ) {
 	screen.drawRect(r,screen.makeColour(SELECTED_BG));
-      } else if (m_alpha==255) {
-	screen.drawRect(m_pos,screen.makeColour(m_bg));
       } else {
-	screen.fade(r);
+	screen.drawRect(m_pos,screen.makeColour(m_bg), true, m_alpha);
       }
     }
   }

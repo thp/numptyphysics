@@ -45,7 +45,6 @@ struct GameControl
   GameControl() : m_quit(false),
 		 m_edit( false ),
 		 m_refresh( true ),
-                 m_fade(false),
 		 m_colour( 2 ),
 		 m_strokeFixed( false ),
 		 m_strokeSleep( false ),
@@ -66,7 +65,6 @@ struct GameControl
   bool  m_quit;
   bool  m_edit;
   bool  m_refresh;
-  bool  m_fade;
   int   m_colour;
   int   m_clickMode;
   bool  m_strokeFixed;
