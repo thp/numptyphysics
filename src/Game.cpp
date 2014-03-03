@@ -22,7 +22,6 @@
 #include "Canvas.h"
 #include "Font.h"
 #include "Levels.h"
-#include "Http.h"
 #include "Os.h"
 #include "Scene.h"
 #include "Script.h"
@@ -153,6 +152,7 @@ public:
   bool send()
   {
     if ( save( SEND_TEMP_FILE ) ) {
+#if 0
       Http h;
       if ( h.post( (Config::planetRoot()+"/upload").c_str(),
 		   "data", SEND_TEMP_FILE, "type=1" ) ) {
@@ -168,6 +168,7 @@ public:
       } else {
 	showMessage(std::string("UploadFailed: ")+h.errorMessage());
       }
+#endif
     }
     return false;
   }
