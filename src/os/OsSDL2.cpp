@@ -98,14 +98,9 @@ SDLRenderer::init()
 NP::Texture
 SDLRenderer::load(const char *filename)
 {
-    std::string f("data/");
+    std::string f = Config::findFile(filename);
 
-    SDL_Surface *img = IMG_Load((f+filename).c_str());
-    if (!img) {
-        f = std::string(DEFAULT_RESOURCE_PATH "/");
-        img = IMG_Load((f+filename).c_str());
-    }
-
+    SDL_Surface *img = IMG_Load(f.c_str());
     SDL_Surface *tmp = SDL_ConvertSurfaceFormat(img, SDL_PIXELFORMAT_ABGR8888, 0);
     SDL_FreeSurface(img);
 

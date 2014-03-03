@@ -28,7 +28,6 @@
 
 #include <cstdio>
 #include <string>
-#include <sys/stat.h>
 #include <unistd.h>
 
 
@@ -173,12 +172,8 @@ private:
 	levels->addPath( files[i] );
       }
     } else {
-      struct stat st;
-      if ( stat("Game.cpp",&st)==0 ) {
-	levels->addPath( "data" );
-      } else {
-	levels->addPath( DEFAULT_LEVEL_PATH );
-      }
+      levels->addPath( "data" );
+      levels->addPath( DEFAULT_LEVEL_PATH );
       levels->addPath( Config::userDataDir().c_str() );
     }
         

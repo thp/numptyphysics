@@ -43,16 +43,15 @@ const int NUM_BRUSHES = (sizeof(brushColours)/sizeof(brushColours[0]));
 
 std::string Config::findFile( const std::string& name )
 {
-  std::string p( "data/" );
-  FILE *fd = fopen( (p+name).c_str(), "rb"  );
-  if ( !fd ) {
-    p = std::string( DEFAULT_RESOURCE_PATH "/" );
-    fd = fopen( (p+name).c_str(), "rb" );
-  }
-  if ( fd ) {
-    fclose(fd);
-    return p+name;
-  }
-  return name;
-}
+    std::string local_name("data/" + name);
+    if (OS->exists(local_name)) {
+        return local_name;
+    }
 
+    std::string global_name(DEFAULT_RESOURCE_PATH "/" + name);
+    if (OS->exists(global_name)) {
+        return global_name;
+    }
+
+    return name;
+}
