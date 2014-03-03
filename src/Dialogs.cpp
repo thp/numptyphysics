@@ -23,8 +23,6 @@
 #include "Scene.h"
 
 
-#include "help_text_html.h"
-
 ////////////////////////////////////////////////////////////////
 
 
@@ -207,6 +205,8 @@ public:
     Box *vbox = new VBox();
     ScrollArea* scroll = new ScrollArea();
     scroll->fitToParent(true);
+    // TODO: Open file and read it
+#if 0
     RichText *text = new RichText(help_text_html, help_text_html_len);
     scroll->virtualSize(Vec2(SCREEN_WIDTH,text->layout(SCREEN_WIDTH)));
     text->fitToParent(true);
@@ -215,6 +215,7 @@ public:
     vbox->add( scroll, 0, 1 );
     vbox->add( new Button(PROJECT_HOMEPAGE,Event::SELECT), 36, 0 );
     m_content->add(vbox,0,0);
+#endif
   }
   bool onEvent(Event& ev)
   {
