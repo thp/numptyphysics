@@ -27,15 +27,24 @@ LIBS += $(shell pkg-config --libs $(PKGS))
 CXXFLAGS += -Iexternal/Box2D/Include
 BOX2D_SOURCE := external/Box2D/Source
 BOX2D_LIBRARY := Gen/float/libbox2d.a
-LIBS += $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
+LOCAL_LIBS += $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
 
 $(BOX2D_SOURCE)/$(BOX2D_LIBRARY):
 	$(MAKE) -C $(BOX2D_SOURCE) $(BOX2D_LIBRARY)
 
+# Glaserl Library
+CXXFLAGS += -Iexternal/glaserl
+GLASERL_SOURCE := external/glaserl
+GLASERL_LIBRARY := libglaserl.a
+LOCAL_LIBS += $(GLASERL_SOURCE)/$(GLASERL_LIBRARY)
+
+$(GLASERL_SOURCE)/$(GLASERL_LIBRARY):
+	$(MAKE) -C $(GLASERL_SOURCE) $(GLASERL_LIBRARY)
 
 # Pick the right OS-specific module here
 SOURCES += src/os/OsSDL2.cpp src/os/GLRenderer.cpp
 CXXFLAGS += -I. -Isrc -Isrc/os
+LIBS += $(LOCAL_LIBS)
 
 # Dependency tracking
 DEPENDENCIES = $(SOURCES:.cpp=.d)
@@ -44,7 +53,7 @@ CXXFLAGS += -MD
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
-$(APP): $(OBJECTS) $(BOX2D_SOURCE)/$(BOX2D_LIBRARY)
+$(APP): $(OBJECTS) $(LOCAL_LIBS)
 	$(CXX) -o $@ $^ $(LIBS)
 
 
@@ -54,6 +63,7 @@ clean:
 
 distclean: clean
 	$(MAKE) -C $(BOX2D_SOURCE) clean
+	$(MAKE) -C $(GLASERL_SOURCE) distclean
 	rm -f $(APP)
 
 install: $(APP)

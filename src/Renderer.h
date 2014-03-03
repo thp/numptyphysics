@@ -47,6 +47,7 @@ public:
     virtual Texture text(const Font &font, const char *text, int rgb) = 0;
 
     virtual void clear() = 0;
+    virtual void flush() = 0;
     virtual void swap() = 0;
 };
 

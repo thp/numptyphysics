@@ -13,6 +13,8 @@ public:
     float m_subheight;
 };
 
+class GLRendererPriv;
+
 class GLRenderer : public NP::Renderer {
 public:
     GLRenderer(int w, int h);
@@ -29,10 +31,13 @@ public:
     virtual void path(const Path &p, int rgba);
 
     virtual void clear();
+    virtual void flush();
 
 private:
     int m_width;
     int m_height;
+
+    GLRendererPriv *priv;
 };
 
 #endif /* NUMPTYPHYSICS_GLRENDERER_H */

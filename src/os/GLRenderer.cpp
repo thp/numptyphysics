@@ -1,10 +1,206 @@
 #include "GLRenderer.h"
 
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
+#include "glaserlxx.h"
+
+class GLRendererPriv {
+public:
+    GLRendererPriv(int width, int height);
+    ~GLRendererPriv();
+
+    void submitTextured(GLuint texture, float *data, size_t size);
+    void submitPath(float *data, size_t size);
+    void flush();
+
+private:
+    void drawTextured();
+    void drawPath();
+
+    Glaserl::Matrix projection;
+
+    Glaserl::Program textured_program;
+    Glaserl::Buffer textured_buffer;
+
+    Glaserl::Program path_program;
+    Glaserl::Buffer path_buffer;
+
+    enum ProgramType {
+        NONE,
+        TEXTURED,
+        PATH,
+    };
+
+    enum ProgramType active_program;
+};
+
+const char *textured_vertex_shader_src =
+"attribute vec4 vtxcoord;\n"
+"attribute vec2 texcoord;\n"
+"uniform mat4 projection;\n"
+"varying vec2 tex;\n"
+"\n"
+"void main() {\n"
+"    gl_Position = projection * vtxcoord;\n"
+"    tex = texcoord;\n"
+"}\n"
+;
+
+const char *textured_fragment_shader_src =
+"varying vec2 tex;\n"
+"uniform sampler2D texture;\n"
+"\n"
+"void main() {\n"
+"    gl_FragColor = texture2D(texture, tex);\n"
+"}\n"
+;
+
+const char *path_vertex_shader_src =
+"attribute vec4 vtxcoord;\n"
+"attribute vec4 color;\n"
+"uniform mat4 projection;\n"
+"varying vec4 col;\n"
+"\n"
+"void main() {\n"
+"    gl_Position = projection * vtxcoord;\n"
+"    col = color;\n"
+"}\n"
+;
+
+const char *path_fragment_shader_src =
+"varying vec4 col;\n"
+"\n"
+"void main() {\n"
+"    gl_FragColor = col;\n"
+"}\n"
+;
+
+GLRendererPriv::GLRendererPriv(int width, int height)
+    : projection(Glaserl::matrix())
+    , textured_program(Glaserl::program(
+                textured_vertex_shader_src,
+                textured_fragment_shader_src,
+                // Attributes
+                "vtxcoord", 2,
+                "texcoord", 2,
+                NULL,
+                // Uniforms
+                "projection",
+                "texture",
+                NULL))
+    , textured_buffer(Glaserl::buffer())
+    , path_program(Glaserl::program(
+                path_vertex_shader_src,
+                path_fragment_shader_src,
+                // Attributes
+                "vtxcoord", 2,
+                "color", 4,
+                NULL,
+                // Uniforms
+                "projection",
+                NULL))
+    , path_buffer(Glaserl::buffer())
+    , active_program(NONE)
+{
+    projection->ortho(0, width, height, 0, 0, 1);
+
+    textured_program->enable();
+    // Projection
+    glUniformMatrix4fv(textured_program->uniform(0), 1, GL_FALSE, projection->data());
+    // Use Texture Unit 0 for textured_program
+    glUniform1i(textured_program->uniform(1), 0);
+    textured_program->disable();
+
+    path_program->enable();
+    // Projection
+    glUniformMatrix4fv(path_program->uniform(0), 1, GL_FALSE, projection->data());
+    path_program->disable();
+}
+
+GLRendererPriv::~GLRendererPriv()
+{
+}
+
+// Scoped usage of a Glaserl::Program together with a Glaserl::Buffer
+class ProgramUsage {
+public:
+    ProgramUsage(Glaserl::Program program, Glaserl::Buffer buffer)
+        : m_program(program)
+        , m_buffer(buffer)
+        , m_size(0)
+    {
+        m_size = m_buffer->enable();
+        m_program->enable();
+        m_buffer->disable();
+    }
+
+    ~ProgramUsage()
+    {
+        m_program->disable();
+    }
+
+    size_t elements() { return m_size / m_program->stride(); }
+
+private:
+    Glaserl::Program m_program;
+    Glaserl::Buffer m_buffer;
+    size_t m_size;
+};
+
+
+// Scoped usage of a texture
+class TextureUsage {
+public:
+    TextureUsage(GLuint texture)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
+    }
+
+    ~TextureUsage()
+    {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+};
+
+void
+GLRendererPriv::submitTextured(GLuint texture, float *data, size_t size)
+{
+    if (active_program != NONE) {
+        flush();
+    }
+
+    textured_buffer->append(data, size);
+
+    ProgramUsage usage(textured_program, textured_buffer);
+    TextureUsage textured(texture);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, usage.elements());
+}
+
+void
+GLRendererPriv::submitPath(float *data, size_t size)
+{
+    if (active_program != PATH) {
+        flush();
+    }
+
+    path_buffer->append(data, size);
+    active_program = PATH;
+}
+
+void
+GLRendererPriv::drawPath()
+{
+    ProgramUsage usage(path_program, path_buffer);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, usage.elements());
+
+    active_program = NONE;
+}
+
+void
+GLRendererPriv::flush()
+{
+    if (active_program == PATH) {
+        drawPath();
+    }
+}
 
 GLTextureData::GLTextureData(unsigned char *pixels, int width, int height)
     : NP::TextureData(width, height)
@@ -51,18 +247,20 @@ GLTextureData::~GLTextureData()
 GLRenderer::GLRenderer(int w, int h)
     : m_width(w)
     , m_height(h)
+    , priv(NULL)
 {
 }
 
 GLRenderer::~GLRenderer()
 {
+    delete priv;
 }
 
 void
 GLRenderer::init()
 {
+    priv = new GLRendererPriv(m_width, m_height);
     glClearColor(1.f, 1.f, 1.f, 1.f);
-    glOrtho(0, m_width, m_height, 0, 0, 1);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -85,31 +283,14 @@ GLRenderer::image(const NP::Texture &texture, int x, int y)
 {
     GLTextureData *data = static_cast<GLTextureData *>(texture.get());
 
-    float texcoords[] = {
-        0, 0,
-        0, data->m_subheight,
-        data->m_subwidth, 0,
-        data->m_subwidth, data->m_subheight,
+    // Layout: vtx.x, vtx.y, tex.x, tex.y
+    float vtxdata[] = {
+        (float)x, (float)y, 0.f, 0.f,
+        (float)x, (float)(y + data->h), 0.f, data->m_subheight,
+        (float)(x + data->w), (float)y, data->m_subwidth, 0.f,
+        (float)(x + data->w), (float)(y + data->h), data->m_subwidth, data->m_subheight,
     };
-
-    float vtxcoords[] = {
-        (float)x, (float)y,
-        (float)x, (float)(y + data->h),
-        (float)(x + data->w), (float)y,
-        (float)(x + data->w), (float)(y + data->h),
-    };
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-    glVertexPointer(2, GL_FLOAT, 0, vtxcoords);
-    glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, data->m_texture);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    priv->submitTextured(data->m_texture, vtxdata, sizeof(vtxdata));
 }
 
 static void rgba_split(int rgba, float &r, float &g, float &b, float &a)
@@ -132,20 +313,16 @@ GLRenderer::rectangle(const Rect &rect, int rgba, bool fill)
 
     float r, g, b, a;
     rgba_split(rgba, r, g, b, a);
-    glColor4f(r, g, b, a);
 
     float vtxcoords[] = {
-        (float)rect.tl.x, (float)rect.tl.y,
-        (float)rect.tl.x, (float)rect.br.y,
-        (float)rect.br.x, (float)rect.tl.y,
-        (float)rect.br.x, (float)rect.br.y,
+        (float)rect.tl.x, (float)rect.tl.y, r, g, b, a,
+        (float)rect.tl.x, (float)rect.tl.y, r, g, b, a,
+        (float)rect.tl.x, (float)rect.br.y, r, g, b, a,
+        (float)rect.br.x, (float)rect.tl.y, r, g, b, a,
+        (float)rect.br.x, (float)rect.br.y, r, g, b, a,
+        (float)rect.br.x, (float)rect.br.y, r, g, b, a,
     };
-
-    glVertexPointer(2, GL_FLOAT, 0, vtxcoords);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glDisable(GL_TEXTURE_2D);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    priv->submitPath(vtxcoords, sizeof(vtxcoords));
 }
 
 static b2Vec2 operator*(b2Vec2 v, float m)
@@ -192,10 +369,10 @@ GLRenderer::path(const Path &path, int rgba)
 {
     float r, g, b, a;
     rgba_split(rgba, r, g, b, a);
-    glColor4f(r, g, b, a);
-    int segments = path.numPoints() - 1;
 
-    float *points = new float[(2 + 4) * 9 * segments];
+    int segments = path.numPoints() - 1;
+    int points_len = (2 + 4) * 9 * segments;
+    float *points = new float[points_len];
     int offset = 0;
     for (int i=0; i<segments; i++) {
         // Segment P1 -> P2
@@ -225,16 +402,7 @@ GLRenderer::path(const Path &path, int rgba)
             }
         }
     }
-
-    glVertexPointer(2, GL_FLOAT, sizeof(float) * (2 + 4), points);
-    glColorPointer(4, GL_FLOAT, sizeof(float) * (2 + 4), points + 2);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glDisable(GL_TEXTURE_2D);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 9 * (path.numPoints() - 1));
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
-
+    priv->submitPath(points, points_len * sizeof(float));
     delete points;
 }
 
@@ -242,4 +410,10 @@ void
 GLRenderer::clear()
 {
     glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void
+GLRenderer::flush()
+{
+    priv->flush();
 }
