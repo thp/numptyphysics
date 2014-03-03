@@ -1,6 +1,10 @@
 #include "GLRenderer.h"
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 GLTextureData::GLTextureData(unsigned char *pixels, int width, int height)
     : NP::TextureData(width, height)
@@ -89,10 +93,10 @@ GLRenderer::image(const NP::Texture &texture, int x, int y)
     };
 
     float vtxcoords[] = {
-        x, y,
-        x, y + data->h,
-        x + data->w, y,
-        x + data->w, y + data->h,
+        (float)x, (float)y,
+        (float)x, (float)(y + data->h),
+        (float)(x + data->w), (float)y,
+        (float)(x + data->w), (float)(y + data->h),
     };
 
     glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -124,10 +128,10 @@ GLRenderer::rectangle(const Rect &rect, int rgba, bool fill)
     glColor4f(r, g, b, a);
 
     float vtxcoords[] = {
-        rect.tl.x, rect.tl.y,
-        rect.tl.x, rect.br.y,
-        rect.br.x, rect.tl.y,
-        rect.br.x, rect.br.y,
+        (float)rect.tl.x, (float)rect.tl.y,
+        (float)rect.tl.x, (float)rect.br.y,
+        (float)rect.br.x, (float)rect.tl.y,
+        (float)rect.br.x, (float)rect.br.y,
     };
 
     glVertexPointer(2, GL_FLOAT, 0, vtxcoords);

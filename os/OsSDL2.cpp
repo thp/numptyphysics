@@ -135,9 +135,9 @@ SDLRenderer::text(const NP::Font &font, const char *text, int rgb)
     SDLFontData *data = static_cast<SDLFontData *>(font.get());
 
     SDL_Color fg = {
-        (rgb >> 16) & 0xff,
-        (rgb >> 8) & 0xff,
-        (rgb) & 0xff
+        (Uint8)((rgb >> 16) & 0xff),
+        (Uint8)((rgb >> 8) & 0xff),
+        (Uint8)((rgb) & 0xff)
     };
 
     SDL_Surface *surface = TTF_RenderText_Blended(data->m_font, text, fg);

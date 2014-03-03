@@ -142,6 +142,7 @@ Image::~Image()
 int Canvas::writeBMP( const char* filename ) const
 {
     throw "writing bmps is broken atm";
+#if 0
 #pragma pack(push,1)
   typedef struct {
     unsigned short int type;         /* Magic identifier */
@@ -187,4 +188,5 @@ int Canvas::writeBMP( const char* filename ) const
     return 1;
   }
   return 0;
+#endif
 }

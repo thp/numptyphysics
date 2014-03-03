@@ -60,7 +60,7 @@ inline bool b2IsValid(float32 x)
 #ifdef _MSC_VER
 	return _finite(x) != 0;
 #else
-	return finite(x) != 0;
+	return isfinite(x) != 0;
 #endif
 }
 
