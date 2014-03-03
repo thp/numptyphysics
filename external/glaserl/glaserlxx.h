@@ -25,11 +25,12 @@ public:
     void enable() { glaserl_program_enable(d); }
     void disable() { glaserl_program_disable(d); }
 
-    GLint uniform(int index) { return d->uniforms[index].location; }
+    GLint uniform_location(const char *uniform) {
+        return glaserl_program_uniform_location(d, uniform);
+    }
 
     size_t stride() { return d->stride; }
 
-private:
     glaserl_program_t *d;
 };
 
@@ -53,7 +54,6 @@ public:
     size_t enable() { return glaserl_buffer_enable(d); }
     void disable() { glaserl_buffer_disable(d); }
 
-private:
     glaserl_buffer_t *d;
 };
 
@@ -79,7 +79,6 @@ public:
     }
     float *data() { return glaserl_matrix_data(d); }
 
-private:
     glaserl_matrix_t *d;
 };
 
@@ -103,7 +102,6 @@ public:
     int height() { return d->height; }
     void map_uv(float &u, float &v) { glaserl_texture_map_uv(d, &u, &v); }
 
-private:
     glaserl_texture_t *d;
 };
 
@@ -134,6 +132,28 @@ texture(unsigned char *rgba, int width, int height)
 {
     return Texture(new PTexture(rgba, width, height));
 }
+
+namespace Util {
+
+static inline void
+render_triangle_strip(Program &program, Buffer &buffer)
+{
+    glaserl_util_render_triangle_strip(program->d, buffer->d);
+}
+
+static inline void
+load_matrix(Program &program, const char *uniform, Matrix &matrix)
+{
+    glaserl_util_load_matrix(program->d, uniform, matrix->d);
+}
+
+static inline void
+default_blend()
+{
+    glaserl_util_default_blend();
+}
+
+}; // Util
 
 }; /* Glaserl */
 

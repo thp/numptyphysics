@@ -138,6 +138,21 @@ glaserl_program_disable(glaserl_program_t *program)
     glUseProgram(0);
 }
 
+GLint
+glaserl_program_uniform_location(glaserl_program_t *program,
+        const char *uniform)
+{
+    glaserl_program_uniform_t *unif = program->uniforms;
+    while (unif && unif->name) {
+        if (strcmp(unif->name, uniform) == 0) {
+            return unif->location;
+        }
+        unif++;
+    }
+
+    return -1;
+}
+
 void
 glaserl_program_destroy(glaserl_program_t *program)
 {

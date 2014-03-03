@@ -52,6 +52,10 @@ glaserl_program_enable(glaserl_program_t *program);
 void
 glaserl_program_disable(glaserl_program_t *program);
 
+GLint
+glaserl_program_uniform_location(glaserl_program_t *program,
+        const char *uniform);
+
 void
 glaserl_program_destroy(glaserl_program_t *program);
 

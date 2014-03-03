@@ -100,49 +100,13 @@ GLRendererPriv::GLRendererPriv(int width, int height)
 {
     projection->ortho(0, width, height, 0, 0, 1);
 
-    textured_program->enable();
-    // Projection
-    glUniformMatrix4fv(textured_program->uniform(0), 1, GL_FALSE, projection->data());
-    // Use Texture Unit 0 for textured_program
-    glUniform1i(textured_program->uniform(1), 0);
-    textured_program->disable();
-
-    path_program->enable();
-    // Projection
-    glUniformMatrix4fv(path_program->uniform(0), 1, GL_FALSE, projection->data());
-    path_program->disable();
+    Glaserl::Util::load_matrix(textured_program, "projection", projection);
+    Glaserl::Util::load_matrix(path_program, "projection", projection);
 }
 
 GLRendererPriv::~GLRendererPriv()
 {
 }
-
-// Scoped usage of a Glaserl::Program together with a Glaserl::Buffer
-class ProgramUsage {
-public:
-    ProgramUsage(Glaserl::Program program, Glaserl::Buffer buffer)
-        : m_program(program)
-        , m_buffer(buffer)
-        , m_size(0)
-    {
-        m_size = m_buffer->enable();
-        m_program->enable();
-        m_buffer->disable();
-    }
-
-    ~ProgramUsage()
-    {
-        m_program->disable();
-    }
-
-    size_t elements() { return m_size / m_program->stride(); }
-
-private:
-    Glaserl::Program m_program;
-    Glaserl::Buffer m_buffer;
-    size_t m_size;
-};
-
 
 void
 GLRendererPriv::submitTextured(Glaserl::Texture &texture, float *data, size_t size)
@@ -153,9 +117,8 @@ GLRendererPriv::submitTextured(Glaserl::Texture &texture, float *data, size_t si
 
     textured_buffer->append(data, size);
 
-    ProgramUsage usage(textured_program, textured_buffer);
     texture->enable();
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, usage.elements());
+    Glaserl::Util::render_triangle_strip(textured_program, textured_buffer);
     texture->disable();
 }
 
@@ -173,9 +136,7 @@ GLRendererPriv::submitPath(float *data, size_t size)
 void
 GLRendererPriv::drawPath()
 {
-    ProgramUsage usage(path_program, path_buffer);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, usage.elements());
-
+    Glaserl::Util::render_triangle_strip(path_program, path_buffer);
     active_program = NONE;
 }
 
@@ -215,8 +176,7 @@ GLRenderer::init()
 {
     priv = new GLRendererPriv(m_width, m_height);
     glClearColor(1.f, 1.f, 1.f, 1.f);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    Glaserl::Util::default_blend();
 }
 
 void
