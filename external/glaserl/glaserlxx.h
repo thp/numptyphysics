@@ -85,6 +85,30 @@ private:
 
 typedef std::shared_ptr<PMatrix> Matrix;
 
+class PTexture {
+public:
+    PTexture(unsigned char *rgba, int width, int height)
+        : d(glaserl_texture_new(rgba, width, height))
+    {
+    }
+
+    ~PTexture()
+    {
+        glaserl_texture_destroy(d);
+    }
+
+    void enable() { glaserl_texture_enable(d); }
+    void disable() { glaserl_texture_disable(d); }
+    int width() { return d->width; }
+    int height() { return d->height; }
+    void map_uv(float &u, float &v) { glaserl_texture_map_uv(d, &u, &v); }
+
+private:
+    glaserl_texture_t *d;
+};
+
+typedef std::shared_ptr<PTexture> Texture;
+
 static inline Program
 program(const char *vertex_shader_src, const char *fragment_shader_src, ...)
 {
@@ -103,6 +127,12 @@ static inline Matrix
 matrix()
 {
     return Matrix(new PMatrix());
+}
+
+static inline Texture
+texture(unsigned char *rgba, int width, int height)
+{
+    return Texture(new PTexture(rgba, width, height));
 }
 
 }; /* Glaserl */

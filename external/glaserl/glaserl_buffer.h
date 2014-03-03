@@ -43,4 +43,4 @@ glaserl_buffer_destroy(glaserl_buffer_t *buffer);
 } /* extern "C" */
 #endif /* __cplusplus */
 
-#endif /* GLASERL_PROGRAM_H */
+#endif /* GLASERL_BUFFER_H */

@@ -1,13 +1,11 @@
 #include "GLRenderer.h"
 
-#include "glaserlxx.h"
-
 class GLRendererPriv {
 public:
     GLRendererPriv(int width, int height);
     ~GLRendererPriv();
 
-    void submitTextured(GLuint texture, float *data, size_t size);
+    void submitTextured(Glaserl::Texture &texture, float *data, size_t size);
     void submitPath(float *data, size_t size);
     void flush();
 
@@ -146,22 +144,8 @@ private:
 };
 
 
-// Scoped usage of a texture
-class TextureUsage {
-public:
-    TextureUsage(GLuint texture)
-    {
-        glBindTexture(GL_TEXTURE_2D, texture);
-    }
-
-    ~TextureUsage()
-    {
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-};
-
 void
-GLRendererPriv::submitTextured(GLuint texture, float *data, size_t size)
+GLRendererPriv::submitTextured(Glaserl::Texture &texture, float *data, size_t size)
 {
     if (active_program != NONE) {
         flush();
@@ -170,8 +154,9 @@ GLRendererPriv::submitTextured(GLuint texture, float *data, size_t size)
     textured_buffer->append(data, size);
 
     ProgramUsage usage(textured_program, textured_buffer);
-    TextureUsage textured(texture);
+    texture->enable();
     glDrawArrays(GL_TRIANGLE_STRIP, 0, usage.elements());
+    texture->disable();
 }
 
 void
@@ -204,43 +189,12 @@ GLRendererPriv::flush()
 
 GLTextureData::GLTextureData(unsigned char *pixels, int width, int height)
     : NP::TextureData(width, height)
-    , m_texture(0)
-    , m_subwidth(1.f)
-    , m_subheight(1.f)
+    , texture(Glaserl::texture(pixels, width, height))
 {
-    glGenTextures(1, &m_texture);
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    int w = 1;
-    while (w < width) w *= 2;
-    int h = 1;
-    while (h < height) h *= 2;
-
-    m_subwidth = (float)width / (float)w;
-    m_subheight = (float)height / (float)h;
-
-    unsigned char *blackness = new unsigned char[w*h*4];
-    memset(blackness, 0, w*h*4);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
-            GL_UNSIGNED_BYTE, blackness);
-    delete [] blackness;
-
-    if (pixels) {
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
-                GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    }
-
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 GLTextureData::~GLTextureData()
 {
-    glDeleteTextures(1, &m_texture);
 }
 
 
@@ -283,14 +237,20 @@ GLRenderer::image(const NP::Texture &texture, int x, int y)
 {
     GLTextureData *data = static_cast<GLTextureData *>(texture.get());
 
+    float tx1 = 0.f, ty1 = 0.f;
+    data->texture->map_uv(tx1, ty1);
+
+    float tx2 = 1.f, ty2 = 1.f;
+    data->texture->map_uv(tx2, ty2);
+
     // Layout: vtx.x, vtx.y, tex.x, tex.y
     float vtxdata[] = {
-        (float)x, (float)y, 0.f, 0.f,
-        (float)x, (float)(y + data->h), 0.f, data->m_subheight,
-        (float)(x + data->w), (float)y, data->m_subwidth, 0.f,
-        (float)(x + data->w), (float)(y + data->h), data->m_subwidth, data->m_subheight,
+        (float)x, (float)y, tx1, ty1,
+        (float)x, (float)(y + data->h), tx1, ty2,
+        (float)(x + data->w), (float)y, tx2, tx1,
+        (float)(x + data->w), (float)(y + data->h), tx2, ty2,
     };
-    priv->submitTextured(data->m_texture, vtxdata, sizeof(vtxdata));
+    priv->submitTextured(data->texture, vtxdata, sizeof(vtxdata));
 }
 
 static void rgba_split(int rgba, float &r, float &g, float &b, float &a)

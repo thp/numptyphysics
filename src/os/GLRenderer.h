@@ -2,15 +2,14 @@
 #define NUMPTYPHYSICS_GLRENDERER_H
 
 #include "Renderer.h"
+#include "glaserlxx.h"
 
 class GLTextureData : public NP::TextureData {
 public:
     GLTextureData(unsigned char *pixels, int width, int height);
     ~GLTextureData();
 
-    unsigned int m_texture;
-    float m_subwidth;
-    float m_subheight;
+    Glaserl::Texture texture;
 };
 
 class GLRendererPriv;
