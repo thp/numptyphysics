@@ -77,6 +77,10 @@ public:
     {
         glaserl_matrix_ortho(d, left, right, bottom, top, zNear, zFar);
     }
+    void rotate_2d(float angle)
+    {
+        glaserl_matrix_rotate_2d(d, angle);
+    }
     float *data() { return glaserl_matrix_data(d); }
 
     glaserl_matrix_t *d;

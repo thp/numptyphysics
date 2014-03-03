@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 glaserl_matrix_t *
 glaserl_matrix_new()
@@ -79,6 +80,25 @@ glaserl_matrix_ortho(glaserl_matrix_t *matrix, float left, float right,
         2.f / (right - left), 0.f, 0.f, tx,
         0.f, 2.f / (top - bottom), 0.f, ty,
         0.f, 0.f, -2.f / (zFar - zNear), tz,
+        0.f, 0.f, 0.f, 1.f,
+    };
+    _glaserl_matrix_transpose_(o);
+
+    float tmp[16];
+    _glaserl_matrix_mult_(matrix->d, o, tmp);
+    _glaserl_matrix_set_(matrix->d, tmp);
+}
+
+void
+glaserl_matrix_rotate_2d(glaserl_matrix_t *matrix, float angle)
+{
+    float s = sinf(angle/180.f*M_PI);
+    float c = cosf(angle/180.f*M_PI);
+
+    float o[] = {
+          c,  -s, 0.f, 0.f,
+          s,   c, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
         0.f, 0.f, 0.f, 1.f,
     };
     _glaserl_matrix_transpose_(o);

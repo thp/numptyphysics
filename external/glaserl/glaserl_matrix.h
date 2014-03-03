@@ -21,6 +21,9 @@ void
 glaserl_matrix_ortho(glaserl_matrix_t *matrix, float left, float right,
         float bottom, float top, float zNear, float zFar);
 
+void
+glaserl_matrix_rotate_2d(glaserl_matrix_t *matrix, float angle);
+
 float *
 glaserl_matrix_data(glaserl_matrix_t *matrix);
 
