@@ -34,8 +34,8 @@ $(BOX2D_SOURCE)/$(BOX2D_LIBRARY):
 
 
 # Pick the right OS-specific module here
-SOURCES += src/os/OsSDL2.cpp
-CXXFLAGS += -I. -Isrc
+SOURCES += src/os/OsSDL2.cpp src/os/GLRenderer.cpp
+CXXFLAGS += -I. -Isrc -Isrc/os
 
 # Dependency tracking
 DEPENDENCIES = $(SOURCES:.cpp=.d)
