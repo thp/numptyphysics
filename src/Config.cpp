@@ -16,6 +16,8 @@
 
 #include "Config.h"
 
+#include <fstream>
+
 
 Rect FULLSCREEN_RECT( 0, 0, WORLD_WIDTH-1, WORLD_HEIGHT-1 );
 
@@ -37,4 +39,23 @@ std::string Config::findFile( const std::string& name )
     }
 
     return name;
+}
+
+std::string
+Config::readFile(const std::string &name)
+{
+    std::string filename = findFile(name);
+    std::ifstream is(filename.c_str(), std::ios::in);
+
+    is.seekg(0, is.end);
+    size_t length = is.tellg();
+    is.seekg(0, is.beg);
+
+    char *buffer = new char [length];
+    is.read (buffer,length);
+    is.close();
+    std::string result = buffer;
+    delete[] buffer;
+
+    return result;
 }

@@ -92,6 +92,7 @@ class Config
     return d;
   }
   static std::string findFile( const std::string& name );
+  static std::string readFile(const std::string &name);
 };
 
 #endif //CONFIG_H
