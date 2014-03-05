@@ -22,6 +22,7 @@
 #include "Event.h"
 
 #include <string>
+#include <functional>
 
 class Canvas;
 class Image;
@@ -40,8 +41,9 @@ class Widget
   virtual void move( const Vec2& by );
   virtual void moveTo( const Vec2& to ) {move(to-m_pos.tl);}
   virtual void sizeTo( const Vec2& size );
+  virtual void animateTo(const Vec2 &to, std::function<void()> done=[](){}) { m_targetPos = to; m_animating = true; m_animation_done = done; }
   virtual const Rect& position() const { return m_pos; }
-  virtual void onTick( int tick ) {}
+  virtual void onTick(int tick);
   virtual void draw( Canvas& screen, const Rect& area );
   virtual bool processEvent(ToolkitEvent &ev);
   bool dispatchEvent( Event& ev );
@@ -64,6 +66,11 @@ class Widget
   void transparent(bool t) {m_alpha=t?0:255;}
   void alpha(int a) {m_alpha=a;}
   void border(bool drawBorder) {m_border = drawBorder?1:0;}
+  void show() { m_visible = true; }
+  void hide() { m_visible = false; }
+
+  int width() { return m_pos.width(); }
+  int height() { return m_pos.height(); }
  protected:
   Widget(WidgetParent *p=NULL);
   WidgetParent* m_parent;
@@ -76,6 +83,10 @@ class Widget
   int           m_bg;
   int           m_fg;
   int           m_border;
+  Vec2          m_targetPos;
+  bool          m_animating;
+  std::function<void()> m_animation_done;
+  bool          m_visible;
 };
 
 class Spacer : public Widget {
@@ -323,7 +334,6 @@ class Dialog : public Panel
   Label *m_title;
   Button *m_left, *m_right;
   Container *m_content;
-  Vec2 m_targetPos;
   bool m_closeRequested;
 };
 

@@ -86,7 +86,8 @@ struct Event
     REPLAY,
     SAVE,
     SEND,
-    TEXT
+    TEXT,
+    POPUP_CLOSING,
   };
 
   Code code;

@@ -37,7 +37,11 @@ Widget::Widget(WidgetParent *p)
     m_greedyMouse(false),
     m_bg(NP::Colour::DEFAULT_BG),
     m_fg(NP::Colour::DEFAULT_FG),
-    m_border(0)
+    m_border(0),
+    m_visible(true),
+    m_targetPos(0, 0),
+    m_animating(false),
+    m_animation_done([](){})
 {}
 
 std::string Widget::toString()
@@ -79,7 +83,7 @@ bool Widget::processEvent(ToolkitEvent &ev)
 
 bool Widget::dispatchEvent( Event& ev )
 {
-  if (onEvent(ev)) {
+  if (m_visible && onEvent(ev)) {
     //fprintf(stderr,"event %d consumed by %s\n", ev.code, name());    
     return true;
   } else if (m_parent) {
@@ -97,6 +101,10 @@ void Widget::setEventMap(EventMapType map)
 
 void Widget::draw( Canvas& screen, const Rect& area )
 {
+  if (!m_visible) {
+      return;
+  }
+
   if ( m_alpha > 0 ) {
     Rect r = m_pos;
     r.clipTo(area);
@@ -112,6 +120,22 @@ void Widget::draw( Canvas& screen, const Rect& area )
     screen.drawRect(m_pos,screen.makeColour(NP::Colour::TL_BORDER),false);
   }
 }
+
+void Widget::onTick(int tick)
+{
+    if (m_animating && m_pos.tl != m_targetPos) {
+        const int RATE = 3;
+        Vec2 diff = m_targetPos - m_pos.tl;
+        if (Abs(diff.x) <= RATE && Abs(diff.y) <= RATE) {
+            moveTo(m_targetPos);
+            m_animating = false;
+            m_animation_done();
+        } else {
+            moveTo((m_pos.tl*RATE+m_targetPos)/(RATE+1));
+        }
+    }
+}
+
 
 WidgetParent* Widget::topLevel()
 {
@@ -143,8 +167,12 @@ void Label::text( const std::string& s )
 
 void Label::draw( Canvas& screen, const Rect& area )
 {
-  Widget::draw(screen,area);
-  m_font->drawCenter( &screen, m_pos.centroid(), m_text, m_fg);
+    if (!m_visible) {
+        return;
+    }
+
+    Widget::draw(screen,area);
+    m_font->drawCenter( &screen, m_pos.centroid(), m_text, m_fg);
 }
 
 void Label::align( int a )
@@ -167,10 +195,14 @@ Button::Button(const std::string& s, Event selEvent)
 
 void Button::draw( Canvas& screen, const Rect& area )
 {
-  Label::draw(screen,area);
-  if (m_focussed) {
-    screen.drawRect(m_pos,screen.makeColour(NP::Colour::TL_BORDER),false);
-  }
+    if (!m_visible) {
+        return;
+    }
+
+    Label::draw(screen,area);
+    if (m_focussed) {
+        screen.drawRect(m_pos,screen.makeColour(NP::Colour::TL_BORDER),false);
+    }
 }
 
 bool Button::onEvent( Event& ev )
@@ -718,6 +750,7 @@ void Container::onTick( int tick )
   for (int i=0; i<m_children.size(); ++i) {
     m_children[i]->onTick(tick);
   }
+  WidgetParent::onTick(tick);
 }
 
 void Container::draw( Canvas& screen, const Rect& area )
@@ -1003,18 +1036,7 @@ void Dialog::onTick( int tick )
     m_parent->remove(this);
     return;
   }
-  if (m_pos.tl != m_targetPos) {
-    const int RATE = 3;
-    //fprintf(stderr,"Dialog::onTick target %d,%d\n",m_targetPos.x,m_targetPos.y);
-    Vec2 diff = m_targetPos - m_pos.tl;
-    //fprintf(stderr,"Dialog::onTick diff %d,%d\n",diff.x,diff.y);
-    if (Abs(diff.x) <= RATE && Abs(diff.y) <= RATE) {
-      moveTo(m_targetPos);
-    } else {
-      moveTo((m_pos.tl*RATE+m_targetPos)/(RATE+1));
-    }
-    //fprintf(stderr,"Dialog::onTick moveTo %d,%d\n",m_pos.tl.x,m_pos.tl.y);
-  }
+
   Panel::onTick(tick);
 }
 
@@ -1065,7 +1087,7 @@ MenuDialog::MenuDialog( Widget* evtarget, const std::string &title, const MenuIt
   content()->add( m_box, 0, 0 );
   moveTo(Vec2(SCREEN_WIDTH-24, 0));
   sizeTo(Vec2(m_buttonDim.x*MENU_COLUMNS+24,200));
-  m_targetPos = Vec2(SCREEN_WIDTH-m_buttonDim.x*MENU_COLUMNS-24, 0);
+  animateTo(Vec2(SCREEN_WIDTH-m_buttonDim.x*MENU_COLUMNS-24, 0));
   if (items) {
     addItems(items);
   }
@@ -1079,7 +1101,8 @@ bool MenuDialog::onEvent( Event& ev )
       && m_target
       && m_target->dispatchEvent(m_items[ev.x]->event)) {
     //fprintf(stderr,"MenuDialog event translate[%d] -> %d\n",ev.x,m_items[ev.x]->event.code);    
-    close();
+    Event closeEvent(Event::CLOSE);
+    onEvent(closeEvent);
     return true;
   }
   return Dialog::onEvent(ev);
@@ -1131,5 +1154,5 @@ MessageBox::MessageBox( const std::string& text )
   vbox->add( rt, 100, 100 );
   content()->add( vbox, 0, 0 );
   sizeTo(Vec2(300,150));
-  m_targetPos = Vec2(250,100);
+  animateTo(Vec2(250,100));
 }

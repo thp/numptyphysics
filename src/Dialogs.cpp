@@ -72,7 +72,7 @@ public:
     content()->add(vbox1);
     sizeTo(Vec2(SCREEN_WIDTH,SCREEN_HEIGHT));
     moveTo(Vec2(0,0));
-    m_targetPos = Vec2( 0,0 );
+    animateTo(Vec2(0,0));
   }
 };
 
@@ -260,7 +260,6 @@ public:
   {
     //Swipe::lock(false);
     content()->add(new FrontPage());
-    m_targetPos = Vec2( 0, 0 );
     sizeTo(Vec2(SCREEN_WIDTH,SCREEN_HEIGHT));
   }
   ~MainMenu() {
@@ -350,10 +349,13 @@ static const MenuItem playPausedOpts[] = {
 
 class OptsPopup : public MenuDialog
 {
+protected:
+  Vec2 m_closeTarget;
 public:
   OptsPopup() : MenuDialog(this, "", NULL) 
   {
     m_buttonDim = Vec2(90,90);
+    m_closeTarget = Vec2(-10, 0);
   }
 
   virtual Widget* makeButton( MenuItem* item, const Event& ev )
@@ -361,6 +363,24 @@ public:
     std::string file = item->text.substr(item->text.find(':')+1); 
     std::string label = item->text.substr(0,item->text.find(':')); 
     return new IconButton(label,file,ev);
+  }
+
+  virtual bool onEvent( Event& ev ) {
+      if (ev.code == Event::CLOSE) {
+          if (m_closeTarget != m_pos.tl) {
+              animateTo(m_closeTarget, [this] () {
+                  Event closeForReal(Event::CLOSE);
+                  onEvent(closeForReal);
+              });
+              return true;
+          }
+
+          Event closingEvent(Event::POPUP_CLOSING);
+          if (dispatchEvent(closingEvent)) {
+              return true;
+          }
+      }
+      return MenuDialog::onEvent(ev);
   }
 };
 
@@ -373,7 +393,8 @@ public:
     addItems(game->m_paused ? playPausedOpts : playNormalOpts);
     sizeTo(Vec2(140,480));
     moveTo(Vec2(SCREEN_WIDTH,0));
-    m_targetPos = Vec2(SCREEN_WIDTH-140,0);
+    animateTo(Vec2(SCREEN_WIDTH-140,0));
+    m_closeTarget = Vec2(SCREEN_WIDTH, 0);
   }
 };
 
@@ -410,7 +431,8 @@ public:
     addItems(game->m_edit ? editDoneOpts : editNormalOpts);
     sizeTo(Vec2(140,480));
     moveTo(Vec2(-140,0));
-    m_targetPos = Vec2(0,0);
+    animateTo(Vec2(0,0));
+    m_closeTarget = Vec2(-width(), 0);
   }
 };
 
@@ -452,7 +474,7 @@ public:
     }
     Vec2 size = m_buttonDim*5;
     sizeTo(size);
-    m_targetPos = Vec2(SCREEN_WIDTH - m_pos.width(),0);
+    animateTo(Vec2(SCREEN_WIDTH - m_pos.width(),0));
   }
   Widget* makeButton( MenuItem* item, const Event& ev )
   {
@@ -655,7 +677,8 @@ public:
 
     vbox->add(new Spacer(),10,0);
     content()->add(vbox,0,0);
-    m_targetPos = Vec2( 150, 70);
+    moveTo(Vec2(150, SCREEN_HEIGHT));
+    animateTo(Vec2(150, 120));
     sizeTo(Vec2(500,240));
   }
 };
@@ -694,7 +717,7 @@ public:
 
     vbox->add(new Spacer(),10,0);
     content()->add(vbox,0,0);
-    m_targetPos = Vec2( 150, 70);
+    animateTo(Vec2(150, 70));
     sizeTo(Vec2(500,240));
   }
   bool onEvent( Event& ev )
