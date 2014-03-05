@@ -237,6 +237,19 @@ std::string Levels::levelName( int i, bool pretty )
   return pretty ? nameFromPath(s) : s;
 }
 
+void
+Levels::dump()
+{
+    for (int i=0; i<m_collections.size(); i++) {
+        printf("Collection #%d: %s\n", (i+1),
+                collectionName(i, true).c_str());
+        for (int j=0; j<m_collections[i]->levels.size(); j++) {
+            LevelDesc *level = m_collections[i]->levels[j];
+            printf(" Level #%d: %s (index=%d, rank%d)\n", (j+1),
+                    level->file.c_str(), level->index, level->rank);
+        }
+    }
+}
 
 int Levels::numCollections()
 {

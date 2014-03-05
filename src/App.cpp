@@ -59,6 +59,7 @@ public:
       levels->addPath( "data" );
       levels->addPath( DEFAULT_LEVEL_PATH );
       levels->addPath( Config::userDataDir().c_str() );
+      levels->dump();
 
       add( createGameLayer( levels, m_width, m_height ), 0, 0 );
   }

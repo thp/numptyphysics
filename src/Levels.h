@@ -32,6 +32,8 @@ class Levels
   std::string levelName( int i, bool pretty=true );
   int findLevel( const char *file );
 
+  void dump();
+
   int  numCollections();
   int  collectionFromLevel( int l, int *indexInCol=NULL );
   std::string collectionName( int i, bool pretty=true );
