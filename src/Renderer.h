@@ -29,6 +29,17 @@ public:
 
 typedef std::shared_ptr<FontData> Font;
 
+class FramebufferData {
+public:
+    FramebufferData(int w, int h) : w(w), h(h) {}
+    virtual ~FramebufferData() {}
+
+    int w;
+    int h;
+};
+
+typedef std::shared_ptr<FramebufferData> Framebuffer;
+
 class Renderer {
 public:
     virtual void init() = 0;
@@ -36,6 +47,11 @@ public:
     virtual void size(int *width, int *height) = 0;
 
     virtual Texture load(const char *filename) = 0;
+
+    virtual Framebuffer framebuffer(int width, int height) = 0;
+    virtual void begin(Framebuffer &rendertarget) = 0;
+    virtual void end(Framebuffer &rendertarget) = 0;
+    virtual Texture retrieve(Framebuffer &rendertarget) = 0;
 
     virtual void image(const Texture &texture, int x, int y) = 0;
     virtual void rectangle(const Rect &rect, int rgba, bool fill) = 0;

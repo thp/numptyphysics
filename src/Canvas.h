@@ -65,7 +65,6 @@ public:
     static Image *fromImage(Image *image);
     static Image *fromFont(NP::Font font, const char *text, int rgb);
 
-private:
     Image(NP::Texture texture);
 
 public:

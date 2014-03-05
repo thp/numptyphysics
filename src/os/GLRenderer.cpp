@@ -9,6 +9,8 @@ public:
     void submitPath(float *data, size_t size);
     void flush();
 
+    void flipVertically(bool flip);
+
 private:
     void drawTextured();
     void drawPath();
@@ -28,6 +30,8 @@ private:
     };
 
     enum ProgramType active_program;
+    int width;
+    int height;
 };
 
 const char *textured_vertex_shader_src =
@@ -97,15 +101,28 @@ GLRendererPriv::GLRendererPriv(int width, int height)
                 NULL))
     , path_buffer(Glaserl::buffer())
     , active_program(NONE)
+    , width(width)
+    , height(height)
 {
-    projection->ortho(0, width, height, 0, 0, 1);
-
-    Glaserl::Util::load_matrix(textured_program, "projection", projection);
-    Glaserl::Util::load_matrix(path_program, "projection", projection);
+    flipVertically(false);
 }
 
 GLRendererPriv::~GLRendererPriv()
 {
+}
+
+void
+GLRendererPriv::flipVertically(bool flip)
+{
+    projection->identity();
+    if (flip) {
+        projection->ortho(0, width, 0, height, 0, 1);
+    } else {
+        projection->ortho(0, width, height, 0, 0, 1);
+    }
+
+    Glaserl::Util::load_matrix(textured_program, "projection", projection);
+    Glaserl::Util::load_matrix(path_program, "projection", projection);
 }
 
 void
@@ -154,10 +171,25 @@ GLTextureData::GLTextureData(unsigned char *pixels, int width, int height)
 {
 }
 
+GLTextureData::GLTextureData(Glaserl::Texture texture)
+    : NP::TextureData(texture->width(), texture->height())
+    , texture(texture)
+{
+}
+
 GLTextureData::~GLTextureData()
 {
 }
 
+GLFramebufferData::GLFramebufferData(int w, int h)
+    : NP::FramebufferData(w, h)
+    , framebuffer(Glaserl::framebuffer(w, h))
+{
+}
+
+GLFramebufferData::~GLFramebufferData()
+{
+}
 
 GLRenderer::GLRenderer(int w, int h)
     : m_width(w)
@@ -190,6 +222,35 @@ NP::Texture
 GLRenderer::load(unsigned char *pixels, int w, int h)
 {
     return NP::Texture(new GLTextureData(pixels, w, h));
+}
+
+NP::Framebuffer
+GLRenderer::framebuffer(int width, int height)
+{
+    return NP::Framebuffer(new GLFramebufferData(width, height));
+}
+
+void
+GLRenderer::begin(NP::Framebuffer &rendertarget)
+{
+    GLFramebufferData *data = static_cast<GLFramebufferData *>(rendertarget.get());
+    data->framebuffer->enable();
+    priv->flipVertically(true);
+}
+
+void
+GLRenderer::end(NP::Framebuffer &rendertarget)
+{
+    GLFramebufferData *data = static_cast<GLFramebufferData *>(rendertarget.get());
+    data->framebuffer->disable();
+    priv->flipVertically(false);
+}
+
+NP::Texture
+GLRenderer::retrieve(NP::Framebuffer &rendertarget)
+{
+    GLFramebufferData *data = static_cast<GLFramebufferData *>(rendertarget.get());
+    return NP::Texture(new GLTextureData(data->framebuffer->texture));
 }
 
 void

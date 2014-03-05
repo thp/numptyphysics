@@ -36,6 +36,14 @@ public:
 
 typedef std::shared_ptr<PProgram> Program;
 
+static inline Program
+program(const char *vertex_shader_src, const char *fragment_shader_src, ...)
+{
+    va_list args;
+    va_start(args, fragment_shader_src);
+    return Program(new PProgram(vertex_shader_src, fragment_shader_src, args));
+}
+
 class PBuffer {
 public:
     PBuffer()
@@ -58,6 +66,12 @@ public:
 };
 
 typedef std::shared_ptr<PBuffer> Buffer;
+
+static inline Buffer
+buffer()
+{
+    return Buffer(new PBuffer());
+}
 
 class PMatrix {
 public:
@@ -88,6 +102,12 @@ public:
 
 typedef std::shared_ptr<PMatrix> Matrix;
 
+static inline Matrix
+matrix()
+{
+    return Matrix(new PMatrix());
+}
+
 class PTexture {
 public:
     PTexture(unsigned char *rgba, int width, int height)
@@ -111,30 +131,41 @@ public:
 
 typedef std::shared_ptr<PTexture> Texture;
 
-static inline Program
-program(const char *vertex_shader_src, const char *fragment_shader_src, ...)
-{
-    va_list args;
-    va_start(args, fragment_shader_src);
-    return Program(new PProgram(vertex_shader_src, fragment_shader_src, args));
-}
-
-static inline Buffer
-buffer()
-{
-    return Buffer(new PBuffer());
-}
-
-static inline Matrix
-matrix()
-{
-    return Matrix(new PMatrix());
-}
-
 static inline Texture
 texture(unsigned char *rgba, int width, int height)
 {
     return Texture(new PTexture(rgba, width, height));
+}
+
+class PFramebuffer {
+public:
+    PFramebuffer(int width, int height)
+        : d(glaserl_framebuffer_new(width, height))
+        , texture(Glaserl::texture(NULL, width, height))
+    {
+        glaserl_framebuffer_attach(d, texture->d);
+    }
+
+    ~PFramebuffer()
+    {
+        glaserl_framebuffer_destroy(d);
+    }
+
+    void enable() { glaserl_framebuffer_enable(d); }
+    void disable() { glaserl_framebuffer_disable(d); }
+    int width() { return d->width; }
+    int height() { return d->height; }
+
+    glaserl_framebuffer_t *d;
+    Texture texture;
+};
+
+typedef std::shared_ptr<PFramebuffer> Framebuffer;
+
+static inline Framebuffer
+framebuffer(int width, int height)
+{
+    return Framebuffer(new PFramebuffer(width, height));
 }
 
 namespace Util {

@@ -52,7 +52,9 @@ public:
     Box *hbox = new HBox();
     hbox->add( new Spacer(),  10, 2 );
     IconButton *icon = new IconButton("level", "", Event::NOP);
-    //icon->image(image, false);
+    if (image) {
+        icon->image(image, false);
+    }
     hbox->add( icon, 300, 0 );
     hbox->add( new Spacer(),  10, 1 );
     Box *vbox = new VBox();
@@ -159,18 +161,26 @@ public:
     m_scroll->add(vbox,0,0);
 
     for (int i=0; i<THUMB_COUNT && i+m_dispbase<m_dispcount; i++) {
-      fprintf(stderr,"creating thumb\n");
-      Canvas temp( SCREEN_WIDTH, SCREEN_HEIGHT );
       Scene scene( true );
       unsigned char buf[64*1024];
       int level = m_levels->collectionLevel(c,i);
       int size = m_levels->load( level, buf, sizeof(buf) );
       if ( size && scene.load( buf, size ) ) {
-	scene.draw( temp, FULLSCREEN_RECT );
-	m_thumbs[i]->text( m_levels->levelName(level) );
-	//m_thumbs[i]->canvas( temp.scale( ICON_SCALE_FACTOR ) );
-	//m_thumbs[i]->canvas(&temp, false);
-	m_thumbs[i]->transparent(m_dispbase+i!=levelInC);
+          int w = SCREEN_WIDTH / ICON_SCALE_FACTOR;
+          int h = SCREEN_HEIGHT / ICON_SCALE_FACTOR;
+
+          NP::Renderer *renderer = OS->renderer();
+
+          NP::Framebuffer fb = renderer->framebuffer(w, h);
+          renderer->begin(fb);
+          Canvas temp(SCREEN_WIDTH, SCREEN_HEIGHT);
+          scene.draw(temp, FULLSCREEN_RECT);
+          renderer->flush();
+          renderer->end(fb);
+
+          m_thumbs[i]->text( m_levels->levelName(level) );
+          m_thumbs[i]->image(new Image(renderer->retrieve(fb)));
+          //m_thumbs[i]->transparent(m_dispbase+i!=levelInC);
       }
     }
   }
