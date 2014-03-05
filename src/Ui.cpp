@@ -523,7 +523,9 @@ bool Draggable::processEvent(ToolkitEvent &ev)
   if (!m_internalEvent && m_eventMap) { 
     Event e = m_eventMap->process(ev);
     if (e.code != Event::NOP) {
-      return onPreEvent(e);
+      if (onPreEvent(e)) {
+          return true;
+      }
     }
   }
   // normal processing
