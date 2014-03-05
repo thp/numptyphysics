@@ -255,7 +255,7 @@ static b2Vec2 operator*(b2Vec2 v, float m)
 static float *
 make_segment(b2Vec2 aa, b2Vec2 a, b2Vec2 b, b2Vec2 bb)
 {
-    static b2Vec2 data[9];
+    static b2Vec2 data[10];
 
     b2Vec2 a_to_b = 0.5 * (b - a) + 0.5 * (a - aa);
     a_to_b.Normalize();
@@ -269,6 +269,8 @@ make_segment(b2Vec2 aa, b2Vec2 a, b2Vec2 b, b2Vec2 bb)
     float e = 1.0;
 
     int offset = 0;
+    data[offset++] = a + a_to_b_90 * (w + e);
+
     data[offset++] = a + a_to_b_90 * (w + e);
     data[offset++] = b + b_to_a_90 * (w + e);
     data[offset++] = a + a_to_b_90 * w;
@@ -291,7 +293,7 @@ GLRenderer::path(const Path &path, int rgba)
     rgba_split(rgba, r, g, b, a);
 
     int segments = path.numPoints() - 1;
-    int points_len = (2 + 4) * 9 * segments;
+    int points_len = (2 + 4) * 10 * segments;
     float *points = new float[points_len];
     int offset = 0;
     for (int i=0; i<segments; i++) {
@@ -304,7 +306,7 @@ GLRenderer::path(const Path &path, int rgba)
         );
 
         int soffset = 0;
-        for (int j=0; j<9; j++) {
+        for (int j=0; j<10; j++) {
             // Vertices
             points[offset++] = segment[soffset++];
             points[offset++] = segment[soffset++];
@@ -313,7 +315,7 @@ GLRenderer::path(const Path &path, int rgba)
             points[offset++] = r;
             points[offset++] = g;
             points[offset++] = b;
-            if ((j < 2 || j > 5)) {
+            if ((j < 3 || j > 6)) {
                 // Transparent
                 points[offset++] = 0.f;
             } else {
