@@ -118,9 +118,9 @@ bool Levels::addPath( const char* path )
 bool Levels::addLevel( const string& file, int rank, int index )
 {
   if (file.substr(file.length()-4) == ".npd") {
-    addLevel( getCollection(DEMO_COLLECTION), file, rank, index );
+    return addLevel( getCollection(DEMO_COLLECTION), file, rank, index );
   } else {
-    addLevel( getCollection(MISC_COLLECTION), file, rank, index );
+    return addLevel( getCollection(MISC_COLLECTION), file, rank, index );
   }
 }
 
@@ -255,6 +255,8 @@ int Levels::collectionFromLevel( int i, int *indexInCol )
       }
     }
   }
+
+  return 0;
 }
 
 std::string Levels::collectionName( int i, bool pretty )

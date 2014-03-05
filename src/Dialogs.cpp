@@ -90,9 +90,9 @@ public:
   LevelSelector(GameControl* game, int initialLevel)
     : m_game(game),
       m_levels(game->m_levels),
+      m_collection(0),
       m_dispbase(0),
-      m_dispcount(0),
-      m_collection(0)
+      m_dispcount(0)
   {
     m_scroll = new ScrollArea();
     m_scroll->fitToParent(true);
@@ -193,6 +193,9 @@ public:
 //       //Event closeEvent(Event::CLOSE);
 //       //m_parent->dispatchEvent(closeEvent);
 //       return true;
+       default:
+      /* do nothing */
+        break;
     }
     return MenuPage::onEvent(ev);
   }
@@ -526,35 +529,34 @@ public:
   }
   bool onEvent( Event& ev )
   {
-    switch (ev.code) {
-    case Event::SELECT:
-      switch(ev.x) {
-      case 0:
-	m_game->m_strokeFixed = !m_game->m_strokeFixed;
-	m_game->m_strokeSleep = false;
-	m_game->m_strokeDecor = false;
-	break;
-      case 1:
-	m_game->m_strokeFixed = false;
-	m_game->m_strokeSleep = !m_game->m_strokeSleep;
-	m_game->m_strokeDecor = false;
-	break;
-      case 2:
-	m_game->m_strokeFixed = false;
-	m_game->m_strokeSleep = false;
-	m_game->m_strokeDecor = !m_game->m_strokeDecor;
-	break;
-      case 3:
-	m_game->clickMode((m_game->m_clickMode==1)?0:1);
-	break;
-      case 4:
-	m_game->clickMode((m_game->m_clickMode==2)?0:2);
-	break;
-      default: return MenuDialog::onEvent(ev);
+      if (ev.code == Event::SELECT) {
+          switch(ev.x) {
+              case 0:
+                  m_game->m_strokeFixed = !m_game->m_strokeFixed;
+                  m_game->m_strokeSleep = false;
+                  m_game->m_strokeDecor = false;
+                  break;
+              case 1:
+                  m_game->m_strokeFixed = false;
+                  m_game->m_strokeSleep = !m_game->m_strokeSleep;
+                  m_game->m_strokeDecor = false;
+                  break;
+              case 2:
+                  m_game->m_strokeFixed = false;
+                  m_game->m_strokeSleep = false;
+                  m_game->m_strokeDecor = !m_game->m_strokeDecor;
+                  break;
+              case 3:
+                  m_game->clickMode((m_game->m_clickMode==1)?0:1);
+                  break;
+              case 4:
+                  m_game->clickMode((m_game->m_clickMode==2)?0:2);
+                  break;
+              default: return MenuDialog::onEvent(ev);
+          }
+          updateTicks();
+          return true;
       }
-      updateTicks();
-      return true;
-    }
     return MenuDialog::onEvent(ev);
   }
 private:

@@ -70,9 +70,9 @@ public:
     m_pauseLabel( NULL ),
     m_editLabel( NULL ),
     m_completedDialog( NULL ),
-    m_isCompleted(false),
     m_options( NULL ),
     m_os( Os::get() ),
+    m_isCompleted(false),
     m_jointInd(JOINT_IND_PATH),
     m_left_button(BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE, BUTTON_BORDER + BUTTON_SIZE),
     m_right_button(SCREEN_WIDTH - BUTTON_BORDER - BUTTON_SIZE, BUTTON_BORDER, SCREEN_WIDTH - BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE)

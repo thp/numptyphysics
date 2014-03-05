@@ -75,9 +75,9 @@ void ScriptLog::append( const std::string& str )
 
 
 ScriptRecorder::ScriptRecorder()
-  : m_log(NULL),
-    m_running(false),
-    m_isPaused(false)
+  : m_running(false)
+  , m_isPaused(false)
+  , m_log(NULL)
 {
 }
 

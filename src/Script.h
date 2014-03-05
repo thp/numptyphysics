@@ -42,7 +42,7 @@ struct ScriptEntry {
   ScriptEntry( int _t, Op _op, int _stroke,
 	     int _arg1, int _arg2, const Vec2& _pt ) 
   : t(_t), op(_op), stroke(_stroke),
-    arg1(_arg1), arg2(arg2), pt(_pt)
+    arg1(_arg1), arg2(_arg2), pt(_pt)
   {}
   ScriptEntry() {};
   ScriptEntry( const std::string& str );

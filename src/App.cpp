@@ -219,6 +219,9 @@ private:
                   default:
                       break;
               }
+          default:
+              /* do nothing */
+              break;
       }
 
       return Container::processEvent(ev);

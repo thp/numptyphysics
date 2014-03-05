@@ -268,8 +268,9 @@ class ScrollArea : public Panel
   Draggable* m_contents;
 };
 
-struct MenuItem
+class MenuItem
 {
+public:
   MenuItem(const std::string& s, Event ev=Event::NOP)
   : text(s), event(ev) {}
   std::string text;
