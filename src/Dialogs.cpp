@@ -52,7 +52,7 @@ public:
     Box *hbox = new HBox();
     hbox->add( new Spacer(),  10, 2 );
     IconButton *icon = new IconButton("level", "", Event::NOP);
-    icon->image(image, false);
+    //icon->image(image, false);
     hbox->add( icon, 300, 0 );
     hbox->add( new Spacer(),  10, 1 );
     Box *vbox = new VBox();
