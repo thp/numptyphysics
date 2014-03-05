@@ -191,21 +191,6 @@ class OsFreeDesktop : public Os
     return NULL;
   }
 
-  virtual void poll() 
-  {
-    if ( m_fifo && !m_cmdReady ) {
-      int c = 0;
-      while ( c != EOF ) {
-	c = fgetc( m_fifo );
-	m_cmdBuffer[m_cmdPos++] = c;
-	if ( c == 0 ) {
-	  m_cmdReady = false;
-	  break;
-	}
-      }
-    }
-  }
-
   virtual bool nextEvent(ToolkitEvent &ev)
   {
       SDL_Event e;
@@ -268,17 +253,6 @@ class OsFreeDesktop : public Os
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0) {
       throw "Couldn't initialize SDL";
     }
-  }
-
-  virtual char *getLaunchFile() 
-  {
-    poll();
-    if ( m_cmdReady ) {
-      m_cmdPos = 0;
-      m_cmdReady = false;
-      return m_cmdBuffer;
-    }
-    return NULL;
   }
 
   bool setupPipe( int argc, char** argv )

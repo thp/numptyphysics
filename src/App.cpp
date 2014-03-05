@@ -26,6 +26,8 @@
 #include "Dialogs.h"
 #include "Event.h"
 
+#include "thp_timestep.h"
+
 #include <cstdio>
 #include <string>
 #include <unistd.h>
@@ -33,23 +35,18 @@
 
 class App : private Container, public MainLoop
 {
-  int   m_width;
-  int   m_height;
-  bool  m_quit;
-  int   m_renderRate;
-  Window            *m_window;
-  int m_iterationRate;
-  int m_iterateCounter;
-  int m_lastTick;
+  int m_width;
+  int m_height;
+  bool m_quit;
+  Window *m_window;
+  thp::Timestep m_timestep;
 public:
   App(int argc, char** argv)
     : m_width(SCREEN_WIDTH)
     , m_height(SCREEN_HEIGHT)
     , m_quit(false)
     , m_window(NULL)
-    , m_iterationRate(ITERATION_RATE)
-    , m_iterateCounter(0)
-    , m_lastTick(OS->ticks())
+    , m_timestep(ITERATION_RATE)
   {
       OS->ensurePath(Config::userDataDir());
       OS->init();
@@ -64,7 +61,6 @@ public:
       levels->addPath( Config::userDataDir().c_str() );
 
       add( createGameLayer( levels, m_width, m_height ), 0, 0 );
-      m_renderRate = (MIN_RENDER_RATE+MAX_RENDER_RATE)/2;
   }
 
   ~App()
@@ -101,7 +97,7 @@ private:
 #if DO_DRAW_FPS
           m_window->drawRect(Rect(0, 0, 50, 50), m_window->makeColour(0xbfbf8f), true);
           char buf[32];
-          sprintf(buf,"%d",m_renderRate);
+          sprintf(buf,"%d", XXX);
           Font::headingFont()->drawLeft(m_window, Vec2(20,20), buf, 0);
 #endif
 
@@ -148,45 +144,16 @@ private:
 
   virtual bool step()
   {
-      OS->poll();
-
-      //assumes RENDER_RATE <= ITERATION_RATE
-      while ( m_iterateCounter < m_iterationRate ) {
-
-          onTick( m_lastTick );
+      m_timestep.update(OS->ticks(), [this] () {
+          onTick(OS->ticks());
 
           ToolkitEvent ev;
           while (OS->nextEvent(ev)) {
               processEvent(ev);
           }
-
-          if ( m_quit ) return false;
-          m_iterateCounter += m_renderRate;
-      }
-      m_iterateCounter -= m_iterationRate;
+      });
 
       render();
-
-      int sleepMs = m_lastTick + 1000/m_renderRate - OS->ticks();
-
-      if ( sleepMs > 1 && m_renderRate < MAX_RENDER_RATE ) {
-          m_renderRate++;
-          printf("increasing render rate to %dfps\n",m_renderRate);
-          sleepMs = m_lastTick + 1000/m_renderRate - OS->ticks();
-      }
-
-      if ( sleepMs > 0 ) {
-          OS->delay(sleepMs);
-      } else {
-          printf("overrun %dms\n",-sleepMs);
-          if ( m_renderRate > MIN_RENDER_RATE ) {
-              m_renderRate--;
-              printf("decreasing render rate to %dfps\n",m_renderRate);
-          } else if ( m_iterationRate > 30 ) {
-              //slow down simulation time to maintain fps??
-          }
-      }
-      m_lastTick = OS->ticks();
 
       return !m_quit;
   }

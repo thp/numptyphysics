@@ -37,7 +37,6 @@ class Os
 {
  public:  
   virtual ~Os() {}
-  virtual void  poll() {};
   virtual bool nextEvent(ToolkitEvent &ev) = 0;
   virtual long ticks() = 0;
   virtual void delay(int ms) = 0;

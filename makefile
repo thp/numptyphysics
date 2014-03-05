@@ -41,6 +41,10 @@ LOCAL_LIBS += $(GLASERL_SOURCE)/$(GLASERL_LIBRARY)
 $(GLASERL_SOURCE)/$(GLASERL_LIBRARY):
 	$(MAKE) -C $(GLASERL_SOURCE) $(GLASERL_LIBRARY)
 
+# Other libs
+CXXFLAGS += -Iexternal/thp
+SOURCES += $(wildcard external/thp/*.cpp)
+
 # Pick the right OS-specific module here
 SOURCES += src/os/OsSDL2.cpp src/os/GLRenderer.cpp
 CXXFLAGS += -I. -Isrc -Isrc/os
