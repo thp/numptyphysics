@@ -226,7 +226,7 @@ public:
 	m_pauseLabel->setBg(0xff0000);
 	m_pauseLabel->setFg(0x000000);
       }
-      add( m_pauseLabel, Rect(0,0,128,32) );
+      add( m_pauseLabel, Rect(SCREEN_WIDTH/2-64,16,SCREEN_WIDTH/2+64,64) );
       m_paused = true;
     } else {
       remove( m_pauseLabel );
