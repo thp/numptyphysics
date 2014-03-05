@@ -51,7 +51,9 @@ Config::readFile(const std::string &name)
     size_t length = is.tellg();
     is.seekg(0, is.beg);
 
-    char *buffer = new char [length];
+    char *buffer = new char [length+1];
+    buffer[length] = '\0';
+
     is.read (buffer,length);
     is.close();
     std::string result = buffer;
