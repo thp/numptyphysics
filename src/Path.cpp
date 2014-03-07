@@ -168,9 +168,13 @@ void Path::simplifySub( int first, int last, float32 threshold, bool* keepflags 
 
 Rect Path::bbox() const
 {
-  Rect r( at(0), at(0) );
-  for ( int i=1; i<size(); i++ ) {
-    r.expand( at(i) );
-  }
-  return r;
+    if (size() == 0) {
+        return Rect(Vec2(), Vec2());
+    }
+
+    Rect r(at(0), at(0));
+    for (auto &p: *this) {
+        r.expand(p);
+    }
+    return r;
 }

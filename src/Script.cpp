@@ -87,7 +87,6 @@ void ScriptRecorder::start( ScriptLog* log )
   m_isPaused = false;
   m_log = log;
   m_log->clear();
-  m_log->resize(128);
   m_lastTick = 0;
 }
 
