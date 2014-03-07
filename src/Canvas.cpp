@@ -24,8 +24,7 @@
 #define RENDERER  (OS->renderer())
 
 Canvas::Canvas( int w, int h )
-  : m_bgImage(NULL)
-  , m_width(w)
+  : m_width(w)
   , m_height(h)
 {
 }
@@ -55,17 +54,9 @@ int Canvas::makeColour( int c ) const
     return c;
 }
 
-void Canvas::setBackground( Image* bg )
-{
-  m_bgImage = bg;
-}
-
 void Canvas::clear()
 {
     RENDERER->clear();
-    if (m_bgImage) {
-        RENDERER->image(m_bgImage->texture(), 0, 0, m_bgImage->width(), m_bgImage->height());
-    }
 }
 
 void Canvas::drawImage(Image &image, int x, int y)

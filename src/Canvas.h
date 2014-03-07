@@ -32,15 +32,13 @@ public:
   int height() const;
   int  makeColour( int c ) const;
   int  makeColour( int r, int g, int b ) const;
-  void setBackground( Image* bg );
   void clear();
-  void drawImage(Image &image, int x, int y);
+  void drawImage(Image &image, int x=0, int y=0);
   void drawPath( const Path& path, int color, bool thick=false );
   void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
   void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
   int writeBMP( const char* filename ) const;
 protected:
-  Image* m_bgImage; 
   int m_width;
   int m_height;
 };

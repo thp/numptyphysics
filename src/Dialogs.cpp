@@ -172,7 +172,7 @@ public:
           RenderTarget temp(SCREEN_WIDTH, SCREEN_HEIGHT);
 
           temp.begin();
-          scene.draw(temp, FULLSCREEN_RECT);
+          scene.draw(temp);
           temp.end();
 
           m_thumbs[i]->text( m_levels->levelName(level) );

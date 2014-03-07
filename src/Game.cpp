@@ -328,7 +328,7 @@ public:
   {
     static int drawCount = 0 ;
     m_refresh = false;
-    m_scene.draw( screen, area );
+    m_scene.draw(screen);
     if ( m_jointCandidates.size() ) {
       float32 rot = (float32)(drawCount&127) / 128.0f;
       for ( int i=0; i<m_jointCandidates.size(); i++ ) {

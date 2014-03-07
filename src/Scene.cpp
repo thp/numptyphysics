@@ -698,18 +698,17 @@ bool Scene::isCompleted()
   return true;
 }
 
-void Scene::draw( Canvas& canvas, const Rect& area )
+void Scene::draw(Canvas &canvas)
 {
-  if ( m_bgImage ) {
-    canvas.setBackground( m_bgImage );
-  } else {
-    canvas.setBackground( 0 );
-  }
-  for ( int i=0; i<m_strokes.size(); i++ ) {
-	m_strokes[i]->draw( canvas );
-  }
+    if (m_bgImage) {
+        canvas.drawImage(*m_bgImage);
+    }
 
-  clearWithDelete(m_deletedStrokes);
+    for (auto &stroke: m_strokes) {
+        stroke->draw(canvas);
+    }
+
+    clearWithDelete(m_deletedStrokes);
 }
 
 void Scene::reset( Stroke* s, bool purgeUnprotected )

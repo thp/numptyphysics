@@ -65,7 +65,7 @@ public:
 
   void step( bool isPaused=false );
   bool isCompleted();
-  void draw( Canvas& canvas, const Rect& area );
+  void draw(Canvas &canvas);
   void reset( Stroke* s=NULL,  bool purgeUnprotected=false );
   Stroke* strokeAtPoint( const Vec2 pt, float32 max );
   void clear();
