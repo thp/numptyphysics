@@ -19,7 +19,6 @@
 #include <dirent.h>
 
 #include "Levels.h"
-#include "ZipFile.h"
 #include "Config.h"
 #include "Os.h"
 
@@ -173,17 +172,7 @@ Levels::Collection* Levels::getCollection( const std::string& file )
 
 bool Levels::scanCollection( const std::string& file, int rank )
 {
-  try {
-    ZipFile zf(file);
-    Collection *collection = getCollection(file);
-    //printf("found collection %s with %d levels\n",file.c_str(),zf.numEntries());
-    for ( int i=0; i<zf.numEntries(); i++ ) {
-      addLevel( collection, file, rankFromPath(zf.entryName(i),rank), i );
-    }
-  } catch (...) {
-    fprintf(stderr,"invalid collection %s\n",file.c_str());
-  }
-  return false;
+    return false;
 }
 
 int Levels::numLevels()
@@ -198,22 +187,11 @@ int Levels::load( int i, unsigned char* buf, int bufLen )
 
   LevelDesc *lev = findLevel(i);
   if (lev) {
-    if ( lev->index >= 0 ) {
-      ZipFile zf( lev->file.c_str() );
-      if ( lev->index < zf.numEntries() ) {
-	
-	unsigned char* d = zf.extract( lev->index, &l);
-	if ( d && l <= bufLen ) {
-	  memcpy( buf, d, l );
-	}
-      }
-    } else {
       FILE *f = fopen( lev->file.c_str(), "rt" );
       if ( f ) {
 	l = fread( buf, 1, bufLen, f );
 	fclose(f);
       }
-    }
     return l;
   }
 
@@ -225,12 +203,7 @@ std::string Levels::levelName( int i, bool pretty )
   std::string s = "end";
   LevelDesc *lev = findLevel(i);
   if (lev) {
-    if ( lev->index >= 0 ) {
-      ZipFile zf( lev->file.c_str() );
-      s = zf.entryName( lev->index );
-    } else {
       s = lev->file;
-    }
   } else {
     s = "err";
   }

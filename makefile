@@ -15,9 +15,9 @@ PKGS += sdl2 SDL2_image SDL2_ttf
 
 UNAME := $(shell uname)
 ifeq ($(UNAME),Darwin)
-LIBS += -lz -framework OpenGL
+LIBS += -framework OpenGL
 else
-PKGS += zlib gl
+PKGS += gl
 endif
 
 CXXFLAGS += $(shell pkg-config --cflags $(PKGS))
