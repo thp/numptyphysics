@@ -164,10 +164,8 @@ public:
 
     for (int i=0; i<THUMB_COUNT && i+m_dispbase<m_dispcount; i++) {
       Scene scene( true );
-      unsigned char buf[64*1024];
       int level = m_levels->collectionLevel(c,i);
-      int size = m_levels->load( level, buf, sizeof(buf) );
-      if ( size && scene.load( buf, size ) ) {
+      if (scene.load(m_levels->load(level))) {
           RenderTarget temp(SCREEN_WIDTH, SCREEN_HEIGHT);
 
           temp.begin();

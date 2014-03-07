@@ -68,7 +68,7 @@ class Levels
   bool addPath(const std::string &path);
   bool addLevel(const std::string &file, int rank);
   int  numLevels();
-  int load( int i, unsigned char* buf, int bufLen );
+  std::string load(int i);
   std::string levelName( int i, bool pretty=true );
   int findLevel( const char *file );
 

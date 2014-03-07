@@ -37,8 +37,6 @@
 
 using namespace std;
 
-unsigned char levelbuf[64*1024];
-
 
 #define JOINT_IND_PATH "282,39 280,38 282,38 285,39 300,39 301,60 303,66 302,64 301,63 300,48 297,41 296,42 294,43 293,45 291,46 289,48 287,49 286,52 284,53 283,58 281,62 280,66 282,78 284,82 287,84 290,85 294,88 297,88 299,89 302,90 308,90 311,89 314,89 320,85 321,83 323,83 324,81 327,78 328,75 327,63 326,58 325,55 323,54 321,51 320,49 319,48 316,46 314,44 312,43 314,43"
 
@@ -105,11 +103,10 @@ public:
       m_scene.start( true );
       ok = true;
     } else if ( level >= 0 && level < m_levels->numLevels() ) {
-      int size = m_levels->load( level, levelbuf, sizeof(levelbuf) );
-      if ( size && m_scene.load( levelbuf, size ) ) {
-	m_scene.start( m_scene.getLog()->size() > 0 );
-	ok = true;
-      }
+        if (m_scene.load(m_levels->load(level))) {
+            m_scene.start( m_scene.getLog()->size() > 0 );
+            ok = true;
+        }
     }
 
     if (ok) {

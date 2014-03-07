@@ -200,21 +200,15 @@ int Levels::numLevels()
 }
 
 
-int Levels::load( int i, unsigned char* buf, int bufLen )
+std::string Levels::load(int i)
 {
-  int l = 0;
-
   LevelDesc *lev = findLevel(i);
+
   if (lev) {
-      FILE *f = fopen( lev->file.c_str(), "rt" );
-      if ( f ) {
-	l = fread( buf, 1, bufLen, f );
-	fclose(f);
-      }
-    return l;
+      return Config::readFile(lev->file);
   }
 
-  throw "invalid level index";  
+  return "";
 }
 
 std::string Levels::levelName( int i, bool pretty )

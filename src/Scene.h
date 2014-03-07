@@ -73,8 +73,7 @@ public:
   void setGravity( const b2Vec2& g );
   void setGravity( const std::string& s );
 
-  bool load( unsigned char *buf, int bufsize );
-  bool load( std::istream& in );
+  bool load(const std::string &level);
   void start( bool replay=false );
   void protect( int n=-1 );
   bool save( const std::string& file, bool saveLog=false );

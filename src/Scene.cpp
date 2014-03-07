@@ -19,9 +19,8 @@
 #include "Accelerometer.h"
 #include "Colour.h"
 
-#include <sstream>
-#include <fstream>
 #include <vector>
+#include <list>
 #include <algorithm>
 
 
@@ -780,31 +779,40 @@ void Scene::setGravity( const std::string& s )
   }
 }
 
-bool Scene::load( unsigned char *buf, int bufsize )
+static std::list<std::string>
+splitLines(const std::string &str)
 {
-  std::string s( (const char*)buf, bufsize );
-  std::stringstream in( s, std::ios::in );
-  return load( in );
+    std::list<std::string> result;
+
+    size_t pos = 0;
+    do {
+        size_t start = pos;
+        pos = str.find('\n', pos + 1);
+        size_t end = (pos == std::string::npos ? pos : pos - start);
+        result.push_back(str.substr(start, end));
+        pos++;
+    } while (pos != std::string::npos + 1);
+
+    return result;
 }
 
-bool Scene::load( std::istream& in )
+bool Scene::load(const std::string &level)
 {
     clear();
     resetWorld();
     m_dynamicGravity = false;
 
-    std::string line;
-    while (!in.eof()) {
-        getline(in, line);
+    for (std::string &line: splitLines(level)) {
+        std::string value = line.substr(line.find(':') + 1);
         switch (line[0]) {
             case 'T':
-                m_title = line.substr(line.find(':') + 1);
+                m_title = value;
                 break;
             case 'B':
-                m_bg = line.substr(line.find(':') + 1);
+                m_bg = value;
                 break;
             case 'A':
-                m_author = line.substr(line.find(':') + 1);
+                m_author = value;
                 break;
             case 'S':
                 m_strokes.push_back(new Stroke(line));
@@ -813,7 +821,7 @@ bool Scene::load( std::istream& in )
                 setGravity(line);
                 break;
             case 'E':
-                m_log.push_back(line.substr(line.find(':') + 1));
+                m_log.push_back(value);
                 break;
             default:
                 printf("Unparsed: '%s'\n", line.c_str());
