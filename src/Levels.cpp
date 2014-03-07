@@ -115,26 +115,24 @@ bool Levels::addLevel(const std::string& file, int rank)
     }
 }
 
-bool Levels::addLevel(Collection* collection, const std::string &file, int rank)
+bool Levels::addLevel(Collection &collection, const std::string &file, int rank)
 {
-    LevelDesc *e = new LevelDesc(file, rank);
-
-    auto &levels = collection->levels;
+    auto &levels = collection.levels;
     for (auto it = levels.begin(); it != levels.end(); ++it) {
         auto &level = *it;
 
-        if (level->file == file) {
+        if (level.file == file) {
             //printf("addLevel %s already present!\n",file.c_str());
             return false;
-        } else if (level->rank > rank) {
+        } else if (level.rank > rank) {
             //printf("insert level %s at %d\n",file.c_str(),i);
-            levels.insert(it, e);
+            levels.insert(it, LevelDesc(file, rank));
             m_numLevels++;
             return true;
         }
     }
 
-    collection->levels.push_back(e);
+    levels.push_back(LevelDesc(file, rank));
     //printf("add level %s as %s[%d]\n",file.c_str(),
     // collection->file.c_str(), collection->levels.size());
     m_numLevels++;
@@ -142,24 +140,24 @@ bool Levels::addLevel(Collection* collection, const std::string &file, int rank)
 }
 
 
-Collection* Levels::getCollection( const std::string& file )
+Collection &Levels::getCollection(const std::string &file)
 {
     for (auto &collection: m_collections) {
-        if (collection->file == file) {
+        if (collection.file == file) {
             return collection;
         }
     }
 
-    Collection *c = new Collection(file, file, rankFromPath(file));
+    int rank = rankFromPath(file);
     for (auto it = m_collections.begin(); it != m_collections.end(); ++it) {
         auto &collection = *it;
-        if (collection->rank > c->rank) {
-            m_collections.insert(it, c);
-            return c;
+        if (collection.rank > rank) {
+            return *m_collections.insert(it, Collection(file, file, rank));
         }
     }
-    m_collections.push_back(c);
-    return c;
+
+    m_collections.push_back(Collection(file, file, rank));
+    return m_collections.back();
 }
 
 
@@ -237,10 +235,10 @@ Levels::dump()
     for (int i=0; i<m_collections.size(); i++) {
         printf("Collection #%d: %s\n", (i+1),
                 collectionName(i, true).c_str());
-        for (int j=0; j<m_collections[i]->levels.size(); j++) {
-            LevelDesc *level = m_collections[i]->levels[j];
+        for (int j=0; j<m_collections[i].levels.size(); j++) {
+            LevelDesc &level = m_collections[i].levels[j];
             printf(" Level #%d: %s (rank=%d)\n", (j+1),
-                    level->file.c_str(), level->rank);
+                    level.file.c_str(), level.rank);
         }
     }
 }
@@ -254,8 +252,8 @@ int Levels::collectionFromLevel( int i, int *indexInCol )
 {
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {
-      if ( i >= m_collections[c]->levels.size() ) {
-	i -= m_collections[c]->levels.size();
+      if ( i >= m_collections[c].levels.size() ) {
+	i -= m_collections[c].levels.size();
       } else {
 	if (indexInCol) *indexInCol = i;
 	return c;
@@ -270,9 +268,9 @@ std::string Levels::collectionName( int i, bool pretty )
 {
   if (i>=0 && i<numCollections()) {
     if (pretty) {
-      return nameFromPath(m_collections[i]->name);
+      return nameFromPath(m_collections[i].name);
     } else {
-      return m_collections[i]->name;
+      return m_collections[i].name;
     }
   }
   return "Bad Collection ID";
@@ -282,7 +280,7 @@ std::string Levels::collectionName( int i, bool pretty )
 int Levels::collectionSize(int c)
 {
   if (c>=0 && c<numCollections()) {
-    return m_collections[c]->levels.size();
+    return m_collections[c].levels.size();
   }
   return 0;
 }
@@ -290,10 +288,10 @@ int Levels::collectionSize(int c)
 int Levels::collectionLevel(int c, int i)
 {
   if (c>=0 && c<numCollections()) {
-    if (i>=0 && i<m_collections[c]->levels.size()) {
+    if (i>=0 && i<m_collections[c].levels.size()) {
       int l = i;
       for (int j=0; j<c; j++) {
-	l += m_collections[j]->levels.size();
+	l += m_collections[j].levels.size();
       }
       return l;
     }
@@ -348,11 +346,11 @@ LevelDesc* Levels::findLevel( int i )
 {
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {
-      if ( i >= m_collections[c]->levels.size() ) {
+      if ( i >= m_collections[c].levels.size() ) {
 	//fprintf(stderr,"index %d not in c%d (size=%d)\n",i,c,m_collections[c]->levels.size());
-	i -= m_collections[c]->levels.size();
+	i -= m_collections[c].levels.size();
       } else {
-	return m_collections[c]->levels[i];
+	return &(m_collections[c].levels[i]);
       }
     }
   }
@@ -364,12 +362,12 @@ int Levels::findLevel( const char *file )
 {
   int index = 0;
   for ( int c=0; c<m_collections.size(); c++ ) {
-    for ( int i=0; i<m_collections[c]->levels.size(); i++ ) {
-      if ( m_collections[c]->levels[i]->file == file ) {
+    for ( int i=0; i<m_collections[c].levels.size(); i++ ) {
+      if ( m_collections[c].levels[i].file == file ) {
 	return index + i;
       }
     }
-    index += m_collections[c]->levels.size();
+    index += m_collections[c].levels.size();
   }
   return -1;
 }

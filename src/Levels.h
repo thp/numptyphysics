@@ -22,6 +22,12 @@
 #include <vector>
 
 struct LevelDesc {
+    LevelDesc()
+        : file()
+        , rank()
+    {
+    }
+
     LevelDesc(const std::string &file, int rank)
         : file(file)
         , rank(rank)
@@ -33,6 +39,14 @@ struct LevelDesc {
 };
 
 struct Collection {
+    Collection()
+        : file()
+        , name()
+        , rank()
+        , levels()
+    {
+    }
+
     Collection(const std::string &file, const std::string &name, int rank)
         : file(file)
         , name(name)
@@ -44,7 +58,7 @@ struct Collection {
     std::string file;
     std::string name;
     int rank;
-    std::vector<LevelDesc*> levels;
+    std::vector<LevelDesc> levels;
 };
 
 class Levels
@@ -72,13 +86,13 @@ class Levels
 
  private:
 
-  bool addLevel(Collection *collection, const std::string &file, int rank);
+  bool addLevel(Collection &collection, const std::string &file, int rank);
   LevelDesc *findLevel(int i);
-  Collection *getCollection( const std::string& file );
+  Collection &getCollection(const std::string &file);
   bool scanCollection( const std::string& file, int rank );
 
   int m_numLevels;
-  std::vector<Collection*> m_collections;
+  std::vector<Collection> m_collections;
 };
 
 #endif //LEVELS_H
