@@ -169,20 +169,16 @@ public:
       int level = m_levels->collectionLevel(c,i);
       int size = m_levels->load( level, buf, sizeof(buf) );
       if ( size && scene.load( buf, size ) ) {
-          int w = SCREEN_WIDTH / ICON_SCALE_FACTOR;
-          int h = SCREEN_HEIGHT / ICON_SCALE_FACTOR;
+          RenderTarget temp(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-          NP::Renderer *renderer = OS->renderer();
-
-          NP::Framebuffer fb = renderer->framebuffer(w, h);
-          renderer->begin(fb);
-          Canvas temp(SCREEN_WIDTH, SCREEN_HEIGHT);
+          temp.begin();
           scene.draw(temp, FULLSCREEN_RECT);
-          renderer->flush();
-          renderer->end(fb);
+          temp.end();
 
           m_thumbs[i]->text( m_levels->levelName(level) );
-          m_thumbs[i]->image(new Image(renderer->retrieve(fb)));
+          Image *image = new Image(temp.contents());
+          image->scale(1. / ICON_SCALE_FACTOR);
+          m_thumbs[i]->image(image);
           //m_thumbs[i]->transparent(m_dispbase+i!=levelInC);
       }
     }

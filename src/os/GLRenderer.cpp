@@ -254,7 +254,7 @@ GLRenderer::retrieve(NP::Framebuffer &rendertarget)
 }
 
 void
-GLRenderer::image(const NP::Texture &texture, int x, int y)
+GLRenderer::image(const NP::Texture &texture, int x, int y, int w, int h)
 {
     GLTextureData *data = static_cast<GLTextureData *>(texture.get());
 
@@ -267,9 +267,9 @@ GLRenderer::image(const NP::Texture &texture, int x, int y)
     // Layout: vtx.x, vtx.y, tex.x, tex.y
     float vtxdata[] = {
         (float)x, (float)y, tx1, ty1,
-        (float)x, (float)(y + data->h), tx1, ty2,
-        (float)(x + data->w), (float)y, tx2, tx1,
-        (float)(x + data->w), (float)(y + data->h), tx2, ty2,
+        (float)x, (float)(y + h), tx1, ty2,
+        (float)(x + w), (float)y, tx2, tx1,
+        (float)(x + w), (float)(y + h), tx2, ty2,
     };
     priv->submitTextured(data->texture, vtxdata, sizeof(vtxdata));
 }

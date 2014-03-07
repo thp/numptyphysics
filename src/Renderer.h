@@ -53,7 +53,7 @@ public:
     virtual void end(Framebuffer &rendertarget) = 0;
     virtual Texture retrieve(Framebuffer &rendertarget) = 0;
 
-    virtual void image(const Texture &texture, int x, int y) = 0;
+    virtual void image(const Texture &texture, int x, int y, int w, int h) = 0;
     virtual void rectangle(const Rect &rect, int rgba, bool fill) = 0;
     virtual void path(const Path &path, int rgba) = 0;
 

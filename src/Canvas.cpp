@@ -64,19 +64,13 @@ void Canvas::clear()
 {
     RENDERER->clear();
     if (m_bgImage) {
-        RENDERER->image(m_bgImage->m_texture, 0, 0);
+        RENDERER->image(m_bgImage->texture(), 0, 0, m_bgImage->width(), m_bgImage->height());
     }
 }
 
-Canvas* Canvas::scale( int factor ) const
+void Canvas::drawImage(Image &image, int x, int y)
 {
-    throw "Scale not implemented";
-}
-
-void Canvas::drawImage( Canvas *canvas, int x, int y )
-{
-    Image *image = (Image *)canvas;
-    RENDERER->image(image->m_texture, x, y);
+    RENDERER->image(image.texture(), x, y, image.width(), image.height());
 }
 
 void Canvas::drawPath( const Path& path, int color, bool thick )
@@ -110,27 +104,56 @@ void Window::update()
     RENDERER->swap();
 }
 
-Image *
-Image::fromFile(const char *filename)
+
+RenderTarget::RenderTarget(int w, int h)
+    : Canvas(w, h)
+    , m_framebuffer(RENDERER->framebuffer(w, h))
 {
-    return new Image(RENDERER->load(filename));
 }
 
-Image *
-Image::fromImage(Image *image)
+RenderTarget::~RenderTarget()
 {
-    return new Image(image->m_texture);
 }
 
-Image *
-Image::fromFont(NP::Font font, const char *text, int rgb)
+void
+RenderTarget::begin()
 {
-    return new Image(RENDERER->text(font, text, rgb));
+    RENDERER->begin(m_framebuffer);
+    clear();
 }
+
+void
+RenderTarget::end()
+{
+    RENDERER->flush();
+    RENDERER->end(m_framebuffer);
+}
+
+NP::Texture
+RenderTarget::contents()
+{
+    return RENDERER->retrieve(m_framebuffer);
+}
+
 
 Image::Image(NP::Texture texture)
-    : Canvas(texture->w, texture->h)
-    , m_texture(texture)
+    : m_texture(texture)
+    , m_width(m_texture->w)
+    , m_height(m_texture->h)
+{
+}
+
+Image::Image(std::string filename)
+    : m_texture(RENDERER->load(filename.c_str()))
+    , m_width(m_texture->w)
+    , m_height(m_texture->h)
+{
+}
+
+Image::Image(NP::Font font, const char *text, int rgb)
+    : m_texture(RENDERER->text(font, text, rgb))
+    , m_width(m_texture->w)
+    , m_height(m_texture->h)
 {
 }
 

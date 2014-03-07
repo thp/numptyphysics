@@ -242,32 +242,31 @@ bool Button::onEvent( Event& ev )
 ////////////////////////////////////////////////////////////////
 
 
-Icon::Icon( Canvas* c )
-  : m_canvas(c)
+Icon::Icon(Image *image)
+    : m_image(image)
 {
-  if (c) {
-    sizeTo(Vec2(c->width(),c->height()));
-  }
+    if (image) {
+        sizeTo(Vec2(image->width(), image->height()));
+    }
 }
 
 Icon::~Icon()
 {
-  delete m_canvas;
+    delete m_image;
 }
 
-void Icon::canvas( Canvas *c )
+void Icon::image(Image *image)
 {
-  delete m_canvas;
-  m_canvas = c; 
+    delete m_image;
+    m_image = image;
 }
 
-
-void Icon::draw( Canvas& screen, const Rect& area )
+void Icon::draw(Canvas &screen, const Rect &area)
 {
-  Widget::draw(screen,area);
-  if (m_canvas) {
-    screen.drawImage(m_canvas,m_pos.tl.x,m_pos.tl.y);
-  }
+    Widget::draw(screen, area);
+    if (m_image) {
+        screen.drawImage(*m_image, m_pos.tl.x, m_pos.tl.y);
+    }
 }
 
 
@@ -277,7 +276,7 @@ void Icon::draw( Canvas& screen, const Rect& area )
 IconButton::IconButton(const std::string& s, const std::string& icon, const Event& ev)
   : Button(s,ev)
   , m_vertical(true)
-  , m_icon(icon.size()==0?NULL:Image::fromFile(icon.c_str()))
+  , m_icon(icon.size() ? new Image(icon) : nullptr)
 {
 }
 
@@ -293,7 +292,7 @@ void IconButton::image(Image *image, bool takeOwnership)
     if (takeOwnership) {
         m_icon = image;
     } else {
-        m_icon = Image::fromImage(image);
+        m_icon = new Image(*image);
     }
 }
 
@@ -305,7 +304,7 @@ Image* IconButton::image()
 void IconButton::icon(const std::string& icon)
 {
     delete m_icon;
-    m_icon = Image::fromFile(icon.c_str());
+    m_icon = new Image(icon);
 }
 
 void IconButton::draw( Canvas& screen, const Rect& area )
@@ -320,14 +319,14 @@ void IconButton::draw( Canvas& screen, const Rect& area )
       int x = m_pos.centroid().x - m_icon->width()/2; 
       int y = m_pos.centroid().y - m_icon->height()/2 - textsize.y/2; 
       if (y<m_pos.tl.y) y = m_pos.tl.y;
-      screen.drawImage(m_icon,x,y);
+      screen.drawImage(*m_icon,x,y);
       x = m_pos.centroid().x;
       y += m_icon->height() + m_pos.height()/10;
       m_font->drawCenter( &screen, Vec2(x,y), m_text, m_fg);
     } else {
       int x = m_pos.tl.x + 10;
       int y = m_pos.centroid().y - m_icon->height()/2;
-      screen.drawImage(m_icon,x,y);
+      screen.drawImage(*m_icon,x,y);
       x += m_icon->width() + 10;
       y = m_pos.centroid().y - textsize.y/2;
       m_font->drawLeft( &screen, Vec2(x,y), m_text, m_fg);

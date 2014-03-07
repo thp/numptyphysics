@@ -39,7 +39,7 @@ public:
     virtual void end(NP::Framebuffer &rendertarget);
     virtual NP::Texture retrieve(NP::Framebuffer &rendertarget);
 
-    virtual void image(const NP::Texture &texture, int x, int y);
+    virtual void image(const NP::Texture &texture, int x, int y, int w, int h);
     virtual void rectangle(const Rect &r, int rgba, bool fill);
     virtual void path(const Path &p, int rgba);
 

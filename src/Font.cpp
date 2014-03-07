@@ -36,9 +36,8 @@ Vec2 Font::metrics( const std::string& text ) const
 void Font::drawLeft( Canvas* canvas, Vec2 pt,
 		     const std::string& text, int colour ) const
 {
-    Image *temp = Image::fromFont(m_font, text.c_str(), colour);
+    Image temp(m_font, text.c_str(), colour);
     canvas->drawImage(temp, pt.x, pt.y);
-    delete temp;
 }
 
 void Font::drawRight( Canvas* canvas, Vec2 pt,

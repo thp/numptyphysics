@@ -126,14 +126,17 @@ class Button : public Label
 
 class Icon : public Label
 {
- public:
-  Icon( Canvas* c=NULL );
-  ~Icon();
-  const char* name() {return "Icon";}
-  void canvas( Canvas* c );
-  void draw( Canvas& screen, const Rect& area );
- protected:
-  Canvas *m_canvas;
+public:
+    Icon(Image *image=nullptr);
+    ~Icon();
+
+    const char *name() { return "Icon"; }
+
+    void image(Image *image);
+    void draw(Canvas &screen, const Rect &area);
+
+protected:
+    Image *m_image;
 };
 
 

@@ -480,7 +480,7 @@ Scene::Scene( bool noWorld )
     m_accelerometer(Os::get()->getAccelerometer())
 {
     if ( g_bgImage==NULL ) {
-        g_bgImage = Image::fromFile("paper.png");
+        g_bgImage = new Image("paper.png");
     }
     m_bgImage = g_bgImage;
 

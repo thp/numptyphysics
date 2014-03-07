@@ -34,8 +34,7 @@ public:
   int  makeColour( int r, int g, int b ) const;
   void setBackground( Image* bg );
   void clear();
-  Canvas* scale( int factor ) const;
-  void drawImage( Canvas *canvas, int x, int y );
+  void drawImage(Image &image, int x, int y);
   void drawPath( const Path& path, int color, bool thick=false );
   void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
   void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
@@ -44,8 +43,6 @@ protected:
   Image* m_bgImage; 
   int m_width;
   int m_height;
-
-  friend class Image;
 };
 
 class Window : public Canvas
@@ -57,20 +54,41 @@ class Window : public Canvas
   std::string m_title;
 };
 
-
-class Image : public Canvas
+class RenderTarget : public Canvas
 {
 public:
-    static Image *fromFile(const char *filename);
-    static Image *fromImage(Image *image);
-    static Image *fromFont(NP::Font font, const char *text, int rgb);
+    RenderTarget(int w, int h);
+    ~RenderTarget();
 
-    Image(NP::Texture texture);
+    void begin();
+    void end();
 
+    NP::Texture contents();
+
+private:
+    NP::Framebuffer m_framebuffer;
+};
+
+
+class Image
+{
 public:
+    Image(NP::Texture texture);
+    Image(std::string filename);
+    Image(NP::Font font, const char *text, int rgb);
     ~Image();
 
+    int width() const { return m_width; }
+    int height() const { return m_height; }
+
+    void scale(float scale) { m_width *= scale; m_height *= scale; }
+
+    NP::Texture texture() const { return m_texture; }
+
+private:
     NP::Texture m_texture;
+    int m_width;
+    int m_height;
 };
 
 
