@@ -18,7 +18,8 @@
 #define PATH_H
 
 #include "Common.h"
-#include "Array.h"
+
+#include <vector>
 
 
 class Segment
@@ -32,7 +33,7 @@ private:
 };
 
 
-class Path : public Array<Vec2>
+class Path : public std::vector<Vec2>
 {
 public:
   Path();
@@ -48,13 +49,13 @@ public:
 
   inline Path& operator&(const Vec2& other) 
   {
-    append(other);
+    push_back(other);
     return *this; 
   }
   
   inline Path& operator&(const b2Vec2& other) 
   {
-    append(Vec2(other));
+    push_back(Vec2(other));
     return *this; 
   }
   

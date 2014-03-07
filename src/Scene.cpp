@@ -14,7 +14,6 @@
  *
  */
 #include "Common.h"
-#include "Array.h"
 #include "Config.h"
 #include "Scene.h"
 #include "Accelerometer.h"
@@ -22,6 +21,8 @@
 
 #include <sstream>
 #include <fstream>
+#include <vector>
+#include <algorithm>
 
 
 Transform::Transform( float32 scale, float32 rotation, const Vec2& translation )
@@ -262,7 +263,7 @@ public:
     transform();
   }
 
-  void determineJoints( Stroke* other, Array<Joint>& joints )
+  void determineJoints( Stroke* other, std::vector<Joint>& joints )
   {
     if ( (m_attributes&ATTRIB_CLASSBITS)
 	 != (other->m_attributes&ATTRIB_CLASSBITS)
@@ -279,7 +280,7 @@ public:
       if ( !m_jointed[end] ) {
 	const Vec2& p = m_xformedPath.endpt(end);
 	if ( other->distanceTo( p ) <= JOINT_TOLERANCE ) {
-	  joints.append( Joint(this,other,end) );
+	  joints.push_back( Joint(this,other,end) );
 	}
       }
     }
@@ -356,7 +357,7 @@ public:
     Vec2 p = pp; p -= m_origin;
     if ( p == m_rawPath.point( m_rawPath.numPoints()-1 ) ) {
     } else {
-      m_rawPath.append( p );
+      m_rawPath.push_back( p );
       m_drawn = false;
     }
   }
@@ -563,19 +564,19 @@ Stroke* Scene::newStroke( const Path& p, int colour, int attribs ) {
   case 1: s->setAttribute( ATTRIB_GOAL ); break;
   default: s->setColour( NP::Colour::values[colour] ); break;
   }
-  m_strokes.append( s );
+  m_strokes.push_back( s );
   m_recorder.newStroke( p, colour, attribs );
   return s;
 }
 
 bool Scene::deleteStroke( Stroke *s ) {
   if ( s ) {
-    int i = m_strokes.indexOf(s);
+    int i = indexOf(m_strokes, s);
     if ( i >= m_protect ) {
 	reset(s);
-	m_strokes.erase( i );
-	m_deletedStrokes.append( s );
-	m_recorder.deleteStroke( i );
+	m_strokes.erase(std::find(m_strokes.begin(), m_strokes.end(), s));
+	m_deletedStrokes.push_back(s);
+	m_recorder.deleteStroke(i);
 	return true;
     }
   }
@@ -586,7 +587,7 @@ bool Scene::deleteStroke( Stroke *s ) {
 void Scene::extendStroke( Stroke* s, const Vec2& pt )
 {
   if ( s ) {
-    int i = m_strokes.indexOf(s);
+    int i = indexOf(m_strokes, s);
     if ( i >= m_protect ) {
       s->addPoint( pt );
       m_recorder.extendStroke( i, pt );
@@ -597,7 +598,7 @@ void Scene::extendStroke( Stroke* s, const Vec2& pt )
 void Scene::moveStroke( Stroke* s, const Vec2& origin )
 {
   if ( s ) {
-    int i = m_strokes.indexOf(s);
+    int i = indexOf(m_strokes, s);
     if ( i >= m_protect ) {
       s->origin( origin );
       m_recorder.moveStroke( i, origin );
@@ -609,13 +610,13 @@ void Scene::moveStroke( Stroke* s, const Vec2& origin )
 bool Scene::activateStroke( Stroke *s )
 {
   bool result = activate(s);
-  m_recorder.activateStroke( m_strokes.indexOf(s) );
+  m_recorder.activateStroke( indexOf(m_strokes, s) );
   return result;
 }
 
 void Scene::getJointCandidates( Stroke* s, Path& pts )
 {
-  Array<Joint> joints;
+    std::vector<Joint> joints;
   for ( int j=m_strokes.size()-1; j>=0; j-- ) {      
     if ( s != m_strokes[j] ) {
       s->determineJoints( m_strokes[j], joints );
@@ -623,7 +624,7 @@ void Scene::getJointCandidates( Stroke* s, Path& pts )
     }
   }
   for ( int j=joints.size()-1; j>=0; j-- ) {
-    pts.append( joints[j].joiner->endpt(joints[j].end) );
+    pts.push_back( joints[j].joiner->endpt(joints[j].end) );
   }
 }
 
@@ -652,7 +653,7 @@ void Scene::createJoints( Stroke *s )
   if ( s->body()==NULL ) {
     return;
   }
-  Array<Joint> joints;
+  std::vector<Joint> joints;
   for ( int j=m_strokes.size()-1; j>=0; j-- ) {      
     if ( s != m_strokes[j] && m_strokes[j]->body() ) {
 	//printf("try join to %d\n",j);
@@ -661,7 +662,7 @@ void Scene::createJoints( Stroke *s )
       for ( int i=0; i<joints.size(); i++ ) {
 	joints[i].joiner->join( m_world, joints[i].joinee, joints[i].end );
       }
-      joints.empty();
+      joints.clear();
     }
   }    
 }
@@ -751,17 +752,15 @@ void Scene::draw( Canvas& canvas, const Rect& area )
   for ( int i=0; i<m_strokes.size(); i++ ) {
 	m_strokes[i]->draw( canvas );
   }
-  while ( m_deletedStrokes.size() ) {
-    delete m_deletedStrokes[0];
-    m_deletedStrokes.erase(0);
-  }
+
+  clearWithDelete(m_deletedStrokes);
 }
 
 void Scene::reset( Stroke* s, bool purgeUnprotected )
 {
   while ( purgeUnprotected && m_strokes.size() > m_protect ) {
     m_strokes[m_strokes.size()-1]->reset(m_world);
-    m_strokes.erase( m_strokes.size()-1 );
+    m_strokes.pop_back();
   }
   for ( int i=0; i<m_strokes.size(); i++ ) {
     if (s==NULL || s==m_strokes[i]) {
@@ -787,19 +786,14 @@ Stroke* Scene::strokeAtPoint( const Vec2 pt, float32 max )
 void Scene::clear()
 {
   reset();
-  while ( m_strokes.size() ) {
-    delete m_strokes[0];
-    m_strokes.erase(0);
-  }
-  while ( m_deletedStrokes.size() ) {
-    delete m_deletedStrokes[0];
-    m_deletedStrokes.erase(0);
-  }
+
+  clearWithDelete(m_strokes);
+  clearWithDelete(m_deletedStrokes);
   if ( m_world ) {
     //step is required to actually destroy bodies and joints
     m_world->Step( ITERATION_TIMESTEPf, SOLVER_ITERATIONS );
   }
-  m_log.empty();
+  m_log.clear();
 }
 
 void Scene::setGravity( const b2Vec2& g )
@@ -884,9 +878,9 @@ bool Scene::parseLine( const std::string& line )
     case 'T': m_title = line.substr(line.find(':')+1);  return true;
     case 'B': m_bg = line.substr(line.find(':')+1);     return true;
     case 'A': m_author = line.substr(line.find(':')+1); return true;
-    case 'S': m_strokes.append( new Stroke(line) );     return true;
+    case 'S': m_strokes.push_back( new Stroke(line) );     return true;
     case 'G': setGravity(line);                         return true;
-    case 'E': m_log.append(line.substr(line.find(':')+1));return true;
+    case 'E': m_log.push_back(line.substr(line.find(':')+1));return true;
     }
   } catch ( const char* e ) {
     printf("Stroke error: %s\n",e);

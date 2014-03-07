@@ -15,7 +15,6 @@
  */
 
 #include "Common.h"
-#include "Array.h"
 #include "Config.h"
 #include "Game.h"
 #include "Path.h"

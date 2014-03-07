@@ -15,9 +15,11 @@
  */
 #ifndef SCRIPT_H
 #define SCRIPT_H
-#include "Array.h"
+
 #include "Path.h"
+
 #include <iostream>
+#include <vector>
 
 class Scene;
 
@@ -50,14 +52,13 @@ struct ScriptEntry {
 };
 
 
-class ScriptLog : public Array<ScriptEntry>
+class ScriptLog : public std::vector<ScriptEntry>
 {
 public:
   std::string asString( int i );
   void append( int tick, ScriptEntry::Op op, int stroke=-1,
 	       int arg1=-1, int arg2=-1, const Vec2& pt=Vec2(-1,-1) );
   void append( const std::string& str );
-  using Array<ScriptEntry>::append;
 };
 
 

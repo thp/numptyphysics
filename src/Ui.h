@@ -18,11 +18,11 @@
 #define UI_H
 
 #include "Common.h"
-#include "Array.h"
 #include "Event.h"
 
 #include <string>
 #include <functional>
+#include <vector>
 
 class Canvas;
 class Image;
@@ -170,7 +170,7 @@ class RichText : public Label
     int align;
     const Font* font;
   };
-  Array<Snippet> m_snippets;
+  std::vector<Snippet> m_snippets;
   bool m_layoutRequired;
 };
 
@@ -204,7 +204,7 @@ class Container : public WidgetParent
   virtual void remove( Widget* w );
   virtual void empty();
  protected:
-  Array<Widget*> m_children;
+  std::vector<Widget*> m_children;
 };
 
 class Panel : public Container
@@ -221,8 +221,8 @@ class Box : public Panel
   virtual void add( Widget* w, int wh, int grow );
   virtual void remove( Widget* w );
  protected:
-  Array<int> m_sizes;
-  Array<int> m_growths;
+  std::vector<int> m_sizes;
+  std::vector<int> m_growths;
   int  m_spacing;
   bool m_vertical;
 };
@@ -296,7 +296,7 @@ class Menu
   void addItem(const std::string& s, Event event=Event::NOP);
  protected:
   virtual void layout() =0;
-  Array<MenuItem*> m_items;
+  std::vector<MenuItem*> m_items;
 };
 
 class TabBook : public Panel
@@ -313,8 +313,8 @@ class TabBook : public Panel
   void selectTab( int t );
  private:
   int m_count, m_selected;
-  Array<Widget*> m_tabs;
-  Array<Widget*> m_panels;
+  std::vector<Widget*> m_tabs;
+  std::vector<Widget*> m_panels;
   Widget* m_contents;
 };
 

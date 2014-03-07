@@ -127,19 +127,23 @@ bool Levels::addLevel( Collection* collection,
 		       const string& file, int rank, int index )
 {
   LevelDesc *e = new LevelDesc( file, rank, index );
-  for ( int i=0; i<collection->levels.size(); i++ ) {
-    if ( collection->levels[i]->file == file
-	 && collection->levels[i]->index == index ) {
-      //printf("addLevel %s already present!\n",file.c_str());
-      return false;
-    } else if ( collection->levels[i]->rank > rank ) {
-      //printf("insert level %s+%d at %d\n",file.c_str(),index,i);
-      collection->levels.insert(i,e);
-      m_numLevels++;
-      return true;
-    }
+
+  auto &levels = collection->levels;
+  for (auto it = levels.begin(); it != levels.end(); ++it) {
+      auto &level = *it;
+
+      if (level->file == file && level->index == index) {
+          //printf("addLevel %s already present!\n",file.c_str());
+          return false;
+      } else if (level->rank > rank) {
+          //printf("insert level %s+%d at %d\n",file.c_str(),index,i);
+          levels.insert(it, e);
+          m_numLevels++;
+          return true;
+      }
   }
-  collection->levels.append( e );
+
+  collection->levels.push_back( e );
   //printf("add level %s+%d as %s[%d]\n",file.c_str(),index,
   // collection->file.c_str(), collection->levels.size());
   m_numLevels++;
@@ -159,13 +163,14 @@ Levels::Collection* Levels::getCollection( const std::string& file )
   c->file = file;
   c->name = file;
   c->rank = rankFromPath(file);
-  for (int i=0; i<m_collections.size(); i++) {
-    if (m_collections[i]->rank > c->rank) { 
-      m_collections.insert(i,c);
-      return c;
-    }
+  for (auto it = m_collections.begin(); it != m_collections.end(); ++it) {
+      auto &collection = *it;
+      if (collection->rank > c->rank) {
+          m_collections.insert(it, c);
+          return c;
+      }
   }
-  m_collections.append(c);
+  m_collections.push_back(c);
   return c;
 }
 

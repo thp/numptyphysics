@@ -23,6 +23,9 @@
 #include "Scene.h"
 #include "Colour.h"
 
+#include <vector>
+#include <algorithm>
+
 
 ////////////////////////////////////////////////////////////////
 
@@ -528,18 +531,23 @@ public:
     std::string label = item->text.substr(0,item->text.find(':')); 
     IconButton *w = new IconButton(label,file,ev);
     w->align(1);
-    m_opts.append(w);
+    m_opts.push_back(w);
     return w;
   }
   void empty()
   {
-    m_opts.empty();
+    m_opts.clear();
   }
   void remove( Widget* w )
   {
-    if (w && m_opts.indexOf((IconButton*)w) >= 0) {
-      m_opts.erase(m_opts.indexOf((IconButton*)w));
-    }
+      if (!w) {
+          return;
+      }
+
+      auto it = std::find(m_opts.begin(), m_opts.end(), static_cast<IconButton *>(w));
+      if (it != m_opts.end()) {
+          m_opts.erase(it);
+      }
   }
   void updateTicks()
   {
@@ -593,7 +601,7 @@ public:
   }
 private:
   GameControl *m_game;
-  Array<IconButton*> m_opts;
+  std::vector<IconButton*> m_opts;
 };
 
 

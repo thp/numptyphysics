@@ -64,12 +64,12 @@ std::string ScriptLog::asString( int i )
 void ScriptLog::append( int tick, ScriptEntry::Op op, int stroke, 
 		      int arg1, int arg2, const Vec2& pt )
 {
-  append( ScriptEntry( tick, op, stroke, arg1, arg2, pt ) );
+  push_back( ScriptEntry( tick, op, stroke, arg1, arg2, pt ) );
 }
 
 void ScriptLog::append( const std::string& str ) 
 {
-  append( ScriptEntry(str) );
+  push_back( ScriptEntry(str) );
 }
 
 
@@ -86,8 +86,8 @@ void ScriptRecorder::start( ScriptLog* log )
   m_running = true;
   m_isPaused = false;
   m_log = log;
-  m_log->empty();
-  m_log->capacity(128);
+  m_log->clear();
+  m_log->resize(128);
   m_lastTick = 0;
 }
 

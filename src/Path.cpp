@@ -52,15 +52,24 @@ float32 Segment::distanceTo( const Vec2& p )
 }
 
 
-Path::Path() : Array<Vec2>() {}
+Path::Path()
+    : std::vector<Vec2>()
+{
+}
 
-Path::Path( int n, Vec2* p ) : Array<Vec2>(n, p) {}
+Path::Path(int n, Vec2* p)
+    : std::vector<Vec2>()
+{
+    for (int i=0; i<n; i++) {
+        push_back(*p++);
+    }
+}
 
 Path::Path( const char *s )
 {
   float32 x,y;      
   while ( sscanf( s, "%f,%f", &x, &y )==2) {
-    append( Vec2((int)x,(int)y) );
+    push_back( Vec2((int)x,(int)y) );
     while ( *s && *s!=' ' && *s!='\t' ) s++;
     while ( *s==' ' || *s=='\t' ) s++;
   }
@@ -120,15 +129,20 @@ void Path::simplify( float32 threshold )
     }
   }
   //printf("simplify %f %dpts to %dpts\n",threshold,size(),k);
-  trim( size() - k );
+  resize(k);
 
   // remove duplicate points (shouldn't be any)
-  for ( int i=size()-1; i>0; i-- ) {
-    if ( at(i) == at(i-1) ) {
-      //printf("alert: duplicate pt %d == %d!\n",i,i-1);
-      erase( i );
-    }
+  std::vector<Vec2> result;
+  Vec2 old = at(0);
+  result.push_back(old);
+  for (int i=1; i<size(); i++) {
+      Vec2 cur = at(i);
+      if (old != cur) {
+          result.push_back(cur);
+      }
+      old = cur;
   }
+  std::swap(*this, result);
 }
 
 void Path::simplifySub( int first, int last, float32 threshold, bool* keepflags )

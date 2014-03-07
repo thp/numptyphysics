@@ -19,7 +19,7 @@
 
 #include <cstdio>
 #include <sstream>
-#include "Array.h"
+#include <vector>
 
 class Levels
 {
@@ -60,7 +60,7 @@ class Levels
     std::string file;
     std::string name;
     int rank;
-    Array<LevelDesc*> levels;
+    std::vector<LevelDesc*> levels;
   };
 
   bool addLevel( Collection* collection,
@@ -70,7 +70,7 @@ class Levels
   bool scanCollection( const std::string& file, int rank );
 
   int m_numLevels;
-  Array<Collection*> m_collections;
+  std::vector<Collection*> m_collections;
 };
 
 #endif //LEVELS_H

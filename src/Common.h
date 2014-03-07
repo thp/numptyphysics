@@ -18,6 +18,8 @@
 #define COMMON_H
 
 #include "Box2D.h"
+#include <vector>
+
 #define ARRAY_SIZE(aRR) (sizeof(aRR)/sizeof((aRR)[0]))
 #define ASSERT(a)
 
@@ -69,6 +71,31 @@ inline Vec2 Max( const Vec2& a, const Vec2& b )
   r.x = Max(a.x,b.x);
   r.y = Max(a.y,b.y);
   return r;
+}
+
+template <typename T>
+inline int indexOf(const std::vector<T> &collection, T &o)
+{
+    int i = 0;
+
+    for (auto &v: collection) {
+        if (v == o) {
+            return i;
+        }
+
+        i++;
+    }
+
+    return -1;
+}
+
+template <typename T>
+inline void clearWithDelete(std::vector<T> &collection)
+{
+    for (auto &item: collection) {
+        delete item;
+    }
+    collection.clear();
 }
 
 #define Sgn(a) ((a)<0?-1:1)
