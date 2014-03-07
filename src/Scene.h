@@ -74,7 +74,6 @@ public:
   void setGravity( const std::string& s );
 
   bool load( unsigned char *buf, int bufsize );
-  bool load( const std::string& file );
   bool load( std::istream& in );
   void start( bool replay=false );
   void protect( int n=-1 );
@@ -87,7 +86,6 @@ private:
   bool activate( Stroke *s );
   void activateAll();
   void createJoints( Stroke *s );
-  bool parseLine( const std::string& line );
 
   // b2ContactListener callback when a new contact is detected
   virtual void Add(const b2ContactPoint* point) ;

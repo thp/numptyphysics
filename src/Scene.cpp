@@ -528,6 +528,11 @@ Scene::Scene( bool noWorld )
     m_dynamicGravity(false),
     m_accelerometer(Os::get()->getAccelerometer())
 {
+    if ( g_bgImage==NULL ) {
+        g_bgImage = Image::fromFile("paper.png");
+    }
+    m_bgImage = g_bgImage;
+
   if ( !noWorld ) {
     resetWorld();
   }
@@ -832,29 +837,48 @@ bool Scene::load( unsigned char *buf, int bufsize )
   return load( in );
 }
 
-bool Scene::load( const std::string& file )
-{
-  std::ifstream in( file.c_str(), std::ios::in );
-  return load( in ); 
-}
-
 bool Scene::load( std::istream& in )
 {
-  clear();
-  resetWorld();
-  m_dynamicGravity = false;
-  if ( g_bgImage==NULL ) {
-    g_bgImage = Image::fromFile("paper.png");
-  }
-  m_bgImage = g_bgImage;
-  std::string line;
-  while ( !in.eof() ) {
-    getline( in, line );
-    parseLine( line );
-  }
-  protect();
-  printf("loaded log=%d\n",m_log.size());
-  return true;
+    clear();
+    resetWorld();
+    m_dynamicGravity = false;
+
+    std::string line;
+    while (!in.eof()) {
+        getline(in, line);
+        switch (line[0]) {
+            case 'T':
+                m_title = line.substr(line.find(':') + 1);
+                break;
+            case 'B':
+                m_bg = line.substr(line.find(':') + 1);
+                break;
+            case 'A':
+                m_author = line.substr(line.find(':') + 1);
+                break;
+            case 'S':
+                m_strokes.push_back(new Stroke(line));
+                break;
+            case 'G':
+                setGravity(line);
+                break;
+            case 'E':
+                m_log.push_back(line.substr(line.find(':') + 1));
+                break;
+            default:
+                printf("Unparsed: '%s'\n", line.c_str());
+                break;
+        }
+    }
+
+    protect();
+
+    int events = m_log.size();
+    if (events) {
+        printf("loaded log=%d\n", events);
+    }
+
+    return true;
 }
 
 
@@ -868,24 +892,6 @@ void Scene::start( bool replay )
     m_player.stop();
     m_recorder.start( &m_log );
   }
-}
-
-
-bool Scene::parseLine( const std::string& line )
-{
-  try {
-    switch( line[0] ) {
-    case 'T': m_title = line.substr(line.find(':')+1);  return true;
-    case 'B': m_bg = line.substr(line.find(':')+1);     return true;
-    case 'A': m_author = line.substr(line.find(':')+1); return true;
-    case 'S': m_strokes.push_back( new Stroke(line) );     return true;
-    case 'G': setGravity(line);                         return true;
-    case 'E': m_log.push_back(line.substr(line.find(':')+1));return true;
-    }
-  } catch ( const char* e ) {
-    printf("Stroke error: %s\n",e);
-  }
-  return false;
 }
 
 void Scene::protect( int n )
