@@ -221,8 +221,8 @@ bool Button::onEvent( Event& ev )
 	//fprintf(stderr,"button press event dispatch %d\n",m_selEvent.code);
 	m_parent->dispatchEvent(m_selEvent);
       }
-      return true;
     }
+    return true;
     break;
   case Event::FOCUS:
     if (m_pos.contains(Vec2(ev.x,ev.y))) {

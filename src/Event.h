@@ -39,7 +39,7 @@ public:
         , x(x)
         , y(y)
         , finger(finger)
-        , key(0)
+        , key(key)
     {
     }
 
