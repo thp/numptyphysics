@@ -54,10 +54,7 @@ public:
       m_window = new Window(m_width,m_height,"Numpty Physics","NPhysics");
       sizeTo(Vec2(m_width,m_height));
 
-      Levels* levels = new Levels();
-      levels->addPath( "data" );
-      levels->addPath( DEFAULT_LEVEL_PATH );
-      levels->addPath( Config::userDataDir().c_str() );
+      Levels* levels = new Levels({"data", DEFAULT_LEVEL_PATH, Config::userDataDir()});
       levels->dump();
 
       add( createGameLayer( levels, m_width, m_height ), 0, 0 );

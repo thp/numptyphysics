@@ -22,12 +22,10 @@
 #include "Config.h"
 #include "Os.h"
 
-using namespace std;
-
 static const char MISC_COLLECTION[] = "My Levels";
 static const char DEMO_COLLECTION[] = "My Solutions";
 
-static int rankFromPath( const string& p, int defaultrank=9999 )
+static int rankFromPath( const std::string& p, int defaultrank=9999 )
 {
   if (p==MISC_COLLECTION) {
     return 10000;
@@ -36,7 +34,7 @@ static int rankFromPath( const string& p, int defaultrank=9999 )
   }
   const char *c = p.data();
   size_t i = p.rfind(Os::pathSep);
-  if ( i != string::npos ) {
+  if ( i != std::string::npos ) {
     c += i+1;
     if ( *c=='L' || *c == 'C' ){
       c++;
@@ -58,7 +56,7 @@ std::string nameFromPath(const std::string& path)
   // TODO extract name from collection manifest
   std::string name;
   size_t i = path.rfind(Os::pathSep);
-  if ( i != string::npos ) {
+  if ( i != std::string::npos ) {
     i++;
   } else {
     i = 0;
@@ -77,106 +75,124 @@ std::string nameFromPath(const std::string& path)
   return name;
 }
 
-Levels::Levels( int numFiles, const char** names )
-  : m_numLevels(0)
+Levels::Levels(std::vector<std::string> dirs)
+    : m_numLevels(0)
 {
-  for ( int d=0;d<numFiles;d++ ) {
-    addPath( names[d] );
-  }
+    for (auto &dir: dirs) {
+        addPath(dir);
+    }
 }
 
-bool Levels::addPath( const char* path )
+static std::string fileExtension(const std::string &path)
 {
-  int len = strlen( path );
-  if ( strcasecmp( path+len-4, ".npz" )==0 ) {
-    scanCollection( string(path), rankFromPath(path) );
-  } else if ( strcasecmp( path+len-4, ".nph" )==0 
-	      || strcasecmp( path+len-4, ".npd" )==0) {
-    addLevel( path, rankFromPath(path) );
-  } else {
-    DIR *dir = opendir( path );
-    if ( dir ) {
-      struct dirent* entry;
-      while ( (entry = readdir( dir )) != NULL ) {
-	if ( entry->d_name[0] != '.' ) {
-	  string full( path );
-	  full += "/";
-	  full += entry->d_name;
-	  //DANGER - recursion may not halt for linked dirs 
-	  addPath( full.c_str() );
-	}
-      }
-      closedir( dir );
+    size_t pos = path.find_last_of('.');
+
+    if (pos != std::string::npos) {
+        return path.substr(pos);
+    }
+
+    return "";
+}
+
+bool Levels::addPath(const std::string &path)
+{
+    std::string ext = fileExtension(path);
+
+    if (ext == ".nph" || ext == ".npd") {
+        addLevel(path, rankFromPath(path));
+        return true;
+    }
+
+    return scanCollection(path, rankFromPath(path));
+}
+
+bool Levels::addLevel(const std::string& file, int rank)
+{
+    if (fileExtension(file) == ".npd") {
+        return addLevel(getCollection(DEMO_COLLECTION), file, rank);
     } else {
-      //printf("bogus level path %s\n",path);
+        return addLevel(getCollection(MISC_COLLECTION), file, rank);
     }
-  }
-  return true;
 }
 
-bool Levels::addLevel( const string& file, int rank, int index )
+bool Levels::addLevel(Collection* collection, const std::string &file, int rank)
 {
-  if (file.substr(file.length()-4) == ".npd") {
-    return addLevel( getCollection(DEMO_COLLECTION), file, rank, index );
-  } else {
-    return addLevel( getCollection(MISC_COLLECTION), file, rank, index );
-  }
-}
+    LevelDesc *e = new LevelDesc(file, rank);
 
-bool Levels::addLevel( Collection* collection,
-		       const string& file, int rank, int index )
-{
-  LevelDesc *e = new LevelDesc( file, rank, index );
+    auto &levels = collection->levels;
+    for (auto it = levels.begin(); it != levels.end(); ++it) {
+        auto &level = *it;
 
-  auto &levels = collection->levels;
-  for (auto it = levels.begin(); it != levels.end(); ++it) {
-      auto &level = *it;
-
-      if (level->file == file && level->index == index) {
-          //printf("addLevel %s already present!\n",file.c_str());
-          return false;
-      } else if (level->rank > rank) {
-          //printf("insert level %s+%d at %d\n",file.c_str(),index,i);
-          levels.insert(it, e);
-          m_numLevels++;
-          return true;
-      }
-  }
-
-  collection->levels.push_back( e );
-  //printf("add level %s+%d as %s[%d]\n",file.c_str(),index,
-  // collection->file.c_str(), collection->levels.size());
-  m_numLevels++;
-  return true;
-}
-
-
-Levels::Collection* Levels::getCollection( const std::string& file )
-{
-  for (int i=0; i<m_collections.size(); i++) {
-    if (m_collections[i]->file == file) {
-      return m_collections[i];
+        if (level->file == file) {
+            //printf("addLevel %s already present!\n",file.c_str());
+            return false;
+        } else if (level->rank > rank) {
+            //printf("insert level %s at %d\n",file.c_str(),i);
+            levels.insert(it, e);
+            m_numLevels++;
+            return true;
+        }
     }
-  }
-  Collection *c = new Collection();
-  //fprintf(stderr,"New Collection %s\n",file.c_str());
-  c->file = file;
-  c->name = file;
-  c->rank = rankFromPath(file);
-  for (auto it = m_collections.begin(); it != m_collections.end(); ++it) {
-      auto &collection = *it;
-      if (collection->rank > c->rank) {
-          m_collections.insert(it, c);
-          return c;
-      }
-  }
-  m_collections.push_back(c);
-  return c;
+
+    collection->levels.push_back(e);
+    //printf("add level %s as %s[%d]\n",file.c_str(),
+    // collection->file.c_str(), collection->levels.size());
+    m_numLevels++;
+    return true;
+}
+
+
+Collection* Levels::getCollection( const std::string& file )
+{
+    for (auto &collection: m_collections) {
+        if (collection->file == file) {
+            return collection;
+        }
+    }
+
+    Collection *c = new Collection(file, file, rankFromPath(file));
+    for (auto it = m_collections.begin(); it != m_collections.end(); ++it) {
+        auto &collection = *it;
+        if (collection->rank > c->rank) {
+            m_collections.insert(it, c);
+            return c;
+        }
+    }
+    m_collections.push_back(c);
+    return c;
 }
 
 
 bool Levels::scanCollection( const std::string& file, int rank )
 {
+    std::string collectionName = file.substr(file.find_last_of('/')+1);
+    DIR *dir = opendir(file.c_str());
+    if (dir) {
+        bool result = false;
+        while (struct dirent *entry = readdir(dir)) {
+            if (entry->d_name[0] == '.') {
+                continue;
+            }
+
+            std::string filename = file + "/" + entry->d_name;
+            std::string ext = fileExtension(filename);
+            if (ext == ".nph") {
+                if (addLevel(getCollection(collectionName), filename, rank)) {
+                    result = true;
+                }
+            } else if (ext == ".npd") {
+                if (addLevel(getCollection(DEMO_COLLECTION), filename, rank)) {
+                    result = true;
+                }
+            } else if (addPath(filename)) {
+                result = true;
+            }
+        }
+
+        closedir(dir);
+        return result;
+    }
+
     return false;
 }
 
@@ -223,8 +239,8 @@ Levels::dump()
                 collectionName(i, true).c_str());
         for (int j=0; j<m_collections[i]->levels.size(); j++) {
             LevelDesc *level = m_collections[i]->levels[j];
-            printf(" Level #%d: %s (index=%d, rank%d)\n", (j+1),
-                    level->file.c_str(), level->index, level->rank);
+            printf(" Level #%d: %s (rank=%d)\n", (j+1),
+                    level->file.c_str(), level->rank);
         }
     }
 }
@@ -289,7 +305,8 @@ int Levels::collectionLevel(int c, int i)
 std::string Levels::demoPath(int l)
 {
   std::string name = levelName(l,false);
-  if (name.substr(name.length()-4) == ".npd") {
+  std::string ext = fileExtension(name);
+  if (ext == ".npd") {
     /* Kludge: If the level from which we want to save a demo is
      * already a demo file, return an empty string to signal
      * "don't have this demo" - see Game.cpp */
@@ -300,7 +317,7 @@ std::string Levels::demoPath(int l)
   std::string path = Config::userDataDir() + Os::pathSep
     + "Recordings" + Os::pathSep
     + collectionName(c,false);
-  if (path.substr(path.length()-4) == ".npz") {
+  if (fileExtension(path) == ".npz") {
     path.resize(path.length()-4);
   }
   return path;
@@ -309,12 +326,14 @@ std::string Levels::demoPath(int l)
 std::string Levels::demoName(int l)
 {
   std::string name = levelName(l,false);
+
   size_t sep = name.rfind(Os::pathSep);
   if (sep != std::string::npos) {
     name = name.substr(sep);
   }
-  if (name.substr(name.length()-4) == ".nph") {
-    name.resize(name.length()-4);
+
+  if (fileExtension(name) == ".nph") {
+      name.resize(name.length()-4);
   }
   return demoPath(l) + Os::pathSep + name + ".npd";
 }
@@ -325,7 +344,7 @@ bool Levels::hasDemo(int l)
 }
 
 
-Levels::LevelDesc* Levels::findLevel( int i )
+LevelDesc* Levels::findLevel( int i )
 {
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {

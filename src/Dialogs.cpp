@@ -106,11 +106,10 @@ public:
     m_content->add(m_scroll,0,0);
     fitToParent(true);
 
-    int levelInC;
-    m_collection = m_levels->collectionFromLevel(initialLevel,&levelInC);
-    setCollection(m_collection, levelInC);
+    m_collection = m_levels->collectionFromLevel(initialLevel);
+    setCollection(m_collection);
   }
-  void setCollection(int c, int levelInC)
+  void setCollection(int c)
   {
     if (c < 0 || c >=m_levels->numCollections()) {
       return;
@@ -179,7 +178,6 @@ public:
           Image *image = new Image(temp.contents());
           image->scale(1. / ICON_SCALE_FACTOR);
           m_thumbs[i]->image(image);
-          //m_thumbs[i]->transparent(m_dispbase+i!=levelInC);
       }
     }
   }
@@ -187,10 +185,10 @@ public:
   {
     switch (ev.code) {
     case Event::PREVIOUS:
-      setCollection(m_collection-1,0);
+      setCollection(m_collection-1);
       return true;
     case Event::NEXT:
-      setCollection(m_collection+1,0);
+      setCollection(m_collection+1);
       return true;
 //     case Event::SELECT:
 //       for (int i=0; i<THUMB_COUNT && i+m_dispbase<m_dispcount; i++) {

@@ -21,12 +21,38 @@
 #include <sstream>
 #include <vector>
 
+struct LevelDesc {
+    LevelDesc(const std::string &file, int rank)
+        : file(file)
+        , rank(rank)
+    {
+    }
+
+    std::string file;
+    int rank;
+};
+
+struct Collection {
+    Collection(const std::string &file, const std::string &name, int rank)
+        : file(file)
+        , name(name)
+        , rank(rank)
+        , levels()
+    {
+    }
+
+    std::string file;
+    std::string name;
+    int rank;
+    std::vector<LevelDesc*> levels;
+};
+
 class Levels
 {
  public:
-  Levels( int numDirs=0, const char** dirs=NULL );
-  bool addPath( const char* path );
-  bool addLevel( const std::string& file, int rank=-1, int index=-1 );
+  Levels(std::vector<std::string> dirs);
+  bool addPath(const std::string &path);
+  bool addLevel(const std::string &file, int rank);
   int  numLevels();
   int load( int i, unsigned char* buf, int bufLen );
   std::string levelName( int i, bool pretty=true );
@@ -46,27 +72,9 @@ class Levels
 
  private:
 
-  struct LevelDesc
-  {
-  LevelDesc( const std::string& f,int r=0, int i=-1)
-  : file(f), index(i), rank(r) {}
-    std::string file;
-    int         index;
-    int         rank;
-  };
-
-  struct Collection
-  {
-    std::string file;
-    std::string name;
-    int rank;
-    std::vector<LevelDesc*> levels;
-  };
-
-  bool addLevel( Collection* collection,
-		 const std::string& file, int rank, int index );
-  LevelDesc* findLevel( int i );
-  Collection* getCollection( const std::string& file );
+  bool addLevel(Collection *collection, const std::string &file, int rank);
+  LevelDesc *findLevel(int i);
+  Collection *getCollection( const std::string& file );
   bool scanCollection( const std::string& file, int rank );
 
   int m_numLevels;
