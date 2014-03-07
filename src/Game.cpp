@@ -86,7 +86,6 @@ public:
     m_jointInd.scale( 12.0f / (float32)m_jointInd.bbox().width() );
     //m_jointInd.simplify( 2.0f );
     m_jointInd.makeRelative();
-    configureScreenTransform( width, height );
     m_levels = levels;
     gotoLevel(0);
     //add( new Button("O",Event::OPTION), Rect(800-32,0,32,32) );
@@ -265,9 +264,7 @@ public:
 
   Vec2 mousePoint( Event& ev )
   {
-    Vec2 pt( ev.x, ev.y );
-    worldToScreen.inverseTransform( pt );
-    return pt;
+      return Vec2(ev.x, ev.y);
   }
 
 

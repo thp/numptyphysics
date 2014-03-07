@@ -25,55 +25,6 @@
 #include <algorithm>
 
 
-Transform::Transform( float32 scale, float32 rotation, const Vec2& translation )
-{
-  set( scale, rotation, translation );
-}
-
-void Transform::set( float32 scale, float32 rotation, const Vec2& translation )
-{
-  if ( scale==0.0f && rotation==0.0f && translation==Vec2(0,0) ) {
-    m_bypass = true;
-  } else {
-    m_rot.Set( rotation );
-    m_pos = translation;
-    m_rot.col1.x *= scale;
-    m_rot.col1.y *= scale;
-    m_rot.col2.x *= scale;
-    m_rot.col2.y *= scale;
-    m_invrot = m_rot.Invert();
-    m_bypass = false;
-  }
-}
-
-Transform worldToScreen( 0.5f, M_PI/2, Vec2(240,0) );
-
-void configureScreenTransform( int w, int h )
-{
-  SCREEN_WIDTH = w;
-  SCREEN_HEIGHT = h;
-  FULLSCREEN_RECT = Rect(0,0,w-1,h-1);
-  if ( w==WORLD_WIDTH && h==WORLD_HEIGHT ) { //unity
-    worldToScreen.set( 0.0f, 0.0f, Vec2(0,0) );
-  } else {
-    float rot = 0.0f;
-    Vec2 tr(0,0);
-    if ( h > w ) { //portrait
-      rot = M_PI/2;
-      tr = Vec2( w, 0 );
-      b2Swap( h, w );
-    }
-    float scalew = (float)w/(float)WORLD_WIDTH;
-    float scaleh = (float)h/(float)WORLD_HEIGHT;
-    if ( scalew < scaleh ) {
-      worldToScreen.set( scalew, rot, tr );
-    } else {
-      worldToScreen.set( scaleh, rot, tr );
-    }
-  }
-}
-
-
 struct Joint
 {
   Joint( Stroke *j1, Stroke* j2, unsigned char e )
@@ -485,7 +436,7 @@ private:
 	m_xformedPath.translate( Vec2(orig) );
 	m_xformAngle = m_body->GetAngle();
 	m_xformPos = m_body->GetPosition();
-	worldToScreen.transform( m_xformedPath, m_screenPath );
+        m_screenPath = m_xformedPath;
 	m_screenBbox = m_screenPath.bbox();      
       } else {
 	//printf("transform none\n");
@@ -495,7 +446,7 @@ private:
       //printf("transform no body\n");
       m_xformedPath = m_rawPath;
       m_xformedPath.translate( m_origin );
-      worldToScreen.transform( m_xformedPath, m_screenPath );
+      m_screenPath = m_xformedPath;
       m_screenBbox = m_screenPath.bbox();      
       return !hasAttribute(ATTRIB_DECOR);
     }
