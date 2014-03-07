@@ -309,18 +309,6 @@ public:
       }
     }
 
-    if ( m_os ) {
-      for ( char *f = m_os->getLaunchFile(); f; f=m_os->getLaunchFile() ) {
-	if ( strstr(f,".npz") ) {
-	  //m_levels->empty();
-	}
-	m_levels->addPath( f );
-	int l = m_levels->findLevel( f );
-	if ( l >= 0 ) {
-	  gotoLevel( l );
-	}
-      }    
-    }  
     Container::onTick(tick);
   }
 

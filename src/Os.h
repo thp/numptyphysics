@@ -43,7 +43,6 @@ class Os
   virtual void init() = 0;
   virtual void window(int w, int h) = 0;
   virtual NP::Renderer *renderer() = 0;
-  virtual char* getLaunchFile() { return NULL; }
   virtual bool  openBrowser( const char* url ) = 0;
   virtual char* saveDialog( const char* path ) { return NULL; }
   virtual Accelerometer*  getAccelerometer() { return NULL; }
