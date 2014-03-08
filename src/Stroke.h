@@ -118,7 +118,6 @@ public:
     float32 distanceTo(const Vec2 &pt);
 
     Rect screenBbox();
-    Rect lastDrawnBbox();
     Rect worldBbox();
 
     void hide();
@@ -142,8 +141,6 @@ private:
     float32   m_xformAngle;
     b2Vec2    m_xformPos;
     Rect      m_screenBbox;
-    Rect      m_drawnBbox;
-    bool      m_drawn;
     b2Body*   m_body;
     bool      m_jointed[2];
     int       m_hide;

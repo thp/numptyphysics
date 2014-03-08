@@ -74,12 +74,9 @@ Stroke::reset(b2World *world)
 
     m_body = NULL;
     m_xformAngle = 7.0f;
-    m_drawnBbox.tl = m_origin;
-    m_drawnBbox.br = m_origin;
     m_jointed[0] = m_jointed[1] = false;
     m_shapePath = m_rawPath;
     m_hide = 0;
-    m_drawn = false;
 }
 
 std::string
@@ -237,7 +234,6 @@ Stroke::draw(Canvas &canvas, bool drawJoints)
         bool thick = (canvas.width() > 400);
         transform();
         canvas.drawPath( m_screenPath, colour, thick );
-        m_drawn = true;
 
         if ( drawJoints ) {
             int jointcolour = canvas.makeColour(0xff0000);
@@ -252,7 +248,6 @@ Stroke::draw(Canvas &canvas, bool drawJoints)
             }
         }
     }
-    m_drawnBbox = m_screenBbox;
 }
 
 void
@@ -262,7 +257,6 @@ Stroke::addPoint(const Vec2 &pp)
     if ( p == m_rawPath.point( m_rawPath.numPoints()-1 ) ) {
     } else {
         m_rawPath.push_back( p );
-        m_drawn = false;
     }
 }
 
@@ -276,7 +270,6 @@ Stroke::origin(const Vec2 &p)
         m_body->SetXForm( pw, m_body->GetAngle() );
     }
     m_origin = p;
-    m_drawn = false;
 }
 
 b2Body *
@@ -306,12 +299,6 @@ Stroke::screenBbox()
 {
     transform();
     return m_screenBbox;
-}
-
-Rect
-Stroke::lastDrawnBbox()
-{
-    return m_drawnBbox;
 }
 
 Rect
