@@ -353,6 +353,10 @@ GLRenderer::path(const Path &path, int rgba)
     float r, g, b, a;
     rgba_split(rgba, r, g, b, a);
 
+    if (path.numPoints() < 2) {
+        return;
+    }
+
     int segments = path.numPoints() - 1;
     int points_len = (2 + 4) * 10 * segments;
     float *points = new float[points_len];
