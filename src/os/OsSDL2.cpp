@@ -127,6 +127,10 @@ SDLRenderer::metrics(const NP::Font &font, const char *text, int *width, int *he
 NP::Texture
 SDLRenderer::text(const NP::Font &font, const char *text, int rgb)
 {
+    if (strlen(text) == 0) {
+        return NP::Texture(new GLTextureData(nullptr, 10, 10));
+    }
+
     SDLFontData *data = static_cast<SDLFontData *>(font.get());
 
     SDL_Color fg = {
