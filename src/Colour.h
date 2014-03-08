@@ -7,6 +7,17 @@ namespace Colour {
 extern const int values[];
 extern const int count;
 
+inline int toIndex(int colour)
+{
+    for (int i=0; i<count; i++) {
+        if (values[i] == colour) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 static const int RED = 0xb80000;
 static const int YELLOW = 0xeec900;
 static const int DEFAULT = 0x000077;

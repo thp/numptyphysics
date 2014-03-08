@@ -456,7 +456,16 @@ public:
       break;
     case Event::DRAWEND:
       if ( m_createStroke ) {
-	if ( m_scene.activateStroke( m_createStroke ) ) {
+        if (m_strokeRope) {
+            m_stats.ropeCount++;
+            if (isPaused()) {
+                m_stats.pausedRopes++;
+            }
+            for (auto &stroke: m_createStroke->ropeify(m_scene)) {
+                m_scene.activateStroke(stroke);
+            }
+            m_scene.deleteStroke(m_createStroke);
+        } else if ( m_scene.activateStroke( m_createStroke ) ) {
 	  m_stats.strokeCount++;
 	  if ( isPaused() ) {
 	    m_stats.pausedStrokes++; 

@@ -30,12 +30,16 @@ struct GameStats
   int strokeCount;
   int pausedStrokes;
   int undoCount;
+  int ropeCount;
+  int pausedRopes;
   void reset(int t) {
     startTime = t;
     endTime = 0;
     strokeCount = 0;
     pausedStrokes = 0;
     undoCount = 0;
+    ropeCount = 0;
+    pausedRopes = 0;
   }
 };
 
@@ -51,6 +55,7 @@ public:
 		 m_strokeFixed( false ),
 		 m_strokeSleep( false ),
 		 m_strokeDecor( false ),
+                 m_strokeRope( false ),
                  m_replaying( false ),
                  m_paused( false ),
                  m_levels(NULL),
@@ -72,6 +77,7 @@ public:
   bool  m_strokeFixed;
   bool  m_strokeSleep;
   bool  m_strokeDecor;
+  bool  m_strokeRope;
   bool  m_replaying;
   bool  m_paused;
   Levels*m_levels;

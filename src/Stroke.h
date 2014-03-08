@@ -23,9 +23,11 @@
 #include "Colour.h"
 
 #include <vector>
+#include <list>
 
 
 class Stroke;
+class Scene;
 
 enum Attribute {
   ATTRIB_DUMMY = 0,
@@ -36,6 +38,7 @@ enum Attribute {
   ATTRIB_SLEEPING = 16,
   ATTRIB_HIDDEN = 32,
   ATTRIB_DELETED = 64,
+  ATTRIB_ROPE = 128,
   ATTRIB_CLASSBITS = ATTRIB_TOKEN | ATTRIB_GOAL,
   ATTRIB_UNJOINABLE = ATTRIB_DECOR | ATTRIB_HIDDEN | ATTRIB_DELETED
 };
@@ -110,6 +113,7 @@ public:
     void join(b2World *world, Stroke *other, unsigned char end);
     bool maybeCreateJoint(b2World &world, Stroke *other);
     void draw(Canvas &canvas, bool drawJoints=false);
+    std::list<Stroke *> ropeify(Scene &scene);
 
     void addPoint(const Vec2 &pp);
     void origin(const Vec2 &p);

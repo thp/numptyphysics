@@ -42,6 +42,7 @@ Stroke::Stroke(const std::string &str)
             case 'f': setAttribute( ATTRIB_GROUND ); break;
             case 's': setAttribute( ATTRIB_SLEEPING ); break;
             case 'd': setAttribute( ATTRIB_DECOR ); break;
+            case 'r': setAttribute( ATTRIB_ROPE ); break;
             default:
                       if ( *s >= '0' && *s <= '9' ) {
                           col = col*10 + *s -'0';
@@ -89,6 +90,7 @@ Stroke::asString()
     if ( hasAttribute(ATTRIB_GROUND) )   s<<'f';
     if ( hasAttribute(ATTRIB_SLEEPING) ) s<<'s';
     if ( hasAttribute(ATTRIB_DECOR) )    s<<'d';
+    if ( hasAttribute(ATTRIB_ROPE) )     s<<'r';
     for ( int i=0; i<NP::Colour::count; i++ ) {
         if ( m_colour==NP::Colour::values[i] )  s<<i;
     }
@@ -248,6 +250,23 @@ Stroke::draw(Canvas &canvas, bool drawJoints)
             }
         }
     }
+}
+
+std::list<Stroke *>
+Stroke::ropeify(Scene &scene)
+{
+    Path path = m_rawPath;
+    path.simplify(SIMPLIFY_THRESHOLDf);
+    std::list<Stroke *> result;
+    for (int i=0; i<path.size()-1; i++) {
+        // TODO: Split path up if its parts are too long
+        Path p;
+        p.insert(p.end(), {path[i], path[i+1]});
+        p.translate(m_origin);
+
+        result.push_back(scene.newStroke(p, NP::Colour::toIndex(m_colour), m_attributes | ATTRIB_ROPE));
+    }
+    return result;
 }
 
 void

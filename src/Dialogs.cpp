@@ -504,6 +504,7 @@ static const MenuItem toolOpts[] = {
   MenuItem("decor:tick.png",Event(Event::SELECT,2)),
   MenuItem("move:tick.png",Event(Event::SELECT,3)),
   MenuItem("erase:tick.png",Event(Event::SELECT,4)),
+  MenuItem("rope:tick.png",Event(Event::SELECT,5)),
   MenuItem("",Event::NOP)
 };
 
@@ -555,6 +556,8 @@ public:
 	tick = m_game->m_clickMode==1;
       } else if (m_opts[i]->text() == "erase") { 
 	tick = m_game->m_clickMode==2;
+      } else if (m_opts[i]->text() == "rope") {
+        tick = m_game->m_strokeRope;
       }
       m_opts[i]->icon(tick ? "tick.png" : "blank.png");
     }
@@ -583,6 +586,9 @@ public:
                   break;
               case 4:
                   m_game->clickMode((m_game->m_clickMode==2)?0:2);
+                  break;
+              case 5:
+                  m_game->m_strokeRope = !m_game->m_strokeRope;
                   break;
               default: return MenuDialog::onEvent(ev);
           }
