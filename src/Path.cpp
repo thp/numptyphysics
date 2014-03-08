@@ -57,6 +57,12 @@ Path::Path()
 {
 }
 
+Path::Path(const Vec2 &p)
+    : std::vector<Vec2>()
+{
+    push_back(p);
+}
+
 Path::Path(int n, Vec2* p)
     : std::vector<Vec2>()
 {

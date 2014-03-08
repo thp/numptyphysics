@@ -257,14 +257,16 @@ Stroke::ropeify(Scene &scene)
 {
     Path path = m_rawPath;
     path.simplify(SIMPLIFY_THRESHOLDf);
+    // TODO: Split path up if its parts are too long
+
+    int color = NP::Colour::toIndex(m_colour);
+    int attr = m_attributes | ATTRIB_ROPE;
+
     std::list<Stroke *> result;
     for (int i=0; i<path.size()-1; i++) {
-        // TODO: Split path up if its parts are too long
-        Path p;
-        p.insert(p.end(), {path[i], path[i+1]});
-        p.translate(m_origin);
-
-        result.push_back(scene.newStroke(p, NP::Colour::toIndex(m_colour), m_attributes | ATTRIB_ROPE));
+        Stroke *s = scene.newStroke(Path(path[i] + m_origin), color, attr);
+        scene.extendStroke(s, path[i+1] + m_origin);
+        result.push_back(s);
     }
     return result;
 }

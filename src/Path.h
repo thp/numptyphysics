@@ -37,6 +37,7 @@ class Path : public std::vector<Vec2>
 {
 public:
   Path();
+  Path(const Vec2 &p);
   Path( int n, Vec2* p );
   Path( const char *ptlist );
 
