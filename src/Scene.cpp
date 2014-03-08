@@ -264,10 +264,16 @@ void Scene::draw(Canvas &canvas, bool everything)
     }
 
     int i = 0;
+    const int fade_duration = 50;
     for (auto &stroke: m_strokes) {
-        if (everything || m_step > i++) {
-            stroke->draw(canvas);
+        int a = 0;
+        if (everything || m_step > i + fade_duration) {
+            a = 255;
+        } else if (m_step > i) {
+            a = 255 * float(m_step - i) / fade_duration;
         }
+        stroke->draw(canvas, a);
+        i++;
     }
 
     clearWithDelete(m_deletedStrokes);

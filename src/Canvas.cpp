@@ -64,9 +64,9 @@ void Canvas::drawImage(Image &image, int x, int y)
     RENDERER->image(image.texture(), x, y, image.width(), image.height());
 }
 
-void Canvas::drawPath( const Path& path, int color, bool thick )
+void Canvas::drawPath( const Path& path, int color, int a )
 {
-    RENDERER->path(path, color | 0xff000000);
+    RENDERER->path(path, color | ((a & 0xff) << 24));
 }
 
 void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill, int a )

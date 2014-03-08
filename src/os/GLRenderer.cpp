@@ -381,7 +381,7 @@ GLRenderer::path(const Path &path, int rgba)
                 points[offset++] = 0.f;
             } else {
                 // Filled
-                points[offset++] = 1.f;
+                points[offset++] = a;
             }
         }
     }

@@ -112,7 +112,7 @@ public:
     void determineJoints(Stroke *other, std::vector<Joint> &joints);
     void join(b2World *world, Stroke *other, unsigned char end);
     bool maybeCreateJoint(b2World &world, Stroke *other);
-    void draw(Canvas &canvas, bool drawJoints=false);
+    void draw(Canvas &canvas, int a);
     std::list<Stroke *> ropeify(Scene &scene);
 
     void addPoint(const Vec2 &pp);

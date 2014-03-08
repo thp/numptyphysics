@@ -229,24 +229,24 @@ Stroke::maybeCreateJoint(b2World &world, Stroke *other)
 }
 
 void
-Stroke::draw(Canvas &canvas, bool drawJoints)
+Stroke::draw(Canvas &canvas, int a)
 {
-    if ( m_hide < HIDE_STEPS ) {
-        int colour = canvas.makeColour(m_colour);
-        bool thick = (canvas.width() > 400);
-        transform();
-        canvas.drawPath( m_screenPath, colour, thick );
+    if (m_hide >= HIDE_STEPS) {
+        return;
+    }
 
-        if ( drawJoints ) {
-            int jointcolour = canvas.makeColour(0xff0000);
-            for ( int e=0; e<2; e++ ) {
-                if (m_jointed[e]) {
-                    const Vec2& pt = m_screenPath.endpt(e);
-                    //canvas.drawPixel( pt.x, pt.y, jointcolour );
-                    //canvas.drawRect( pt.x-1, pt.y-1, 3, 3, jointcolour );
-                    canvas.drawRect( pt.x-1, pt.y, 3, 1, jointcolour );
-                    canvas.drawRect( pt.x, pt.y-1, 1, 3, jointcolour );
-                }
+    transform();
+    canvas.drawPath(m_screenPath, m_colour, a);
+
+    if ( false /* drawJoints */ ) {
+        int jointcolour = canvas.makeColour(0xff0000);
+        for ( int e=0; e<2; e++ ) {
+            if (m_jointed[e]) {
+                const Vec2& pt = m_screenPath.endpt(e);
+                //canvas.drawPixel( pt.x, pt.y, jointcolour );
+                //canvas.drawRect( pt.x-1, pt.y-1, 3, 3, jointcolour );
+                canvas.drawRect( pt.x-1, pt.y, 3, 1, jointcolour );
+                canvas.drawRect( pt.x, pt.y-1, 1, 3, jointcolour );
             }
         }
     }
