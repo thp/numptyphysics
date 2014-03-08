@@ -66,7 +66,11 @@ std::string nameFromPath(const std::string& path)
   while (path[i] >= '0' && path[i] <= '9') i++;
   if (path[i] == '_') i++;
   size_t e = path.rfind('.');
-  name = path.substr(i,e-i);
+  if (e != 0) {
+      name = path.substr(i,e-i);
+  } else {
+      name = path.substr(1);
+  }
   for (i=0; i<name.size(); i++) {
     if (name[i]=='-' || name[i]=='_' || name[i]=='.') {
       name[i] = ' ';
