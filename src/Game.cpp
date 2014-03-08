@@ -349,6 +349,7 @@ public:
 	  m_scene.deleteStroke( m_createStroke );
 	  m_createStroke = NULL;
 	} else if ( m_scene.strokes().size() && m_scene.deleteStroke( m_scene.strokes().at(m_scene.strokes().size()-1) ) ) {
+          // FIXME: Make sure undo also works correctly for ropes (delete whole rope at once)
 	  m_stats.undoCount++;
 	}
       }
