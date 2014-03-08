@@ -25,6 +25,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <list>
 
 
 class Stroke;
@@ -44,7 +45,7 @@ public:
   void extendStroke( Stroke* s, const Vec2& pt );
   void moveStroke( Stroke* s, const Vec2& origin );
   bool activateStroke( Stroke *s );
-  void getJointCandidates( Stroke* s, Path& pts );
+  std::list<Vec2> getJointCandidates(Stroke *s);
 
   int numStrokes() {
     return m_strokes.size();

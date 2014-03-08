@@ -317,10 +317,7 @@ public:
     if (m_createStroke) {
         b2Mat22 rot(0.01 * OS->ticks());
 
-        Path candidates;
-        m_scene.getJointCandidates(m_createStroke, candidates);
-
-        for (auto &candidate: candidates) {
+        for (auto &candidate: m_scene.getJointCandidates(m_createStroke)) {
             Path joint = m_jointInd;
             joint.translate(-joint.bbox().centroid());
             joint.rotate(rot);

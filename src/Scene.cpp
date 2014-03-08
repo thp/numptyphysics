@@ -125,18 +125,19 @@ bool Scene::activateStroke( Stroke *s )
   return result;
 }
 
-void Scene::getJointCandidates( Stroke* s, Path& pts )
+std::list<Vec2> Scene::getJointCandidates(Stroke *s)
 {
     std::vector<Joint> joints;
-  for ( int j=m_strokes.size()-1; j>=0; j-- ) {      
-    if ( s != m_strokes[j] ) {
-      s->determineJoints( m_strokes[j], joints );
-      m_strokes[j]->determineJoints( s, joints );
+    for (auto &stroke: m_strokes) {
+        s->determineJoints(stroke, joints);
+        stroke->determineJoints(s, joints);
     }
-  }
-  for ( int j=joints.size()-1; j>=0; j-- ) {
-    pts.push_back( joints[j].joiner->endpt(joints[j].end) );
-  }
+
+    std::list<Vec2> result;
+    for (auto &joint: joints) {
+        result.push_front(joint.joiner->endpt(joint.end));
+    }
+    return result;
 }
 
 bool Scene::activate( Stroke *s )
