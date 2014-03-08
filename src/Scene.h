@@ -21,6 +21,7 @@
 #include "Path.h"
 #include "Canvas.h"
 #include "Script.h"
+#include "Interactions.h"
 
 #include <string>
 #include <fstream>
@@ -48,8 +49,6 @@ public:
   bool activateStroke( Stroke *s );
   std::list<Vec2> getJointCandidates(Stroke *s);
 
-  std::map<int,Rect> getColorRects();
-
   int numStrokes() {
     return m_strokes.size();
   }
@@ -57,6 +56,8 @@ public:
   std::vector<Stroke*>& strokes() {
     return m_strokes;
   }
+
+  bool interact(const Vec2 &pos);
 
   void step( bool isPaused=false );
   bool isCompleted();
@@ -80,6 +81,7 @@ private:
   bool activate( Stroke *s );
   void activateAll();
   void createJoints( Stroke *s );
+  std::map<int,Rect> calcColorRects();
 
   // b2ContactListener callback when a new contact is detected
   virtual void Add(const b2ContactPoint* point) ;
@@ -100,6 +102,8 @@ private:
   bool            m_dynamicGravity;
   Accelerometer  *m_accelerometer;
   int             m_step;
+  std::map<int,Rect> m_color_rects;
+  NP::Interactions    m_interactions;
 };
 
 #endif /* NUMPTYPHYSICS_SCENE_H */

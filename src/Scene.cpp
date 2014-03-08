@@ -33,6 +33,8 @@ Scene::Scene( bool noWorld )
     m_dynamicGravity(false),
     m_accelerometer(Os::get()->getAccelerometer()),
     m_step(0)
+  , m_color_rects()
+  , m_interactions()
 {
     if ( g_bgImage==NULL ) {
         g_bgImage = new Image("paper.png");
@@ -224,6 +226,9 @@ void Scene::step( bool isPaused )
       }
     }
   }
+
+    // Update bounding boxes for interactive elements
+    m_color_rects = calcColorRects();
 }
 
 // b2ContactListener callback when a new contact is detected
@@ -279,19 +284,36 @@ void Scene::draw(Canvas &canvas, bool everything)
     clearWithDelete(m_deletedStrokes);
 
 #if 0
-    for (auto &kv: getColorRects()) {
+    for (auto &kv: m_color_rects) {
         canvas.drawRect(kv.second, kv.first, true, 128);
     }
 #endif
 }
 
-std::map<int,Rect> Scene::getColorRects()
+bool Scene::interact(const Vec2 &pos)
+{
+    for (auto &kv: m_color_rects) {
+        if (kv.second.contains(pos)) {
+            if (m_interactions.handle(kv.first)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+std::map<int,Rect> Scene::calcColorRects()
 {
     std::map<int,Rect> result;
 
     std::map<int,std::list<Stroke *>> strokesMap;
     for (auto &stroke: m_strokes) {
-        strokesMap[stroke->colour()].push_back(stroke);
+        if (!stroke->hasAttribute(ATTRIB_INTERACTIVE)) {
+            continue;
+        }
+
+        strokesMap[NP::Colour::toIndex(stroke->colour())].push_back(stroke);
     }
 
     for (auto &kv: strokesMap) {
@@ -417,6 +439,9 @@ bool Scene::load(const std::string &level)
             case 'S':
                 m_strokes.push_back(new Stroke(line));
                 break;
+            case 'I':
+                m_interactions.parse(value);
+                break;
             case 'G':
                 setGravity(line);
                 break;
@@ -465,6 +490,7 @@ bool Scene::save( const std::string& file, bool saveLog )
     o << "Title: "<<m_title<<std::endl;
     o << "Author: "<<m_author<<std::endl;
     o << "Background: "<<m_bg<<std::endl;
+    o << m_interactions.serialize();
     for ( int i=0; i<m_strokes.size() && (!saveLog || i<m_protect); i++ ) {
 	o << m_strokes[i]->asString();
     }

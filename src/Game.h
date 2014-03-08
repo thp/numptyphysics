@@ -56,6 +56,7 @@ public:
 		 m_strokeSleep( false ),
 		 m_strokeDecor( false ),
                  m_strokeRope( false ),
+                 m_interactiveDraw( false ),
                  m_replaying( false ),
                  m_paused( false ),
                  m_levels(NULL),
@@ -78,6 +79,7 @@ public:
   bool  m_strokeSleep;
   bool  m_strokeDecor;
   bool  m_strokeRope;
+  bool  m_interactiveDraw;
   bool  m_replaying;
   bool  m_paused;
   Levels*m_levels;

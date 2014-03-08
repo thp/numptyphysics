@@ -43,6 +43,7 @@ Stroke::Stroke(const std::string &str)
             case 's': setAttribute( ATTRIB_SLEEPING ); break;
             case 'd': setAttribute( ATTRIB_DECOR ); break;
             case 'r': setAttribute( ATTRIB_ROPE ); break;
+            case 'i': setAttribute( ATTRIB_INTERACTIVE ); break;
             default:
                       if ( *s >= '0' && *s <= '9' ) {
                           col = col*10 + *s -'0';
@@ -91,6 +92,7 @@ Stroke::asString()
     if ( hasAttribute(ATTRIB_SLEEPING) ) s<<'s';
     if ( hasAttribute(ATTRIB_DECOR) )    s<<'d';
     if ( hasAttribute(ATTRIB_ROPE) )     s<<'r';
+    if ( hasAttribute(ATTRIB_INTERACTIVE) ) s<<'i';
     for ( int i=0; i<NP::Colour::count; i++ ) {
         if ( m_colour==NP::Colour::values[i] )  s<<i;
     }

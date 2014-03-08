@@ -505,6 +505,7 @@ static const MenuItem toolOpts[] = {
   MenuItem("move:tick.png",Event(Event::SELECT,3)),
   MenuItem("erase:tick.png",Event(Event::SELECT,4)),
   MenuItem("rope:tick.png",Event(Event::SELECT,5)),
+  MenuItem("interactive:tick.png",Event(Event::SELECT,6)),
   MenuItem("",Event::NOP)
 };
 
@@ -515,6 +516,7 @@ public:
   ToolDialog(GameControl* game) : MenuDialog(this, "tools",NULL),
 				  m_game(game)
   {
+    m_buttonDim = Vec2(200, 40);
     addItems( toolOpts );
     updateTicks();
   }
@@ -558,6 +560,8 @@ public:
 	tick = m_game->m_clickMode==2;
       } else if (m_opts[i]->text() == "rope") {
         tick = m_game->m_strokeRope;
+      } else if (m_opts[i]->text() == "interactive") {
+        tick = m_game->m_interactiveDraw;
       }
       m_opts[i]->icon(tick ? "tick.png" : "blank.png");
     }
@@ -589,6 +593,9 @@ public:
                   break;
               case 5:
                   m_game->m_strokeRope = !m_game->m_strokeRope;
+                  break;
+              case 6:
+                  m_game->m_interactiveDraw = !m_game->m_interactiveDraw;
                   break;
               default: return MenuDialog::onEvent(ev);
           }

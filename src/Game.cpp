@@ -449,12 +449,14 @@ public:
       break;
     case Event::DRAWBEGIN:
       if ( !m_replaying && !m_createStroke ) {
-	int attrib = 0;
-	if ( m_strokeFixed ) attrib |= ATTRIB_GROUND;
-	if ( m_strokeSleep ) attrib |= ATTRIB_SLEEPING;
-	if ( m_strokeDecor ) attrib |= ATTRIB_DECOR;
-	m_createStroke = m_scene.newStroke( Path()&mousePoint(ev), 
-					    m_colour, attrib );
+          if (!m_scene.interact(mousePoint(ev))) {
+              int attrib = 0;
+              if ( m_strokeFixed ) attrib |= ATTRIB_GROUND;
+              if ( m_strokeSleep ) attrib |= ATTRIB_SLEEPING;
+              if ( m_strokeDecor ) attrib |= ATTRIB_DECOR;
+              if ( m_interactiveDraw ) attrib |= ATTRIB_INTERACTIVE;
+              m_createStroke = m_scene.newStroke(Path() & mousePoint(ev), m_colour, attrib);
+          }
       }
       break;
     case Event::DRAWMORE:
