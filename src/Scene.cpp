@@ -476,7 +476,8 @@ Scene::Scene( bool noWorld )
     m_protect( 0 ),
     m_gravity(0.0f, 0.0f),
     m_dynamicGravity(false),
-    m_accelerometer(Os::get()->getAccelerometer())
+    m_accelerometer(Os::get()->getAccelerometer()),
+    m_step(0)
 {
     if ( g_bgImage==NULL ) {
         g_bgImage = new Image("paper.png");
@@ -627,7 +628,7 @@ void Scene::step( bool isPaused )
   m_recorder.tick(isPaused);
   isPaused |= m_player.tick();
 
-  if ( !isPaused ) {
+  if ( (m_step++ >= m_strokes.size()) && !isPaused ) {
     if (m_accelerometer && m_dynamicGravity) {
       float32 gx, gy, gz;
       if ( m_accelerometer->poll( gx, gy, gz ) ) {
@@ -697,14 +698,17 @@ bool Scene::isCompleted()
   return true;
 }
 
-void Scene::draw(Canvas &canvas)
+void Scene::draw(Canvas &canvas, bool everything)
 {
     if (m_bgImage) {
         canvas.drawImage(*m_bgImage);
     }
 
+    int i = 0;
     for (auto &stroke: m_strokes) {
-        stroke->draw(canvas);
+        if (everything || m_step > i++) {
+            stroke->draw(canvas);
+        }
     }
 
     clearWithDelete(m_deletedStrokes);
@@ -801,6 +805,7 @@ bool Scene::load(const std::string &level)
     clear();
     resetWorld();
     m_dynamicGravity = false;
+    m_step = 0;
 
     for (std::string &line: splitLines(level)) {
         std::string value = line.substr(line.find(':') + 1);

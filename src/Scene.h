@@ -65,7 +65,7 @@ public:
 
   void step( bool isPaused=false );
   bool isCompleted();
-  void draw(Canvas &canvas);
+  void draw(Canvas &canvas, bool everything=false);
   void reset( Stroke* s=NULL,  bool purgeUnprotected=false );
   Stroke* strokeAtPoint( const Vec2 pt, float32 max );
   void clear();
@@ -104,4 +104,5 @@ private:
   b2Vec2          m_currentGravity;
   bool            m_dynamicGravity;
   Accelerometer  *m_accelerometer;
+  int             m_step;
 };
