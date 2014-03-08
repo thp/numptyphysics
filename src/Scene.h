@@ -13,6 +13,10 @@
  * General Public License for more details.
  *
  */
+
+#ifndef NUMPTYPHYSICS_SCENE_H
+#define NUMPTYPHYSICS_SCENE_H
+
 #include "Common.h"
 #include "Path.h"
 #include "Canvas.h"
@@ -26,19 +30,6 @@
 class Stroke;
 class b2World;
 class Accelerometer;
-
-typedef enum {
-  ATTRIB_DUMMY = 0,
-  ATTRIB_GROUND = 1,
-  ATTRIB_TOKEN = 2,
-  ATTRIB_GOAL = 4,
-  ATTRIB_DECOR = 8,
-  ATTRIB_SLEEPING = 16,
-  ATTRIB_HIDDEN = 32,
-  ATTRIB_DELETED = 64,
-  ATTRIB_CLASSBITS = ATTRIB_TOKEN | ATTRIB_GOAL,
-  ATTRIB_UNJOINABLE = ATTRIB_DECOR | ATTRIB_HIDDEN | ATTRIB_DELETED
-} Attribute;
 
 
 class Scene : private b2ContactListener
@@ -106,3 +97,5 @@ private:
   Accelerometer  *m_accelerometer;
   int             m_step;
 };
+
+#endif /* NUMPTYPHYSICS_SCENE_H */

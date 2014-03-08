@@ -23,6 +23,7 @@
 #include "Levels.h"
 #include "Os.h"
 #include "Scene.h"
+#include "Stroke.h"
 #include "Script.h"
 #include "Dialogs.h"
 #include "Ui.h"
