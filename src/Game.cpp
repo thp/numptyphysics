@@ -346,7 +346,7 @@ public:
 	if ( m_createStroke ) {
 	  m_scene.deleteStroke( m_createStroke );
 	  m_createStroke = NULL;
-	} else if ( m_scene.deleteStroke( m_scene.strokes().at(m_scene.strokes().size()-1) ) ) {
+	} else if ( m_scene.strokes().size() && m_scene.deleteStroke( m_scene.strokes().at(m_scene.strokes().size()-1) ) ) {
 	  m_stats.undoCount++;
 	}
       }
