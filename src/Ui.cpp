@@ -1006,7 +1006,8 @@ void TabBook::selectTab( int t )
 Dialog::Dialog( const std::string &title, Event left, Event right )
 {
   setEventMap(UI_DIALOG_MAP);
-  alpha(100);
+  setFg(0x000000);
+  alpha(200);
   m_greedyMouse = true;
   m_title = new Label(title,Font::titleFont());
   m_title->alpha(0);
@@ -1079,13 +1080,13 @@ void Dialog::draw(Canvas &screen, const Rect &area)
 
         Image *offscreen = window->offscreen();
         Rect r2(0, 0, screen.width(), screen.height());
-        tmp.drawBlur(*offscreen, m_pos, r2, 0.0, 1.5);
+        tmp.drawBlur(*offscreen, m_pos, r2, 0.0, 0.7);
 
         tmp.end();
 
         Image image(tmp.contents());
         Rect r(0, 0, tmp.width(), tmp.height());
-        screen.drawBlur(image, r, m_pos, 1.5, 0.0);
+        screen.drawBlur(image, r, m_pos, 0.7, 0.0);
     } else {
         screen.drawRect(area, 0xff0000);
     }
