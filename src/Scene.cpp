@@ -129,6 +129,9 @@ std::list<Vec2> Scene::getJointCandidates(Stroke *s)
 {
     std::vector<Joint> joints;
     for (auto &stroke: m_strokes) {
+        if (s == stroke) {
+            continue;
+        }
         s->determineJoints(stroke, joints);
         stroke->determineJoints(s, joints);
     }
