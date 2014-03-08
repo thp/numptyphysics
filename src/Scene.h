@@ -26,6 +26,7 @@
 #include <fstream>
 #include <vector>
 #include <list>
+#include <map>
 
 
 class Stroke;
@@ -46,6 +47,8 @@ public:
   void moveStroke( Stroke* s, const Vec2& origin );
   bool activateStroke( Stroke *s );
   std::list<Vec2> getJointCandidates(Stroke *s);
+
+  std::map<int,Rect> getColorRects();
 
   int numStrokes() {
     return m_strokes.size();

@@ -277,6 +277,36 @@ void Scene::draw(Canvas &canvas, bool everything)
     }
 
     clearWithDelete(m_deletedStrokes);
+
+#if 0
+    for (auto &kv: getColorRects()) {
+        canvas.drawRect(kv.second, kv.first, true, 128);
+    }
+#endif
+}
+
+std::map<int,Rect> Scene::getColorRects()
+{
+    std::map<int,Rect> result;
+
+    std::map<int,std::list<Stroke *>> strokesMap;
+    for (auto &stroke: m_strokes) {
+        strokesMap[stroke->colour()].push_back(stroke);
+    }
+
+    for (auto &kv: strokesMap) {
+        int color = kv.first;
+        auto &strokes = kv.second;
+        Rect r = strokes.front()->worldBbox();
+
+        for (auto &s: strokes) {
+            r.expand(s->worldBbox());
+        }
+
+        result[color] = r;
+    }
+
+    return result;
 }
 
 void Scene::reset( Stroke* s, bool purgeUnprotected )

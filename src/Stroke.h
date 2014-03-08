@@ -107,6 +107,7 @@ public:
     bool hasAttribute(Attribute a);
 
     void setColour(int c);
+    int colour() { return m_colour; }
 
     void createBodies(b2World &world);
     void determineJoints(Stroke *other, std::vector<Joint> &joints);
