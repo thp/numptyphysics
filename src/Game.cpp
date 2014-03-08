@@ -56,7 +56,6 @@ class Game : public GameControl, public Container
   Widget           *m_options;
   Os               *m_os;
   bool              m_isCompleted;
-  Path              m_jointCandidates;
   Path              m_jointInd;
   Widget           *m_left_button;
   Widget           *m_right_button;
@@ -312,19 +311,22 @@ public:
 
   virtual void draw( Canvas& screen, const Rect& area )
   {
-    static int drawCount = 0 ;
     m_refresh = false;
     m_scene.draw(screen);
-    if ( m_jointCandidates.size() ) {
-      float32 rot = (float32)(drawCount&127) / 128.0f;
-      for ( int i=0; i<m_jointCandidates.size(); i++ ) {
-	Path joint = m_jointInd;
-	joint.translate( -joint.bbox().centroid() );
-	joint.rotate( b2Mat22(rot*2.0*3.141) );
-	joint.translate( m_jointCandidates[i] + joint.bbox().centroid() );
-	screen.drawPath( joint, 0x606060 );
-      }
-      drawCount++;
+
+    if (m_createStroke) {
+        b2Mat22 rot(0.01 * OS->ticks());
+
+        Path candidates;
+        m_scene.getJointCandidates(m_createStroke, candidates);
+
+        for (auto &candidate: candidates) {
+            Path joint = m_jointInd;
+            joint.translate(-joint.bbox().centroid());
+            joint.rotate(rot);
+            joint.translate(candidate + joint.bbox().centroid());
+            screen.drawPath(joint, 0x606060);
+        }
     }
 
     Container::draw(screen,area);
