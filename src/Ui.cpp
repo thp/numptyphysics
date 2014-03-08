@@ -845,12 +845,9 @@ void Container::remove( Widget* w )
 
 void Container::empty()
 {
-    for (auto &child: m_children) {
-        child->setParent(nullptr);
-        delete child;
+    for (int i=m_children.size()-1; i>=0; i--) {
+        remove(m_children[i]);
     }
-
-    m_children.clear();
 }
 
 ////////////////////////////////////////////////////////////////
