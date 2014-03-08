@@ -97,7 +97,7 @@ class Label : public Widget
 {
  public:
   Label();
-  Label(const std::string& s, const Font* f=NULL);
+  Label(const std::string& s, const Font* f=NULL, int color=0xffffff);
   const char* name() {return "Label";}
   virtual void text( const std::string& s );
   const std::string& text() const { return m_text; }
@@ -329,6 +329,7 @@ class Dialog : public Panel
   void onTick( int tick );
   bool processEvent(ToolkitEvent &ev);
   bool onEvent( Event& ev );
+  virtual void draw(Canvas &screen, const Rect &area);
   bool close();
   virtual Container* content() { return m_content; }
   Button* leftControl() { return m_left; }

@@ -34,6 +34,7 @@ public:
   int  makeColour( int r, int g, int b ) const;
   void clear();
   void drawImage(Image &image, int x=0, int y=0);
+  void drawBlur(Image &image, const Rect &src, const Rect &dst, float rx, float ry);
   void drawPath( const Path& path, int color, int a=255 );
   void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
   void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
@@ -41,15 +42,6 @@ public:
 protected:
   int m_width;
   int m_height;
-};
-
-class Window : public Canvas
-{
- public:
-  Window( int w, int h, const char* title=NULL, const char* winclass=NULL, bool fullscreen=false );
-  void update();
- protected:
-  std::string m_title;
 };
 
 class RenderTarget : public Canvas
@@ -65,6 +57,25 @@ public:
 
 private:
     NP::Framebuffer m_framebuffer;
+};
+
+class Window : public Canvas
+{
+public:
+    Window(int w, int h, const char *title);
+    ~Window();
+    void update();
+
+    void beginOffscreen();
+    void endOffscreen();
+    Image *offscreen();
+
+private:
+    RenderTarget *m_offscreen_target;
+    Image *m_offscreen_image;
+
+protected:
+    std::string m_title;
 };
 
 

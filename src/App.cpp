@@ -51,7 +51,7 @@ public:
       OS->init();
       setEventMap(APP_MAP);
 
-      m_window = new Window(m_width,m_height,"Numpty Physics","NPhysics");
+      m_window = new Window(m_width,m_height,"Numpty Physics");
       sizeTo(Vec2(m_width,m_height));
 
       Levels* levels = new Levels({"data", DEFAULT_LEVEL_PATH, Config::userDataDir()});

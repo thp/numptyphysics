@@ -64,6 +64,11 @@ void Canvas::drawImage(Image &image, int x, int y)
     RENDERER->image(image.texture(), x, y, image.width(), image.height());
 }
 
+void Canvas::drawBlur(Image &image, const Rect &src, const Rect &dst, float rx, float ry)
+{
+    RENDERER->blur(image.texture(), src, dst, rx, ry);
+}
+
 void Canvas::drawPath( const Path& path, int color, int a )
 {
     RENDERER->path(path, color | ((a & 0xff) << 24));
@@ -80,14 +85,24 @@ void Canvas::drawRect( const Rect& r, int c, bool fill, int a )
 }
 
 
-Window::Window( int w, int h, const char* title, const char* winclass, bool fullscreen )
+Window::Window(int w, int h, const char *title)
     : Canvas(w, h)
+    , m_offscreen_target(nullptr)
+    , m_offscreen_image(nullptr)
     , m_title(title)
 {
     OS->window(w, h);
     RENDERER->size(&m_width, &m_height);
+
+    m_offscreen_target = new RenderTarget(w, h);
+    m_offscreen_image = new Image(m_offscreen_target->contents());
 }
 
+Window::~Window()
+{
+    delete m_offscreen_image;
+    delete m_offscreen_target;
+}
 
 void Window::update()
 {
@@ -95,6 +110,23 @@ void Window::update()
     RENDERER->swap();
 }
 
+void
+Window::beginOffscreen()
+{
+    m_offscreen_target->begin();
+}
+
+void
+Window::endOffscreen()
+{
+    m_offscreen_target->end();
+}
+
+Image *
+Window::offscreen()
+{
+    return m_offscreen_image;
+}
 
 RenderTarget::RenderTarget(int w, int h)
     : Canvas(w, h)

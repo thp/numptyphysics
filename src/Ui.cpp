@@ -109,10 +109,9 @@ void Widget::draw( Canvas& screen, const Rect& area )
 
   if ( m_alpha > 0 ) {
     Rect r = m_pos;
-    r.clipTo(area);
     if (!r.isEmpty()) {
       if ( m_focussed ) {
-	screen.drawRect(r,screen.makeColour(NP::Colour::SELECTED_BG));
+	screen.drawRect(m_pos,screen.makeColour(NP::Colour::SELECTED_BG));
       } else {
 	screen.drawRect(m_pos,screen.makeColour(m_bg), true, m_alpha);
       }
@@ -157,10 +156,12 @@ Label::Label()
 }
 
 
-Label::Label(const std::string& s, const Font* f)
-  : m_text(s),
-    m_font(f?f:Font::blurbFont())
-{}
+Label::Label(const std::string& s, const Font* f, int color)
+  : m_text(s)
+  , m_font(f?f:Font::blurbFont())
+{
+    setFg(color);
+}
 
 void Label::text( const std::string& s )
 {
@@ -188,7 +189,7 @@ Button::Button(const std::string& s, Event selEvent)
   : Label(s),
     m_selEvent(selEvent)
 {
-  border(true);
+  border(false);
   alpha(100);
   font(Font::headingFont());
   setEventMap(UI_BUTTON_MAP);
@@ -201,9 +202,9 @@ void Button::draw( Canvas& screen, const Rect& area )
         return;
     }
 
-    Label::draw(screen,area);
+    Label::draw(screen, m_pos);
     if (m_focussed) {
-        screen.drawRect(m_pos,screen.makeColour(NP::Colour::TL_BORDER),false);
+        //screen.drawRect(m_pos,screen.makeColour(NP::Colour::TL_BORDER),false);
     }
 }
 
@@ -1008,7 +1009,7 @@ Dialog::Dialog( const std::string &title, Event left, Event right )
   alpha(100);
   m_greedyMouse = true;
   m_title = new Label(title,Font::titleFont());
-  m_title->alpha(100);
+  m_title->alpha(0);
   m_content = new Panel();
   m_left = m_right = NULL;
   m_closeRequested = false;
@@ -1022,9 +1023,9 @@ Dialog::Dialog( const std::string &title, Event left, Event right )
     bar->add(m_title, 64, 1);
     if (right.code!=Event::NOP) {
       if (right.code==Event::CANCEL) {
-	m_right = new Button("<--",right);
+	m_right = new IconButton("","close.png",right);
       } else {
-	m_right = new Button("X",right);
+	m_right = new IconButton("","close.png",right);
       }
       bar->add(m_right, 100, 0);
     }
@@ -1066,6 +1067,30 @@ bool Dialog::onEvent( Event& ev )
     return true;
   }
   return Panel::onEvent(ev);
+}
+
+
+void Dialog::draw(Canvas &screen, const Rect &area)
+{
+    Window *window = dynamic_cast<Window *>(&screen);
+    if (window) {
+        RenderTarget tmp(m_pos.width() / 2, m_pos.height() / 2);
+        tmp.begin();
+
+        Image *offscreen = window->offscreen();
+        Rect r2(0, 0, screen.width(), screen.height());
+        tmp.drawBlur(*offscreen, m_pos, r2, 0.0, 1.5);
+
+        tmp.end();
+
+        Image image(tmp.contents());
+        Rect r(0, 0, tmp.width(), tmp.height());
+        screen.drawBlur(image, r, m_pos, 1.5, 0.0);
+    } else {
+        screen.drawRect(area, 0xff0000);
+    }
+    screen.drawRect(m_pos, 0xffffff, true, 100);
+    Panel::draw(screen, area);
 }
 
 bool Dialog::close()

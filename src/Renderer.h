@@ -54,6 +54,7 @@ public:
     virtual Texture retrieve(Framebuffer &rendertarget) = 0;
 
     virtual void image(const Texture &texture, int x, int y, int w, int h) = 0;
+    virtual void blur(const Texture &texture, const Rect &src, const Rect &dst, float rx, float ry) = 0;
     virtual void rectangle(const Rect &rect, int rgba, bool fill) = 0;
     virtual void path(const Path &path, int rgba) = 0;
 

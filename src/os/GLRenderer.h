@@ -40,6 +40,7 @@ public:
     virtual NP::Texture retrieve(NP::Framebuffer &rendertarget);
 
     virtual void image(const NP::Texture &texture, int x, int y, int w, int h);
+    virtual void blur(const NP::Texture &texture, const Rect &src, const Rect &dst, float rx, float ry);
     virtual void rectangle(const Rect &r, int rgba, bool fill);
     virtual void path(const Path &p, int rgba);
 

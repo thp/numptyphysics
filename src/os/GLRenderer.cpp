@@ -6,6 +6,7 @@ public:
     ~GLRendererPriv();
 
     void submitTextured(Glaserl::Texture &texture, float *data, size_t size);
+    void submitBlur(Glaserl::Texture &texture, float *data, size_t size);
     void submitPath(float *data, size_t size);
     void flush();
 
@@ -20,12 +21,18 @@ private:
     Glaserl::Program textured_program;
     Glaserl::Buffer textured_buffer;
 
+public:
+    Glaserl::Program blur_program;
+    Glaserl::Buffer blur_buffer;
+private:
+
     Glaserl::Program path_program;
     Glaserl::Buffer path_buffer;
 
     enum ProgramType {
         NONE,
         TEXTURED,
+        BLUR,
         PATH,
     };
 
@@ -52,6 +59,41 @@ const char *textured_fragment_shader_src =
 "\n"
 "void main() {\n"
 "    gl_FragColor = texture2D(texture, tex);\n"
+"}\n"
+;
+
+const char *blur_vertex_shader_src =
+"attribute vec4 vtxcoord;\n"
+"attribute vec2 texcoord;\n"
+"uniform mat4 projection;\n"
+"varying vec2 sample[7];\n"
+"uniform vec2 pixelgrid;\n"
+"\n"
+"void main() {\n"
+"    gl_Position = projection * vtxcoord;\n"
+"    sample[0] = texcoord;\n"
+"    sample[1] = texcoord - 3.0 * pixelgrid;\n"
+"    sample[2] = texcoord - 2.0 * pixelgrid;\n"
+"    sample[3] = texcoord - 1.0 * pixelgrid;\n"
+"    sample[4] = texcoord + 1.0 * pixelgrid;\n"
+"    sample[5] = texcoord + 2.0 * pixelgrid;\n"
+"    sample[6] = texcoord + 3.0 * pixelgrid;\n"
+"}\n"
+;
+
+const char *blur_fragment_shader_src =
+"varying vec2 sample[7];\n"
+"uniform sampler2D texture;\n"
+"\n"
+"void main() {\n"
+"    gl_FragColor.rgb = texture2D(texture, sample[1]).rgb * 0.006 +\n"
+"                       texture2D(texture, sample[2]).rgb * 0.061 +\n"
+"                       texture2D(texture, sample[3]).rgb * 0.242 +\n"
+"                       texture2D(texture, sample[0]).rgb * 0.383 +\n"
+"                       texture2D(texture, sample[4]).rgb * 0.242 +\n"
+"                       texture2D(texture, sample[5]).rgb * 0.061 +\n"
+"                       texture2D(texture, sample[6]).rgb * 0.006;\n"
+"    gl_FragColor.a = 1.0;\n"
 "}\n"
 ;
 
@@ -89,6 +131,19 @@ GLRendererPriv::GLRendererPriv(int width, int height)
                 "texture",
                 NULL))
     , textured_buffer(Glaserl::buffer())
+    , blur_program(Glaserl::program(
+                blur_vertex_shader_src,
+                blur_fragment_shader_src,
+                // Attributes
+                "vtxcoord", 2,
+                "texcoord", 2,
+                NULL,
+                // Uniforms
+                "projection",
+                "texture",
+                "pixelgrid",
+                NULL))
+    , blur_buffer(Glaserl::buffer())
     , path_program(Glaserl::program(
                 path_vertex_shader_src,
                 path_fragment_shader_src,
@@ -122,6 +177,7 @@ GLRendererPriv::flipVertically(bool flip)
     }
 
     Glaserl::Util::load_matrix(textured_program, "projection", projection);
+    Glaserl::Util::load_matrix(blur_program, "projection", projection);
     Glaserl::Util::load_matrix(path_program, "projection", projection);
 }
 
@@ -136,6 +192,20 @@ GLRendererPriv::submitTextured(Glaserl::Texture &texture, float *data, size_t si
 
     texture->enable();
     Glaserl::Util::render_triangle_strip(textured_program, textured_buffer);
+    texture->disable();
+}
+
+void
+GLRendererPriv::submitBlur(Glaserl::Texture &texture, float *data, size_t size)
+{
+    if (active_program != NONE) {
+        flush();
+    }
+
+    blur_buffer->append(data, size);
+
+    texture->enable();
+    Glaserl::Util::render_triangle_strip(blur_program, blur_buffer);
     texture->disable();
 }
 
@@ -268,10 +338,46 @@ GLRenderer::image(const NP::Texture &texture, int x, int y, int w, int h)
     float vtxdata[] = {
         (float)x, (float)y, tx1, ty1,
         (float)x, (float)(y + h), tx1, ty2,
-        (float)(x + w), (float)y, tx2, tx1,
+        (float)(x + w), (float)y, tx2, ty1,
         (float)(x + w), (float)(y + h), tx2, ty2,
     };
     priv->submitTextured(data->texture, vtxdata, sizeof(vtxdata));
+}
+
+void
+GLRenderer::blur(const NP::Texture &texture, const Rect &src, const Rect &dst, float rx, float ry)
+{
+    GLTextureData *data = static_cast<GLTextureData *>(texture.get());
+
+    priv->blur_program->enable();
+    float w = data->texture->width();
+    float h = data->texture->height();
+    data->texture->map_uv(w, h);
+    glUniform2f(priv->blur_program->uniform_location("pixelgrid"), rx / w, ry / h);
+    priv->blur_program->disable();
+
+    w = data->texture->width();
+    h = data->texture->height();
+
+    float tx1 = float(src.tl.x) / w, ty1 = float(src.tl.y) / h;
+    data->texture->map_uv(tx1, ty1);
+
+    float tx2 = float(src.br.x) / w, ty2 = float(src.br.y) / h;
+    data->texture->map_uv(tx2, ty2);
+
+    float x = dst.tl.x;
+    float y = dst.tl.y;
+    w = dst.br.x - dst.tl.x;
+    h = dst.br.y - dst.tl.y;
+
+    // Layout: vtx.x, vtx.y, tex.x, tex.y
+    float vtxdata[] = {
+        (float)x, (float)y, tx1, ty1,
+        (float)x, (float)(y + h), tx1, ty2,
+        (float)(x + w), (float)y, tx2, ty1,
+        (float)(x + w), (float)(y + h), tx2, ty2,
+    };
+    priv->submitBlur(data->texture, vtxdata, sizeof(vtxdata));
 }
 
 static void rgba_split(int rgba, float &r, float &g, float &b, float &a)

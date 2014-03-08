@@ -313,6 +313,13 @@ public:
 
   virtual void draw( Canvas& screen, const Rect& area )
   {
+      Window *window = dynamic_cast<Window *>(&screen);
+      if (window) {
+          window->beginOffscreen();
+          m_scene.draw(*window);
+          window->endOffscreen();
+      }
+
     m_refresh = false;
     m_scene.draw(screen);
 

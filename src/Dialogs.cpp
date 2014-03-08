@@ -279,7 +279,7 @@ public:
 	content()->empty();	
 	content()->add(new LevelSelector(m_game, m_chosenLevel));
         if (rightControl()) {
-            rightControl()->text("<--");
+            rightControl()->text("");
             rightControl()->event(Event::CANCEL);
         }
 	break;
@@ -290,7 +290,7 @@ public:
 	content()->empty();
 	content()->add(new HelpPage());
         if (rightControl()) {
-            rightControl()->text("<--");
+            rightControl()->text("");
             rightControl()->event(Event::CANCEL);
         }
 	break;
@@ -302,7 +302,7 @@ public:
       content()->empty();
       content()->add(new LevelLauncher(m_chosenLevel, NULL));
       if (rightControl()) {
-          rightControl()->text("<--");
+          rightControl()->text("");
           rightControl()->event(Event(Event::MENU,1));
       }
       return true;
@@ -652,7 +652,7 @@ public:
     : Dialog("BRAVO!!!",Event::NOP,Event::MENU),
       m_game(game)
   {
-    rightControl()->text("<--");
+    rightControl()->text("");
     char buf[32];
     const GameStats& stats = m_game->stats();
     int time = (stats.endTime - stats.startTime)/1000;
@@ -670,15 +670,15 @@ public:
     } else {
       sprintf(buf,"time: %ds",s);
     }
-    vbox->add(new Label(buf),20,0);
+    vbox->add(new Label(buf, nullptr, 0x000000),20,0);
     sprintf(buf,"%d stroke%s",stats.strokeCount,stats.strokeCount==1?"":"s");
-    vbox->add(new Label(buf),20,0);
+    vbox->add(new Label(buf, nullptr, 0x000000),20,0);
     if (stats.pausedStrokes) {
       sprintf(buf,"     (%d while paused)",stats.pausedStrokes);
-      vbox->add(new Label(buf),20,0);
+      vbox->add(new Label(buf, nullptr, 0x000000),20,0);
     }
     sprintf(buf,"%d undo%s",stats.undoCount,stats.undoCount==1?"":"s");
-    vbox->add(new Label(buf),20,0);
+    vbox->add(new Label(buf, nullptr, 0x000000),20,0);
     vbox->add(new Spacer(),10,1);
  
     Box *hbox2 = new HBox();
