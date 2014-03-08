@@ -50,6 +50,7 @@ class Game : public GameControl, public Container
   Scene   	    m_scene;
   Stroke  	   *m_createStroke;
   Stroke           *m_moveStroke;
+  Vec2              m_moveOffset;
   Widget           *m_pauseLabel;
   Widget           *m_editLabel;
   Widget           *m_completedDialog;
@@ -63,6 +64,7 @@ public:
   Game( Levels* levels, int width, int height ) 
   : m_createStroke(NULL),
     m_moveStroke(NULL),
+    m_moveOffset(),
     m_pauseLabel( NULL ),
     m_editLabel( NULL ),
     m_completedDialog( NULL ),
@@ -468,14 +470,17 @@ public:
     case Event::MOVEBEGIN:
       fprintf(stderr,"MOVING!\n");
       if ( !m_replaying && !m_moveStroke ) {
-	m_moveStroke = m_scene.strokeAtPoint( mousePoint(ev),
-					      SELECT_TOLERANCE );
+          Vec2 point(mousePoint(ev));
+          m_moveStroke = m_scene.strokeAtPoint(point, SELECT_TOLERANCE);
+          if (m_moveStroke) {
+              m_moveOffset = point - m_moveStroke->origin();
+          }
       }
       break;
     case Event::MOVEMORE:
       if ( m_moveStroke ) {
 	fprintf(stderr,"MOVING MORE!\n");
-	m_scene.moveStroke( m_moveStroke, mousePoint(ev) );
+	m_scene.moveStroke( m_moveStroke, mousePoint(ev) - m_moveOffset);
       }
       break;
     case Event::MOVEEND:

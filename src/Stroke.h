@@ -126,6 +126,8 @@ public:
 
     const Vec2 &endpt(unsigned char end);
 
+    Vec2 origin() { return m_origin; }
+
 private:
     void process();
     bool transform();
