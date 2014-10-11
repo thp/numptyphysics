@@ -4,6 +4,7 @@ APP = numptyphysics
 DESTDIR ?=
 PREFIX = /opt/numptyphysics
 
+CXXFLAGS += -I. -Isrc
 CXXFLAGS += -std=c++11 -Wall -DINSTALL_BASE_PATH=\"$(PREFIX)/data\"
 
 SOURCES = $(wildcard src/*.cpp)
@@ -46,8 +47,12 @@ CXXFLAGS += -Iexternal/thp
 SOURCES += $(wildcard external/thp/*.cpp)
 
 # Pick the right OS-specific module here
-SOURCES += src/os/OsSDL2.cpp src/os/GLRenderer.cpp
-CXXFLAGS += -I. -Isrc -Isrc/os
+SOURCES += platform/sdl2/OsSDL2.cpp
+
+# OpenGL platform integration code (using Glaserl)
+SOURCES += platform/gl/GLRenderer.cpp
+CXXFLAGS += -Iplatform/gl
+
 LIBS += $(LOCAL_LIBS)
 
 # Dependency tracking
