@@ -227,7 +227,7 @@ class OsFreeDesktop : public Os
           case SDL_KEYDOWN:
               ev.type = ToolkitEvent::KEYDOWN;
               ev.x = ev.y = ev.finger = 0;
-              ev.key = e.key.keysym.sym;
+              ev.key = mapSDLKeyToNumptyKey(e.key.keysym.sym);
               break;
           case SDL_QUIT:
               ev.type = ToolkitEvent::QUIT;
@@ -283,6 +283,38 @@ class OsFreeDesktop : public Os
   }
 
 private:
+  static int mapSDLKeyToNumptyKey(int key)
+  {
+      switch (key) {
+          case SDLK_SPACE: return NUMPTYKEY_SPACE;
+          case SDLK_RETURN: return NUMPTYKEY_RETURN;
+          case SDLK_ESCAPE: return NUMPTYKEY_ESCAPE;
+          case SDLK_BACKSPACE: return NUMPTYKEY_BACKSPACE;
+
+          case SDLK_DOWN: return NUMPTYKEY_DOWN;
+          case SDLK_UP: return NUMPTYKEY_UP;
+          case SDLK_LEFT: return NUMPTYKEY_LEFT;
+          case SDLK_RIGHT: return NUMPTYKEY_RIGHT;
+
+          case SDLK_u: return NUMPTYKEY_u;
+          case SDLK_s: return NUMPTYKEY_s;
+          case SDLK_m: return NUMPTYKEY_m;
+          case SDLK_e: return NUMPTYKEY_e;
+          case SDLK_r: return NUMPTYKEY_r;
+          case SDLK_n: return NUMPTYKEY_n;
+          case SDLK_p: return NUMPTYKEY_p;
+          case SDLK_v: return NUMPTYKEY_v;
+          case SDLK_q: return NUMPTYKEY_q;
+
+          case SDLK_F4: return NUMPTYKEY_F4;
+          case SDLK_F6: return NUMPTYKEY_F6;
+          case SDLK_F7: return NUMPTYKEY_F7;
+          default: return NUMPTYKEY_NONE;
+      }
+
+    return NUMPTYKEY_NONE;
+  }
+
   FILE *m_fifo;
   char m_cmdBuffer[128];
   int  m_cmdPos;

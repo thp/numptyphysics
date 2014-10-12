@@ -15,7 +15,6 @@
  */
 
 #include "Os.h"
-#include <SDL.h>
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -23,26 +22,25 @@
 OsObj OS;
 
 static const BasicEventMap::KeyPair game_keymap[] = {
-  { SDLK_SPACE,    Event::PAUSE },
-  { SDLK_KP_ENTER, Event::PAUSE },
-  { SDLK_RETURN,   Event::PAUSE },
-  { SDLK_ESCAPE,   Event::UNDO  },
-  { SDLK_BACKSPACE,Event::UNDO  },
-  { SDLK_u,        Event::UNDO  },
-  { SDLK_DOWN,     Event::UNDO  },
-  { SDLK_F7,       Event::UNDO  },
-  { SDLK_s,        Event::SAVE  },
-  { SDLK_F4,       Event::OPTION},
-  { SDLK_m,        Event::MENU},
-  { SDLK_e,        Event::EDIT  },
-  { SDLK_F6,       Event::EDIT  },
-  { SDLK_r,        Event::RESET },
-  { SDLK_UP,       Event::RESET },
-  { SDLK_n,        Event::NEXT  },
-  { SDLK_RIGHT,    Event::NEXT  },
-  { SDLK_p,        Event::PREVIOUS },
-  { SDLK_LEFT,     Event::PREVIOUS },
-  { SDLK_v,        Event::REPLAY},
+  { NUMPTYKEY_SPACE,    Event::PAUSE },
+  { NUMPTYKEY_RETURN,   Event::PAUSE },
+  { NUMPTYKEY_ESCAPE,   Event::UNDO  },
+  { NUMPTYKEY_BACKSPACE,Event::UNDO  },
+  { NUMPTYKEY_u,        Event::UNDO  },
+  { NUMPTYKEY_DOWN,     Event::UNDO  },
+  { NUMPTYKEY_F7,       Event::UNDO  },
+  { NUMPTYKEY_s,        Event::SAVE  },
+  { NUMPTYKEY_F4,       Event::OPTION},
+  { NUMPTYKEY_m,        Event::MENU},
+  { NUMPTYKEY_e,        Event::EDIT  },
+  { NUMPTYKEY_F6,       Event::EDIT  },
+  { NUMPTYKEY_r,        Event::RESET },
+  { NUMPTYKEY_UP,       Event::RESET },
+  { NUMPTYKEY_n,        Event::NEXT  },
+  { NUMPTYKEY_RIGHT,    Event::NEXT  },
+  { NUMPTYKEY_p,        Event::PREVIOUS },
+  { NUMPTYKEY_LEFT,     Event::PREVIOUS },
+  { NUMPTYKEY_v,        Event::REPLAY},
   {}
 };
 
@@ -62,7 +60,7 @@ static const BasicEventMap::ButtonPair game_erase_mousemap[] = {
 };
 
 static const BasicEventMap::KeyPair app_keymap[] = {
-  { SDLK_q, Event::QUIT },
+  { NUMPTYKEY_q, Event::QUIT },
   {}
 };
 
@@ -85,15 +83,15 @@ static const BasicEventMap::ButtonPair ui_draggable_mousemap[] = {
 };
 
 static const BasicEventMap::KeyPair ui_draggable_keymap[] = {
-  { SDLK_UP,       Event::UP },
-  { SDLK_DOWN,     Event::DOWN },
-  { SDLK_RIGHT,    Event::RIGHT  },
-  { SDLK_LEFT,     Event::LEFT },
+  { NUMPTYKEY_UP,       Event::UP },
+  { NUMPTYKEY_DOWN,     Event::DOWN },
+  { NUMPTYKEY_RIGHT,    Event::RIGHT  },
+  { NUMPTYKEY_LEFT,     Event::LEFT },
   {}
 };
 
 static const BasicEventMap::KeyPair ui_dialog_keymap[] = {
-  { SDLK_ESCAPE,   Event::CLOSE  },
+  { NUMPTYKEY_ESCAPE,   Event::CLOSE  },
   {}
 };
 
