@@ -1,9 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Version=1.0
-Type=Application
-Name=Numpty
-Categories=Game;LogicGame;
-Exec=invoker --single-instance --type=e /opt/numptyphysics/bin/numptyphysics
-Icon=/opt/numptyphysics/data/numptyphysics.png
-

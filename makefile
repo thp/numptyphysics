@@ -78,8 +78,6 @@ distclean: clean
 install: $(APP)
 	mkdir -p $(DESTDIR)/$(PREFIX)/bin
 	install -m 755 $(APP) $(DESTDIR)/$(PREFIX)/bin/
-	mkdir -p $(DESTDIR)/usr/share/applications
-	install -m 644 resources/$(APP).desktop $(DESTDIR)/usr/share/applications/
 	mkdir -p $(DESTDIR)/$(PREFIX)/data
 	cp -rpv data/*.png data/*.ttf data/*.npz $(DESTDIR)/$(PREFIX)/data/
 
