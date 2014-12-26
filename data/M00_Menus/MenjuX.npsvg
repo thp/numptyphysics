@@ -1,0 +1,34 @@
+<svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
+<rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
+<np:meta author="test" background="" title="" />
+<np:interaction np:color="3" np:action="play" />
+<np:interaction np:color="10" np:action="blubb" />
+<np:interaction np:color="6" np:action="bla" />
+<path np:class="decor interactive" fill="none" stroke="#108710" stroke-width="2" d="M325 215L323 317L324 217L321 307L319 281L318 218L317 223L317 313L319 288L319 240L323 227L325 237L329 301" />
+<path np:class="decor interactive" fill="none" stroke="#108710" stroke-width="2" d="M335 311L378 304L409 303L454 299L445 299L417 304L368 308L342 307L329 304L354 310L407 310L464 304L443 305L413 309L339 311L315 313L325 315L360 317L378 316L395 314L433 306L431 306" />
+<path np:class="decor interactive" fill="none" stroke="#108710" stroke-width="2" d="M350 234L349 289L348 272L343 249L341 229L343 226L350 226L362 235L364 240L364 250L357 257L348 262L343 263" />
+<path np:class="decor interactive" fill="none" stroke="#108710" stroke-width="2" d="M376 230L374 230L372 233L367 247L367 265L369 275L372 277L380 276" />
+<path np:class="decor interactive" fill="none" stroke="#108710" stroke-width="2" d="M389 258L384 260L382 263L382 272L388 276L393 275L400 268L403 257L401 254L397 254L394 258L394 265L397 269L403 269L419 254L418 263L420 265L427 265L433 261" />
+<path np:class="decor interactive" fill="none" stroke="#108710" stroke-width="2" d="M436 253L434 256L434 284L429 286L418 284L411 278L410 274" />
+<path np:class="decor interactive" fill="none" stroke="#108710" stroke-width="2" d="M462 206L463 230L461 259L461 302L461 299" />
+<path np:class="decor interactive" fill="none" stroke="#108710" stroke-width="2" d="M322 215L322 213L324 212L344 208L380 208L432 211L442 211L460 208" />
+<path np:class="decor interactive" fill="none" stroke="#ff7f00" stroke-width="2" d="M535 206L533 235L533 276L528 315L538 222L537 253L530 311L536 260L535 225L536 261L529 313L536 250L537 220L541 209L541 251L537 290L540 253L539 230L537 222L537 257L533 317L536 280L536 227L537 224L539 224L540 260L535 309" />
+<path np:class="decor interactive" fill="none" stroke="#ff7f00" stroke-width="2" d="M539 308L544 310L562 310L602 308L656 309L664 307L652 307L633 303L619 302L552 304L555 308L565 312L649 312L565 317L546 317L540 314L540 316L547 318L569 318L628 306L622 304L602 302L528 299L556 306L594 306L636 302L642 301L649 297L605 299L587 303L574 303L549 308L571 312L617 312L649 307" />
+<path np:class="decor interactive" fill="none" stroke="#ff7f00" stroke-width="2" d="M652 226L653 218L653 255L648 300" />
+<path np:class="decor interactive" fill="none" stroke="#ff7f00" stroke-width="2" d="M550 206L540 206L565 212L637 214L660 217L666 217L668 216L667 215" />
+<path np:class="decor interactive" fill="none" stroke="#ff7f00" stroke-width="2" d="M561 241L559 243L553 272" />
+<path np:class="decor interactive" fill="none" stroke="#ff7f00" stroke-width="2" d="M556 261L563 261L569 255" />
+<path np:class="decor interactive" fill="none" stroke="#ff7f00" stroke-width="2" d="M570 239L566 271" />
+<path np:class="decor interactive" fill="none" stroke="#ff7f00" stroke-width="2" d="M578 263L589 256L591 253L586 250L580 251L577 254L575 259L575 266L580 270L584 270L594 264L608 249L611 240L610 237L606 237L599 246L596 253L595 265L597 267L605 268L613 263L621 255L615 290L615 269L619 255L624 251L629 250L632 253L634 261L633 266L629 268L612 268" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M94 212L93 263L90 306L87 246L84 230L83 209L85 238L85 298L83 318L85 265L88 243L88 225L86 212L88 238L88 304L89 268L94 211L94 259L90 303L90 288L92 275" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M86 230L89 305" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M88 309L86 309L139 309L192 300L160 305L90 309L84 308L142 307L161 305L201 297L181 300L136 300L96 307L110 311L120 312L149 312L203 301L174 304L137 305L121 308L92 317L129 316L158 314L212 302L222 301L208 304L173 306L117 305L158 307L192 301" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M123 226L115 227L108 233L103 241L103 247L107 250L119 251L123 253L124 259L117 265L104 265" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M131 255L137 249L136 245L132 245L127 250L125 254L126 264L136 263L146 250L149 236L149 227L148 224L145 222L142 225L139 239L139 262L143 265L153 264L160 252L160 247L154 246L151 248L147 257L148 262L150 264L161 264L166 261" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M173 249L169 249L166 255L167 263L172 265L176 262L183 251" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M184 217L182 218L180 231L178 265L178 263" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M193 250L194 249L189 254L188 261L190 262L195 261L199 254L200 249L199 241L194 241L191 249L191 256L194 258L196 258L204 250L206 260L204 259L204 252L212 246L214 246" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M218 203L216 302L216 298" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M210 218L210 215L210 217" />
+<path np:class="decor interactive" fill="none" stroke="#87cefa" stroke-width="2" d="M87 208L85 206L99 203L170 205L200 204L221 201" />
+</svg>

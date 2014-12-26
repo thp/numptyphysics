@@ -1,0 +1,8 @@
+<svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
+<rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
+<np:meta author="test" background="" title="" />
+<path np:class="fixed" fill="none" stroke="#000077" stroke-width="2" d="M5 450L795 450" />
+<path np:class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M596 391L605 370L604 379L607 389L623 390L619 392L615 399L613 399L617 409L612 407L611 408L612 407L614 409L616 415L606 402L604 402L599 407L598 410L596 410L594 413L593 412L591 405L593 399L587 397L582 391L591 388L598 388" />
+<path np:class="fixed" fill="none" stroke="#101010" stroke-width="2" d="M400 136" />
+<path np:class="token" fill="none" stroke="#b80000" stroke-width="2" d="M328 68L329 71L327 71L324 72L323 73L319 76L318 78L316 79L315 83L314 85L318 98L320 101L323 103L325 105L327 106L331 109L340 109L346 107L349 104L351 103L353 100L354 99L356 96L357 91L358 91L357 77L354 77L351 73L350 70L342 66L339 65L331 65L330 68" />
+</svg>

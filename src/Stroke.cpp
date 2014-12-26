@@ -81,21 +81,22 @@ Stroke::Stroke(const std::string &flags, const std::string &rgb, const std::stri
         m_colour = (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
     }
 
-    if (flags.find("t") != std::string::npos) setAttribute(ATTRIB_TOKEN);
-    if (flags.find("g") != std::string::npos) setAttribute(ATTRIB_GOAL);
-    if (flags.find("f") != std::string::npos) setAttribute(ATTRIB_GROUND);
-    if (flags.find("s") != std::string::npos) setAttribute(ATTRIB_SLEEPING);
-    if (flags.find("d") != std::string::npos) setAttribute(ATTRIB_DECOR);
-    if (flags.find("r") != std::string::npos) setAttribute(ATTRIB_ROPE);
-    if (flags.find("i") != std::string::npos) setAttribute(ATTRIB_INTERACTIVE);
+    std::map<std::string,Attribute> m;
+    m["token"] = ATTRIB_TOKEN;
+    m["goal"] = ATTRIB_GOAL;
+    m["fixed"] = ATTRIB_GROUND;
+    m["sleeping"] = ATTRIB_SLEEPING;
+    m["decor"] = ATTRIB_DECOR;
+    m["rope"] = ATTRIB_ROPE;
+    m["interactive"] = ATTRIB_INTERACTIVE;
+
+    std::istringstream iss(flags);
+    std::string flag;
+    while (getline(iss, flag, ' ')) {
+        setAttribute(m[flag]);
+    }
 
     m_rawPath = Path::fromSVG(svgpath);
-
-#if 0
-    if (m_rawPath.size() < 2) {
-        throw "invalid stroke def";
-    }
-#endif
 
     m_origin = m_rawPath.point(0);
     m_rawPath.translate(-m_origin);

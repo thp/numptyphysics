@@ -459,12 +459,11 @@ public:
                 std::cerr << "Invalid np:interaction" << std::endl;
             }
         } else if (strcmp(element.Name(), "path") == 0) {
-            const tinyxml2::XMLAttribute *flags = element.FindAttribute("np:flags");
-            const tinyxml2::XMLAttribute *color = element.FindAttribute("np:color");
+            const tinyxml2::XMLAttribute *flags = element.FindAttribute("np:class");
             const tinyxml2::XMLAttribute *rgb = element.FindAttribute("stroke");
             const tinyxml2::XMLAttribute *data = element.FindAttribute("d");
 
-            if (flags && color && rgb && data) {
+            if (flags && rgb && data) {
                 scene->m_strokes.push_back(new Stroke(flags->Value(),
                                                       rgb->Value(),
                                                       data->Value()));

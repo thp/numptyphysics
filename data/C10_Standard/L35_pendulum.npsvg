@@ -1,0 +1,40 @@
+<svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
+<rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
+<np:meta author="test" background="" title="" />
+<path np:class="fixed" fill="none" stroke="#000077" stroke-width="2" d="M5 450L795 450" />
+<path np:class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M596 391L605 370L604 379L607 389L623 390L619 392L615 399L613 399L617 409L612 407L611 408L612 407L614 409L616 415L606 402L604 402L599 407L598 410L596 410L594 413L593 412L591 405L593 399L587 397L582 391L591 388L598 388" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M354 0L353 12" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M354 13L353 3" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M355 9L356 3L371 3L373 2L400 2L401 1L404 1L407 0L453 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M362 0L451 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M388 0L451 0L450 0L448 2L447 20L445 21" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M356 4L355 0L354 6L353 15L355 16L363 16L368 17L373 17L387 20L406 20L409 19L411 19L414 18L421 18L425 17L428 16L431 16L434 15L436 14L441 14L444 15L446 15" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M359 11L358 5L360 5L375 0L386 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M369 12L371 9L382 1L386 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M388 14L392 7L397 2L402 2" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M402 17L403 13L407 8L413 3L419 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M415 10L416 8L422 3L429 0L435 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M433 15L435 5L442 0L448 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M410 15L412 10L415 5L420 0L426 0L420 0L417 3L416 6L419 2L425 0L429 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M426 15L432 2L438 0L442 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M398 0L447 0L403 0L443 0L408 0L439 0" />
+<path np:class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M446 7L448 0L404 0" />
+<path np:class="" fill="none" stroke="#000077" stroke-width="2" d="M393 12" />
+<path np:class="" fill="none" stroke="#000077" stroke-width="2" d="M398 19" />
+<path np:class="" fill="none" stroke="#000077" stroke-width="2" d="M398 19L399 55L400 75L399 95L398 122L394 145L392 174L393 249L394 264L396 272L397 295L398 345L399 366L400 371L401 372" />
+<path np:class="" fill="none" stroke="#000077" stroke-width="2" d="M417 364L412 364L408 365L403 366L396 371L388 377L380 381L375 384L371 390L367 399L372 424L379 431L386 436L397 439L410 437L423 433L433 426L442 419L448 411L450 403L449 395L445 385L438 376L430 372L421 369L411 369" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M29 441L28 440L26 434L23 428L19 418L16 413L14 411L17 415L21 426L26 437L29 446L28 448L27 441L28 418L30 413L29 415L27 424L30 432L33 423L36 417L33 422L31 432L30 440L33 435L34 424L36 420L34 426L29 443L30 438L33 427" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M33 447L32 451L29 448" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M34 442L33 433L35 417L36 415" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M34 437L33 436L36 413" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M33 449L35 431" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M38 437L36 437L43 419L49 409" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M755 451L758 451L755 420L752 402" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M759 447L763 443L769 428L773 420" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M761 449L762 443L766 415" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M761 445L764 421L767 408" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M759 438L761 419" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M757 442L760 427L765 412" />
+<path np:class="fixed" fill="none" stroke="#108710" stroke-width="2" d="M758 446L761 443L767 429L773 414" />
+<path np:class="token" fill="none" stroke="#b80000" stroke-width="2" d="M118 377L117 376L116 397L115 409L114 417L113 430L112 434L111 440L121 440L125 441L172 441L176 442L190 442L191 438L192 389L190 386L187 386L184 383L179 383L174 384L167 384L162 381L123 381L122 380L119 380" />
+</svg>

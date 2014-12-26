@@ -11,7 +11,17 @@ import sys
 
 WIDTH = 800
 HEIGHT = 480
-URL = 'http://numptyphysics.garage.maemo.org/np-svg'
+URL = 'http://numptyphysics.garage.maemo.org/'
+
+FLAGS = [
+    'token',
+    'goal',
+    'fixed',
+    'sleeping',
+    'decor',
+    'rope',
+    'interactive',
+]
 
 # Taken from src/Colour.{h,cpp}
 COLORS = [
@@ -55,8 +65,10 @@ class NumptyPhysicsLevel(object):
                 elif 'g' in stroke_flags:
                     stroke_color = 1
 
+                flags = [next(flag for flag in FLAGS if flag.startswith(c)) for c in stroke_flags]
+
                 stroke_points = [tuple(map(int, part.split(','))) for part in value.split()]
-                self.strokes.append((stroke_flags, stroke_color, stroke_points))
+                self.strokes.append((flags, stroke_color, stroke_points))
             else:
                 raise NotImplementedError('Cannot parse line: {}: {}'.format(key, value))
 
@@ -71,13 +83,10 @@ class NumptyPhysicsLevel(object):
         for color, action in self.interactions:
             print >>fp, '<np:interaction np:color="{}" np:action="{}" />'.format(color, action)
 
-
         for stroke_flags, stroke_color, stroke_points in self.strokes:
-            colorcode = '#%06x' % COLORS[stroke_color]
-            strokedata = 'L'.join('%d %d' % (x, y) for x, y in stroke_points)
-            print >>fp, ('<path np:flags="{}" np:color="{}" fill="none" '
-                         'stroke="{}" stroke-width="{}" d="M{}" />').format(stroke_flags, stroke_color,
-                                                                           colorcode, stroke_width, strokedata)
+            node = '<path np:class="{}" fill="none" stroke="{}" stroke-width="{}" d="M{}" />'
+            print >>fp, node.format(' '.join(stroke_flags), '#%06x' % COLORS[stroke_color], stroke_width,
+                                    'L'.join('%d %d' % (x, y) for x, y in stroke_points))
 
         for event in self.events:
             print >>fp, '<np:event value="{}" />'.format(event)
