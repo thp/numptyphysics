@@ -21,10 +21,8 @@ private:
     Glaserl::Program textured_program;
     Glaserl::Buffer textured_buffer;
 
-public:
     Glaserl::Program blur_program;
     Glaserl::Buffer blur_buffer;
-private:
 
     Glaserl::Program path_program;
     Glaserl::Buffer path_buffer;
@@ -39,6 +37,8 @@ private:
     enum ProgramType active_program;
     int width;
     int height;
+
+    friend class GLRenderer;
 };
 
 const char *textured_vertex_shader_src =
