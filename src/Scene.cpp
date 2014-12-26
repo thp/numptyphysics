@@ -21,6 +21,7 @@
 #include "Stroke.h"
 
 #include "tinyxml2.h"
+#include "thp_format.h"
 
 #include <vector>
 #include <list>
@@ -51,6 +52,7 @@ Scene::Scene( bool noWorld )
 Scene::~Scene()
 {
   clear();
+  m_interactions.clear();
   if ( m_world ) {
     delete m_world;
   }
@@ -567,19 +569,22 @@ bool Scene::save( const std::string& file, bool saveLog )
   printf("saving to %s\n",file.c_str());
   std::ofstream o( file.c_str(), std::ios::out );
   if ( o.is_open() ) {
-    o << "Title: "<<m_title<<std::endl;
-    o << "Author: "<<m_author<<std::endl;
-    o << "Background: "<<m_bg<<std::endl;
+    o << thp::format("<svg width=\"%d\" height=\"%d\" xmlns:np=\"%s\">", WORLD_WIDTH, WORLD_HEIGHT, NPSVG_NAMESPACE) << std::endl;
+    o << thp::format("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"white\" stroke=\"none\" />", WORLD_WIDTH, WORLD_HEIGHT) << std::endl;
+    o << thp::format("<np:meta author=\"%s\" background=\"%s\" title=\"%s\" />", m_author.c_str(), m_bg.c_str(), m_title.c_str()) << std::endl;
+
     o << m_interactions.serialize();
     for ( int i=0; i<m_strokes.size() && (!saveLog || i<m_protect); i++ ) {
-	o << m_strokes[i]->asString();
+	o << m_strokes[i]->asString() << std::endl;
     }
 
     if ( saveLog ) {      
       for ( int i=0; i<m_log.size(); i++ ) {
-	o << "E: " << m_log.asString( i ) <<std::endl;
+	o << m_log.asString( i ) <<std::endl;
       }
     }
+
+    o << "</svg>" << std::endl;
 
     o.close();
     return true;

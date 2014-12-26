@@ -22,6 +22,7 @@
 #include "Os.h"
 
 #define PROJECT_HOMEPAGE "http://github.com/harmattan/numptyphysics"
+#define NPSVG_NAMESPACE "http://numptyphysics.garage.maemo.org/"
 
 #define WORLD_WIDTH  800
 #define WORLD_HEIGHT 480

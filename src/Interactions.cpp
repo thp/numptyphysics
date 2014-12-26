@@ -1,5 +1,7 @@
 #include "Interactions.h"
 
+#include "thp_format.h"
+
 #include <sstream>
 #include <cctype>
 
@@ -77,7 +79,8 @@ Interactions::serialize()
     std::stringstream s;
 
     for (auto &interaction: m_interactions) {
-        s << "Interaction: " << interaction.first << " = " << interaction.second << std::endl;
+        s << thp::format("<np:interaction np:color=\"%d\" np_action=\"%s\" />",
+                         interaction.first, interaction.second.c_str()) << std::endl;
     }
 
     return s.str();

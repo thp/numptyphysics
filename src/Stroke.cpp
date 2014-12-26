@@ -17,7 +17,24 @@
 #include "Stroke.h"
 #include "Scene.h"
 
+#include "thp_format.h"
+
 #include <string>
+
+#define SVG_STROKE_WIDTH 3
+
+static struct {
+    const char *name;
+    Attribute attribute;
+} ATTRIBUTE_NAMES[] = {
+    "token", ATTRIB_TOKEN,
+    "goal", ATTRIB_GOAL,
+    "fixed", ATTRIB_GROUND,
+    "sleeping", ATTRIB_SLEEPING,
+    "decor", ATTRIB_DECOR,
+    "rope", ATTRIB_ROPE,
+    "interactive", ATTRIB_INTERACTIVE,
+};
 
 Stroke::Stroke(const Path &path)
     : m_rawPath(path)
@@ -82,13 +99,9 @@ Stroke::Stroke(const std::string &flags, const std::string &rgb, const std::stri
     }
 
     std::map<std::string,Attribute> m;
-    m["token"] = ATTRIB_TOKEN;
-    m["goal"] = ATTRIB_GOAL;
-    m["fixed"] = ATTRIB_GROUND;
-    m["sleeping"] = ATTRIB_SLEEPING;
-    m["decor"] = ATTRIB_DECOR;
-    m["rope"] = ATTRIB_ROPE;
-    m["interactive"] = ATTRIB_INTERACTIVE;
+    for (auto &e: ATTRIBUTE_NAMES) {
+        m[e.name] = e.attribute;
+    }
 
     std::istringstream iss(flags);
     std::string flag;
@@ -120,27 +133,26 @@ Stroke::reset(b2World *world)
 std::string
 Stroke::asString()
 {
-    std::stringstream s;
-    s << 'S';
-    if ( hasAttribute(ATTRIB_TOKEN) )    s<<'t';
-    if ( hasAttribute(ATTRIB_GOAL) )     s<<'g';
-    if ( hasAttribute(ATTRIB_GROUND) )   s<<'f';
-    if ( hasAttribute(ATTRIB_SLEEPING) ) s<<'s';
-    if ( hasAttribute(ATTRIB_DECOR) )    s<<'d';
-    if ( hasAttribute(ATTRIB_ROPE) )     s<<'r';
-    if ( hasAttribute(ATTRIB_INTERACTIVE) ) s<<'i';
-    for ( int i=0; i<NP::Colour::count; i++ ) {
-        if ( m_colour==NP::Colour::values[i] )  s<<i;
+    std::stringstream classes;
+    for (auto &e: ATTRIBUTE_NAMES) {
+        if (hasAttribute(e.attribute)) {
+            classes << thp::format("%s ", e.name);
+        }
     }
-    s << ":";
+
+    std::stringstream points;
     Path opath = m_rawPath;
     opath.translate(m_origin);
-    for ( int i=0; i<opath.size(); i++ ) {
+    for (int i=0; i<opath.size(); i++) {
         const Vec2& p = opath.point(i);
-        s <<' '<< p.x << ',' << p.y;
+        points << thp::format("%d %d", p.x, p.y);
+        if (i < opath.size() - 1) {
+            points << 'L';
+        }
     }
-    s << std::endl;
-    return s.str();
+
+    return thp::format("<path np:class=\"%s\" fill=\"none\" stroke=\"#%06x\" stroke-width=\"%d\" d=\"M%s\" />",
+                       classes.str().c_str(), m_colour, SVG_STROKE_WIDTH, points.str().c_str());
 }
 
 void
