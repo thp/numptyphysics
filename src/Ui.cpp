@@ -1007,7 +1007,7 @@ Dialog::Dialog( const std::string &title, Event left, Event right )
 {
   setEventMap(UI_DIALOG_MAP);
   setFg(0x000000);
-  alpha(200);
+  alpha(100);
   m_greedyMouse = true;
   m_title = new Label(title,Font::titleFont());
   m_title->alpha(0);
