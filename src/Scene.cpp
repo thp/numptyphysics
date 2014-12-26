@@ -285,11 +285,9 @@ void Scene::draw(Canvas &canvas, bool everything)
 
     clearWithDelete(m_deletedStrokes);
 
-#if 0
     for (auto &kv: m_color_rects) {
         canvas.drawRect(kv.second, kv.first, true, 128);
     }
-#endif
 }
 
 bool Scene::interact(const Vec2 &pos)

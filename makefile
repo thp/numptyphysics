@@ -4,7 +4,7 @@ APP = numptyphysics
 DESTDIR ?=
 PREFIX = /opt/numptyphysics
 
-CXXFLAGS += -I. -Isrc
+CXXFLAGS += -I. -Isrc -Wno-sign-compare
 CXXFLAGS += -std=c++11 -Wall -DINSTALL_BASE_PATH=\"$(PREFIX)/data\"
 
 SOURCES = $(wildcard src/*.cpp)
@@ -83,7 +83,7 @@ install: $(APP)
 	mkdir -p $(DESTDIR)/$(PREFIX)/bin
 	install -m 755 $(APP) $(DESTDIR)/$(PREFIX)/bin/
 	mkdir -p $(DESTDIR)/$(PREFIX)/data
-	cp -rpv data/*.png data/*.ttf data/*.npz $(DESTDIR)/$(PREFIX)/data/
+	cp -rpv data/*.png data/*.ttf $(DESTDIR)/$(PREFIX)/data/
 
 
 .PHONY: all clean distclean

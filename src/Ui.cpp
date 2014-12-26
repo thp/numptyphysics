@@ -40,10 +40,10 @@ Widget::Widget(WidgetParent *p)
     m_bg(NP::Colour::DEFAULT_BG),
     m_fg(NP::Colour::DEFAULT_FG),
     m_border(0),
-    m_visible(true),
     m_targetPos(0, 0),
     m_animating(false),
-    m_animation_done([](){})
+    m_animation_done([](){}),
+    m_visible(true)
 {}
 
 std::string Widget::toString()

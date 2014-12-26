@@ -159,7 +159,7 @@ void ScriptPlayer::start( const ScriptLog* log, Scene* scene )
   m_index = 0;
   m_lastTick = 0;
   m_scene = scene;
-  printf("start playback: %d events\n",m_log->size());
+  printf("start playback: %lu events\n",m_log->size());
 }
 
 
@@ -201,6 +201,9 @@ bool ScriptPlayer::tick()
       case ScriptEntry::OP_PAUSE:
 	m_isPaused = (e.stroke != 0);
 	break;
+      case ScriptEntry::OP_GOAL:
+        // TODO
+        break;
       }
       m_index++;
     }

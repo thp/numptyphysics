@@ -68,6 +68,7 @@ bool
 Interactions::add(const std::string &color, const std::string &action)
 {
     m_interactions[atoi(color.c_str())] = action;
+    return true;
 }
 
 std::string

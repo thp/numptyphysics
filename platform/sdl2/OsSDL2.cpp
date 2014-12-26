@@ -158,8 +158,8 @@ class OsFreeDesktop : public Os
  public:
   OsFreeDesktop()
     : m_fifo(NULL)
-    , m_cmdReady(false)
     , m_cmdPos(0)
+    , m_cmdReady(false)
     , m_renderer(NULL)
   {
   }

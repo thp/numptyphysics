@@ -313,9 +313,6 @@ std::string Levels::demoPath(int l)
   std::string path = Config::userDataDir() + Os::pathSep
     + "Recordings" + Os::pathSep
     + collectionName(c,false);
-  if (fileExtension(path) == ".npz") {
-    path.resize(path.length()-4);
-  }
   return path;
 }
 
