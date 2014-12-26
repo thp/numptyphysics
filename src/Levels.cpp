@@ -102,7 +102,7 @@ bool Levels::addPath(const std::string &path)
 {
     std::string ext = fileExtension(path);
 
-    if (ext == ".nph" || ext == ".npd") {
+    if (ext == ".nph" || ext == ".npd" || ext == ".npsvg") {
         addLevel(path, rankFromPath(path));
         return true;
     }
@@ -178,7 +178,7 @@ bool Levels::scanCollection( const std::string& file, int rank )
 
             std::string filename = file + "/" + entry->d_name;
             std::string ext = fileExtension(filename);
-            if (ext == ".nph") {
+            if (ext == ".nph" || ext == ".npsvg") {
                 if (addLevel(getCollection(collectionName), filename, rank)) {
                     result = true;
                 }

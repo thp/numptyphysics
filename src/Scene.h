@@ -104,6 +104,8 @@ private:
   int             m_step;
   std::map<int,Rect> m_color_rects;
   NP::Interactions    m_interactions;
+
+  friend class SceneSVGVisitor;
 };
 
 #endif /* NUMPTYPHYSICS_SCENE_H */

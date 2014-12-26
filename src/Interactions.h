@@ -15,6 +15,7 @@ public:
     void clear();
 
     bool parse(const std::string &line);
+    bool add(const std::string &color, const std::string &action);
     std::string serialize();
 
 private:

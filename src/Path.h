@@ -41,6 +41,8 @@ public:
   Path( int n, Vec2* p );
   Path( const char *ptlist );
 
+  static Path fromSVG(const std::string &svgpath);
+
   void makeRelative();
   Path& translate(const Vec2& xlate);
   Path& rotate(const b2Mat22& rot);

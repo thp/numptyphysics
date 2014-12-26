@@ -20,6 +20,8 @@
 #include "Colour.h"
 #include "Stroke.h"
 
+#include "tinyxml2.h"
+
 #include <vector>
 #include <list>
 #include <algorithm>
@@ -417,6 +419,79 @@ splitLines(const std::string &str)
     return result;
 }
 
+class SceneSVGVisitor : public tinyxml2::XMLVisitor {
+public:
+    SceneSVGVisitor(Scene *scene)
+        : tinyxml2::XMLVisitor()
+        , scene(scene)
+    {
+        std::cout << "SVG Visitor" << std::endl;
+    }
+
+    virtual bool VisitEnter(const tinyxml2::XMLElement &element, const tinyxml2::XMLAttribute *firstAttribute) {
+        if (strcmp(element.Name(), "np:meta") == 0) {
+            const tinyxml2::XMLAttribute *attr;
+
+            attr = element.FindAttribute("title");
+            if (attr) {
+                scene->m_title = attr->Value();
+            }
+
+            attr = element.FindAttribute("background");
+            if (attr) {
+                scene->m_bg = attr->Value();
+            }
+
+            attr = element.FindAttribute("author");
+            if (attr) {
+                scene->m_author = attr->Value();
+            }
+
+            attr = element.FindAttribute("gravity");
+            if (attr) {
+                scene->setGravity(attr->Value());
+            }
+        } else if (strcmp(element.Name(), "np:interaction") == 0) {
+            const tinyxml2::XMLAttribute *color = element.FindAttribute("np:color");
+            const tinyxml2::XMLAttribute *action = element.FindAttribute("np:action");
+
+            if (color && action) {
+                scene->m_interactions.add(color->Value(), action->Value());
+            } else {
+                std::cerr << "Invalid np:interaction" << std::endl;
+            }
+        } else if (strcmp(element.Name(), "path") == 0) {
+            const tinyxml2::XMLAttribute *flags = element.FindAttribute("np:flags");
+            const tinyxml2::XMLAttribute *color = element.FindAttribute("np:color");
+            const tinyxml2::XMLAttribute *rgb = element.FindAttribute("stroke");
+            const tinyxml2::XMLAttribute *data = element.FindAttribute("d");
+
+            if (flags && color && rgb && data) {
+                scene->m_strokes.push_back(new Stroke(flags->Value(),
+                                                      rgb->Value(),
+                                                      data->Value()));
+            } else {
+                std::cerr << "Invalid path" << std::endl;
+            }
+        } else if (strcmp(element.Name(), "np:event") == 0) {
+            const tinyxml2::XMLAttribute *attr = element.FindAttribute("value");
+
+            if (attr) {
+                scene->m_log.push_back(std::string(attr->Value()));
+            } else {
+                std::cerr << "Invalid np:event" << std::endl;
+            }
+        } else {
+            std::cerr << "Unhandled XML element: " << element.Name() << std::endl;
+        }
+
+        return true;
+    }
+
+private:
+    Scene *scene;
+};
+
 bool Scene::load(const std::string &level)
 {
     clear();
@@ -424,33 +499,41 @@ bool Scene::load(const std::string &level)
     m_dynamicGravity = false;
     m_step = 0;
 
-    for (std::string &line: splitLines(level)) {
-        std::string value = line.substr(line.find(':') + 1);
-        switch (line[0]) {
-            case 'T':
-                m_title = value;
-                break;
-            case 'B':
-                m_bg = value;
-                break;
-            case 'A':
-                m_author = value;
-                break;
-            case 'S':
-                m_strokes.push_back(new Stroke(line));
-                break;
-            case 'I':
-                m_interactions.parse(value);
-                break;
-            case 'G':
-                setGravity(line);
-                break;
-            case 'E':
-                m_log.push_back(value);
-                break;
-            default:
-                printf("Unparsed: '%s'\n", line.c_str());
-                break;
+    if (level.find("<svg") == 0) {
+        tinyxml2::XMLDocument doc;
+        doc.Parse(level.c_str());
+        SceneSVGVisitor visitor(this);
+        doc.Accept(&visitor);
+    } else {
+        // NPH format
+        for (std::string &line: splitLines(level)) {
+            std::string value = line.substr(line.find(':') + 1);
+            switch (line[0]) {
+                case 'T':
+                    m_title = value;
+                    break;
+                case 'B':
+                    m_bg = value;
+                    break;
+                case 'A':
+                    m_author = value;
+                    break;
+                case 'S':
+                    m_strokes.push_back(new Stroke(line));
+                    break;
+                case 'I':
+                    m_interactions.parse(value);
+                    break;
+                case 'G':
+                    setGravity(line);
+                    break;
+                case 'E':
+                    m_log.push_back(value);
+                    break;
+                default:
+                    printf("Unparsed: '%s'\n", line.c_str());
+                    break;
+            }
         }
     }
 

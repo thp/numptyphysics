@@ -69,22 +69,6 @@ public:
 
 private:
 
-#if 0
-  void renderThumbnail( const char* file, int width, int height )
-  {
-    configureScreenTransform( width, height );
-    Scene scene( true );
-    if ( scene.load( file ) ) {
-      printf("generating bmp %s\n", file);
-      Canvas temp( width, height );
-      scene.draw( temp, FULLSCREEN_RECT );
-      std::string bmp( file );
-      bmp += ".bmp";
-      temp.writeBMP( bmp.c_str() );
-    }
-  }
-#endif
-
   void render()
   {
       m_window->clear();

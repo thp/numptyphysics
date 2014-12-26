@@ -15,6 +15,8 @@
  */
 
 #include <cstring>
+#include <iostream>
+
 #include "Path.h"
 
 
@@ -79,6 +81,30 @@ Path::Path( const char *s )
     while ( *s && *s!=' ' && *s!='\t' ) s++;
     while ( *s==' ' || *s=='\t' ) s++;
   }
+}
+
+Path
+Path::fromSVG(const std::string &svgpath)
+{
+    Path path;
+
+    int start = 1;
+    while (start < svgpath.length()) {
+        int end = svgpath.find("L", start);
+        if (end == std::string::npos) {
+            end = svgpath.length();
+        }
+        std::string part = svgpath.substr(start, end-1);
+
+        int x, y;
+        if (sscanf(part.c_str(), "%d %d", &x, &y) == 2) {
+            path.push_back(Vec2(x, y));
+        }
+
+        start = end + 1;
+    }
+
+    return path;
 }
 
 void Path::makeRelative() 

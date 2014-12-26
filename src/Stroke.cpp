@@ -17,6 +17,8 @@
 #include "Stroke.h"
 #include "Scene.h"
 
+#include <string>
+
 Stroke::Stroke(const Path &path)
     : m_rawPath(path)
 {
@@ -65,6 +67,39 @@ Stroke::Stroke(const std::string &str)
     m_origin = m_rawPath.point(0);
     m_rawPath.translate( -m_origin );
     setAttribute( ATTRIB_DUMMY );
+}
+
+Stroke::Stroke(const std::string &flags, const std::string &rgb, const std::string &svgpath)
+{
+    m_colour = NP::Colour::DEFAULT;
+    m_attributes = 0;
+    m_origin = Vec2(400,240);
+    reset();
+
+    int r = 0, g = 0, b = 0;
+    if (sscanf(rgb.c_str(), "#%02x%02x%02x", &r, &g, &b) == 3) {
+        m_colour = (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
+    }
+
+    if (flags.find("t") != std::string::npos) setAttribute(ATTRIB_TOKEN);
+    if (flags.find("g") != std::string::npos) setAttribute(ATTRIB_GOAL);
+    if (flags.find("f") != std::string::npos) setAttribute(ATTRIB_GROUND);
+    if (flags.find("s") != std::string::npos) setAttribute(ATTRIB_SLEEPING);
+    if (flags.find("d") != std::string::npos) setAttribute(ATTRIB_DECOR);
+    if (flags.find("r") != std::string::npos) setAttribute(ATTRIB_ROPE);
+    if (flags.find("i") != std::string::npos) setAttribute(ATTRIB_INTERACTIVE);
+
+    m_rawPath = Path::fromSVG(svgpath);
+
+#if 0
+    if (m_rawPath.size() < 2) {
+        throw "invalid stroke def";
+    }
+#endif
+
+    m_origin = m_rawPath.point(0);
+    m_rawPath.translate(-m_origin);
+    setAttribute(ATTRIB_DUMMY);
 }
 
 void

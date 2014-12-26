@@ -100,6 +100,7 @@ class Stroke {
 public:
     Stroke(const Path &path);
     Stroke(const std::string &str);
+    Stroke(const std::string &flags, const std::string &rgb, const std::string &svgpath);
 
     void reset(b2World *world=nullptr);
     std::string asString();

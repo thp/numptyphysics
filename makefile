@@ -46,6 +46,10 @@ $(GLASERL_SOURCE)/$(GLASERL_LIBRARY):
 CXXFLAGS += -Iexternal/thp
 SOURCES += $(wildcard external/thp/*.cpp)
 
+# TinyXML2
+CXXFLAGS += -Iexternal/tinyxml2
+SOURCES += external/tinyxml2/tinyxml2.cpp
+
 # Pick the right OS-specific module here
 SOURCES += platform/sdl2/OsSDL2.cpp
 
