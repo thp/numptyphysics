@@ -1,1 +1,4 @@
-*.[do] numptyphysics
+*.d
+*.o
+*.a
+numptyphysics

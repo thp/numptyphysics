@@ -328,19 +328,33 @@ GLRenderer::image(const NP::Texture &texture, int x, int y, int w, int h)
 {
     GLTextureData *data = static_cast<GLTextureData *>(texture.get());
 
-    float tx1 = 0.f, ty1 = 0.f;
+    Rect src(0, 0, data->texture->width(), data->texture->height());
+    Rect dst(x, y, x+w, y+h);
+
+    subimage(texture, src, dst);
+}
+
+void
+GLRenderer::subimage(const NP::Texture &texture, const Rect &src, const Rect &dst)
+{
+    GLTextureData *data = static_cast<GLTextureData *>(texture.get());
+    float w = data->texture->width();
+    float h = data->texture->height();
+
+    float tx1 = float(src.tl.x) / w, ty1 = float(src.tl.y) / h;
     data->texture->map_uv(tx1, ty1);
 
-    float tx2 = 1.f, ty2 = 1.f;
+    float tx2 = float(src.br.x) / w, ty2 = float(src.br.y) / h;
     data->texture->map_uv(tx2, ty2);
 
     // Layout: vtx.x, vtx.y, tex.x, tex.y
     float vtxdata[] = {
-        (float)x, (float)y, tx1, ty1,
-        (float)x, (float)(y + h), tx1, ty2,
-        (float)(x + w), (float)y, tx2, ty1,
-        (float)(x + w), (float)(y + h), tx2, ty2,
+        (float)dst.tl.x, (float)dst.tl.y, tx1, ty1,
+        (float)dst.tl.x, (float)dst.br.y, tx1, ty2,
+        (float)dst.br.x, (float)dst.tl.y, tx2, ty1,
+        (float)dst.br.x, (float)dst.br.y, tx2, ty2,
     };
+
     priv->submitTextured(data->texture, vtxdata, sizeof(vtxdata));
 }
 
@@ -348,11 +362,11 @@ void
 GLRenderer::blur(const NP::Texture &texture, const Rect &src, const Rect &dst, float rx, float ry)
 {
     GLTextureData *data = static_cast<GLTextureData *>(texture.get());
-
-    priv->blur_program->enable();
     float w = data->texture->width();
     float h = data->texture->height();
     data->texture->map_uv(w, h);
+
+    priv->blur_program->enable();
     glUniform2f(priv->blur_program->uniform_location("pixelgrid"), rx / w, ry / h);
     priv->blur_program->disable();
 

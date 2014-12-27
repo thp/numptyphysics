@@ -34,6 +34,7 @@ public:
   int  makeColour( int r, int g, int b ) const;
   void clear();
   void drawImage(Image &image, int x=0, int y=0);
+  void drawAtlas(Image &image, const Rect &src, const Rect &dst);
   void drawBlur(Image &image, const Rect &src, const Rect &dst, float rx, float ry);
   void drawPath( const Path& path, int color, int a=255 );
   void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
@@ -83,7 +84,7 @@ class Image
 {
 public:
     Image(NP::Texture texture);
-    Image(std::string filename);
+    Image(std::string filename, bool cache=false);
     Image(NP::Font font, const char *text, int rgb);
     ~Image();
 

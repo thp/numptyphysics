@@ -46,7 +46,7 @@ public:
 
     virtual void size(int *width, int *height) = 0;
 
-    virtual Texture load(const char *filename) = 0;
+    virtual Texture load(const char *filename, bool cache) = 0;
 
     virtual Framebuffer framebuffer(int width, int height) = 0;
     virtual void begin(Framebuffer &rendertarget) = 0;
@@ -54,6 +54,7 @@ public:
     virtual Texture retrieve(Framebuffer &rendertarget) = 0;
 
     virtual void image(const Texture &texture, int x, int y, int w, int h) = 0;
+    virtual void subimage(const Texture &texture, const Rect &src, const Rect &dst) = 0;
     virtual void blur(const Texture &texture, const Rect &src, const Rect &dst, float rx, float ry) = 0;
     virtual void rectangle(const Rect &rect, int rgba, bool fill) = 0;
     virtual void path(const Path &path, int rgba) = 0;

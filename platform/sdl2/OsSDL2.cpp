@@ -25,6 +25,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include <map>
+#include <string>
+
 #include "Renderer.h"
 #include "GLRenderer.h"
 
@@ -58,7 +61,7 @@ public:
 
     virtual void init();
 
-    virtual NP::Texture load(const char *filename);
+    virtual NP::Texture load(const char *filename, bool cache);
 
     virtual NP::Font load(const char *filename, int size);
 
@@ -70,12 +73,14 @@ public:
 private:
     SDL_Window *m_window;
     SDL_GLContext m_gl_context;
+    std::map<std::string, NP::Texture> m_texture_cache;
 };
 
 SDLRenderer::SDLRenderer(int w, int h)
     : GLRenderer(w, h)
     , m_window(NULL)
     , m_gl_context()
+    , m_texture_cache()
 {
     m_window = SDL_CreateWindow("NumptyPhysics", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
@@ -96,8 +101,19 @@ SDLRenderer::init()
 }
 
 NP::Texture
-SDLRenderer::load(const char *filename)
+SDLRenderer::load(const char *filename, bool cache)
 {
+    std::string fn(filename);
+
+    if (cache) {
+        // Cache lookup
+        for (auto &item: m_texture_cache) {
+            if (item.first == fn) {
+                return item.second;
+            }
+        }
+    }
+
     std::string f = Config::findFile(filename);
 
     SDL_Surface *img = IMG_Load(f.c_str());
@@ -106,6 +122,11 @@ SDLRenderer::load(const char *filename)
 
     NP::Texture result = GLRenderer::load((unsigned char *)tmp->pixels, img->w, img->h);
     SDL_FreeSurface(tmp);
+
+    if (cache) {
+        // Store loaded image in cache
+        m_texture_cache[fn] = result;
+    }
 
     return result;
 }

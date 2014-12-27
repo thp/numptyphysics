@@ -64,6 +64,11 @@ void Canvas::drawImage(Image &image, int x, int y)
     RENDERER->image(image.texture(), x, y, image.width(), image.height());
 }
 
+void Canvas::drawAtlas(Image &image, const Rect &src, const Rect &dst)
+{
+    RENDERER->subimage(image.texture(), src, dst);
+}
+
 void Canvas::drawBlur(Image &image, const Rect &src, const Rect &dst, float rx, float ry)
 {
     RENDERER->blur(image.texture(), src, dst, rx, ry);
@@ -166,8 +171,8 @@ Image::Image(NP::Texture texture)
 {
 }
 
-Image::Image(std::string filename)
-    : m_texture(RENDERER->load(filename.c_str()))
+Image::Image(std::string filename, bool cache)
+    : m_texture(RENDERER->load(filename.c_str(), cache))
     , m_width(m_texture->w)
     , m_height(m_texture->h)
 {

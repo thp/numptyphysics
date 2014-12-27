@@ -239,14 +239,11 @@ struct FrontPage : public MenuPage
 {
   FrontPage() : MenuPage(true)
   {
-    m_content->add( new IconButton("CHOOSE","choose.png",
-				   Event(Event::MENU,1)),
+    m_content->add( new StockIconButton("CHOOSE", StockIcon::CHOOSE, Event(Event::MENU,1)),
 		    Rect(125,100,275,300) );
-    m_content->add( new IconButton("PLAY","play.png",
-				   Event(Event::MENU,2)),
+    m_content->add( new StockIconButton("PLAY", StockIcon::PLAY, Event(Event::MENU,2)),
 		    Rect(325,100,475,300) );
-    m_content->add( new IconButton("HELP","help.png",
-				   Event(Event::MENU,3)),
+    m_content->add( new StockIconButton("HELP", StockIcon::HELP, Event(Event::MENU,3)),
 		    Rect(525,100,675,300) );
     fitToParent(true);
   }
@@ -310,7 +307,6 @@ public:
       content()->empty();
       content()->add(new FrontPage());
       if (rightControl()) {
-          rightControl()->text("X");
           rightControl()->event(Event::QUIT);
       }
       return true;
@@ -336,19 +332,19 @@ Widget* createMainMenu(GameControl* game)
 
 
 static const MenuItem playNormalOpts[] = {
-  MenuItem("pen:pen.png",Event(Event::SELECT,1,-1)),
-  MenuItem("tools:choose.png",Event(Event::SELECT,2,-1)),
-  MenuItem("pause:pause.png",Event::PAUSE),
-  MenuItem("undo:undo.png",Event::UNDO),
-  MenuItem("",Event::NOP)
+  MenuItem("pen", StockIcon::PEN, Event(Event::SELECT,1,-1)),
+  MenuItem("tools", StockIcon::CHOOSE, Event(Event::SELECT,2,-1)),
+  MenuItem("pause", StockIcon::PAUSE, Event::PAUSE),
+  MenuItem("undo", StockIcon::UNDO, Event::UNDO),
+  MenuItem("", StockIcon::NONE, Event::NOP)
 };
 
 static const MenuItem playPausedOpts[] = {
-  MenuItem("pen:pen.png",Event(Event::SELECT,1,-1)),
-  MenuItem("tools:choose.png",Event(Event::SELECT,2,-1)),
-  MenuItem("resume:play.png",Event::PAUSE),
-  MenuItem("undo:undo.png",Event::UNDO),
-  MenuItem("",Event::NOP)
+  MenuItem("pen", StockIcon::PEN, Event(Event::SELECT,1,-1)),
+  MenuItem("tools", StockIcon::CHOOSE, Event(Event::SELECT,2,-1)),
+  MenuItem("resume", StockIcon::PLAY, Event::PAUSE),
+  MenuItem("undo", StockIcon::UNDO, Event::UNDO),
+  MenuItem("", StockIcon::NONE, Event::NOP)
 };
 
 
@@ -365,9 +361,7 @@ public:
 
   virtual Widget* makeButton( MenuItem* item, const Event& ev )
   {
-    std::string file = item->text.substr(item->text.find(':')+1); 
-    std::string label = item->text.substr(0,item->text.find(':')); 
-    return new IconButton(label,file,ev);
+    return new StockIconButton(item->text, item->icon, ev);
   }
 
   virtual bool onEvent( Event& ev ) {
@@ -413,18 +407,18 @@ Widget* createPlayOpts(GameControl* game )
 
 
 static const MenuItem editNormalOpts[] = {
-  MenuItem("menu:close.png",Event::MENU),
-  MenuItem("reset:reset.png",Event::RESET),
-  MenuItem("skip:forward.png",Event::NEXT),
-  MenuItem("edit:share.png",Event::EDIT),
-  MenuItem("",Event::NOP)
+  MenuItem("menu", StockIcon::CLOSE, Event::MENU),
+  MenuItem("reset", StockIcon::RESET, Event::RESET),
+  MenuItem("skip", StockIcon::FORWARD, Event::NEXT),
+  MenuItem("edit", StockIcon::SHARE, Event::EDIT),
+  MenuItem("", StockIcon::NONE, Event::NOP)
 };
 
 static const MenuItem editDoneOpts[] = {
-  MenuItem("menu:close.png",Event::MENU),
-  MenuItem("reset:reset.png",Event::RESET),
-  MenuItem("done:share.png",Event::DONE),
-  MenuItem("",Event::NOP)
+  MenuItem("menu", StockIcon::CLOSE, Event::MENU),
+  MenuItem("reset", StockIcon::RESET, Event::RESET),
+  MenuItem("done", StockIcon::SHARE, Event::DONE),
+  MenuItem("", StockIcon::NONE, Event::NOP)
 };
 
 
@@ -472,9 +466,9 @@ public:
     m_buttonDim = Vec2(BUTTON_HEIGHT, BUTTON_HEIGHT);
     for (int i=0; i<num; i++) {
       switch(i) {
-      case 0: addItem( MenuItem("O",Event(Event::SELECT,1,i)) ); break;
-      case 1: addItem( MenuItem("X",Event(Event::SELECT,1,i)) ); break;
-      default: addItem( MenuItem("/",Event(Event::SELECT,1,i)) ); break;
+          case 0: addItem( MenuItem("O", StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
+          case 1: addItem( MenuItem("X", StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
+          default: addItem( MenuItem("/", StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
       }
     }
     Vec2 size = m_buttonDim*5;
@@ -499,14 +493,14 @@ Widget* createColourDialog(GameControl* game, int n, const int* cols)
 ////////////////////////////////////////////////////////////////
 
 static const MenuItem toolOpts[] = {
-  MenuItem("ground:tick.png",Event(Event::SELECT,0)),
-  MenuItem("sleepy:tick.png",Event(Event::SELECT,1)),
-  MenuItem("decor:tick.png",Event(Event::SELECT,2)),
-  MenuItem("move:tick.png",Event(Event::SELECT,3)),
-  MenuItem("erase:tick.png",Event(Event::SELECT,4)),
-  MenuItem("rope:tick.png",Event(Event::SELECT,5)),
-  MenuItem("interactive:tick.png",Event(Event::SELECT,6)),
-  MenuItem("",Event::NOP)
+  MenuItem("ground", StockIcon::TICK, Event(Event::SELECT,0)),
+  MenuItem("sleepy", StockIcon::TICK, Event(Event::SELECT,1)),
+  MenuItem("decor", StockIcon::TICK, Event(Event::SELECT,2)),
+  MenuItem("move", StockIcon::TICK, Event(Event::SELECT,3)),
+  MenuItem("erase", StockIcon::TICK, Event(Event::SELECT,4)),
+  MenuItem("rope", StockIcon::TICK, Event(Event::SELECT,5)),
+  MenuItem("interactive", StockIcon::TICK, Event(Event::SELECT,6)),
+  MenuItem("", StockIcon::NONE, Event::NOP)
 };
 
 
@@ -522,9 +516,7 @@ public:
   }
   Widget* makeButton( MenuItem* item, const Event& ev )
   {
-    std::string file = item->text.substr(item->text.find(':')+1); 
-    std::string label = item->text.substr(0,item->text.find(':')); 
-    IconButton *w = new IconButton(label,file,ev);
+    StockIconButton *w = new StockIconButton(item->text, item->icon, ev);
     w->align(1);
     m_opts.push_back(w);
     return w;
@@ -539,7 +531,7 @@ public:
           return;
       }
 
-      auto it = std::find(m_opts.begin(), m_opts.end(), static_cast<IconButton *>(w));
+      auto it = std::find(m_opts.begin(), m_opts.end(), static_cast<StockIconButton *>(w));
       if (it != m_opts.end()) {
           m_opts.erase(it);
       }
@@ -563,7 +555,7 @@ public:
       } else if (m_opts[i]->text() == "interactive") {
         tick = m_game->m_interactiveDraw;
       }
-      m_opts[i]->icon(tick ? "tick.png" : "blank.png");
+      m_opts[i]->set(tick ? StockIcon::TICK : StockIcon::BLANK);
     }
   }
   bool onEvent( Event& ev )
@@ -606,7 +598,7 @@ public:
   }
 private:
   GameControl *m_game;
-  std::vector<IconButton*> m_opts;
+  std::vector<StockIconButton*> m_opts;
 };
 
 
@@ -614,36 +606,6 @@ private:
 Widget* createToolDialog(GameControl* game)
 {
   return new ToolDialog(game);
-}
-
-
-////////////////////////////////////////////////////////////////
-
-
-
-class IconDialog : public MenuDialog
-{
-public:
-  IconDialog( const std::string &title, const MenuItem* items=NULL ) 
-    : MenuDialog(this,title)
-  {
-    // add items here to use correct buttons
-    addItems(items);
-  }
-  Widget* makeButton( MenuItem* item, const Event& ev )
-  {
-    fprintf(stderr,"IconDialog::makeButton %s\n",item->text.c_str());
-    try {
-      return new IconButton(item->text,item->text+".png",ev);
-    } catch (...) {
-      return new Button(item->text,ev);
-    }
-  }
-};
-
-Widget *createIconDialog( const std::string &title, const MenuItem* items )
-{
-  return new IconDialog( title, items );
 }
 
 

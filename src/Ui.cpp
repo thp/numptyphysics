@@ -21,6 +21,7 @@
 #include "Config.h"
 #include "Colour.h"
 
+#include <iostream>
 #include <algorithm>
 
 
@@ -267,6 +268,61 @@ void Icon::draw(Canvas &screen, const Rect &area)
     Widget::draw(screen, area);
     if (m_image) {
         screen.drawImage(*m_image, m_pos.tl.x, m_pos.tl.y);
+    }
+}
+
+
+////////////////////////////////////////////////////////////////
+
+
+StockIconButton::StockIconButton(const std::string &label, enum StockIcon::Kind icon, const Event &ev)
+    : Button(label, ev)
+    , m_icon(icon)
+    , m_vertical(true)
+{
+}
+
+StockIconButton::~StockIconButton()
+{
+}
+
+void
+StockIconButton::draw(Canvas &screen, const Rect &area)
+{
+    Widget::draw(screen, area);
+
+    int spacing = 10;
+    Vec2 textsize = m_font->metrics(m_text);
+    Vec2 offset;
+
+    if (m_text.empty()) {
+        StockIcon::draw(screen, area, m_icon, m_pos.centroid());
+        return;
+    }
+
+    if (m_vertical) {
+        if (textsize.y + spacing + StockIcon::size() > m_pos.height()) {
+            offset = Vec2(0, -textsize.y / 4);
+            StockIcon::draw(screen, area, m_icon, m_pos.centroid() + offset);
+
+            offset = Vec2(0, (StockIcon::size()) / 4);
+            m_font->drawCenter(&screen, m_pos.centroid() + offset, m_text, m_fg);
+        } else {
+            offset = Vec2(0, -(textsize.y + spacing) / 2);
+            StockIcon::draw(screen, area, m_icon, m_pos.centroid() + offset);
+
+            offset = Vec2(0, (StockIcon::size() + spacing) / 2);
+            m_font->drawCenter(&screen, m_pos.centroid() + offset, m_text, m_fg);
+        }
+    } else {
+        Vec2 contentSize(StockIcon::size() + textsize.x,
+                         std::max(StockIcon::size(), textsize.y));
+
+        offset = Vec2(m_pos.height() / 2 - m_pos.width() / 2, 0);
+        StockIcon::draw(screen, area, m_icon, m_pos.centroid() + offset);
+
+        offset = Vec2(m_pos.height() - m_pos.width() / 2 + spacing, -textsize.y / 2);
+        m_font->drawLeft(&screen, m_pos.centroid() + offset, m_text, m_fg);
     }
 }
 
@@ -911,7 +967,7 @@ void Box::remove( Widget* w )
 void Menu::addItems(const MenuItem* item)
 {
   while (item && item->event.code != Event::NOP) {
-    m_items.push_back(new MenuItem(item->text,item->event));
+    m_items.push_back(new MenuItem(item->text, item->icon, item->event));
     item++;
   }
   layout();
@@ -919,13 +975,13 @@ void Menu::addItems(const MenuItem* item)
 
 void Menu::addItem(const MenuItem& item)
 {
-  m_items.push_back(new MenuItem(item.text,item.event));
+  m_items.push_back(new MenuItem(item.text, item.icon, item.event));
   layout();
 }
 
 void Menu::addItem(const std::string& s, Event event)
 {
-  addItem(MenuItem(s,event));    
+  addItem(MenuItem(s, StockIcon::NONE, event));
 }
 
 
@@ -1023,11 +1079,7 @@ Dialog::Dialog( const std::string &title, Event left, Event right )
     }
     bar->add(m_title, 64, 1);
     if (right.code!=Event::NOP) {
-      if (right.code==Event::CANCEL) {
-	m_right = new IconButton("","close.png",right);
-      } else {
-	m_right = new IconButton("","close.png",right);
-      }
+      m_right = new StockIconButton("", StockIcon::CLOSE, right);
       bar->add(m_right, 100, 0);
     }
     all->add(bar, DIALOG_TITLE_HEIGHT, 0);
@@ -1186,4 +1238,44 @@ MessageBox::MessageBox( const std::string& text )
   content()->add( vbox, 0, 0 );
   sizeTo(Vec2(300,150));
   animateTo(Vec2(250,100));
+}
+
+
+////////////////////////////////////////////////////////////////
+
+
+void
+StockIcon::draw(Canvas &screen, const Rect &area, enum Kind kind, const Vec2 &pos)
+{
+    if (kind < 0 || kind >= ICON_COUNT) {
+        std::cerr << "Invalid icon kind!" << std::endl;
+        return;
+    }
+
+    constexpr int COLUMNS = 4;
+    constexpr int ROWS = 3;
+
+    constexpr int BORDER = 10;
+    constexpr int SIZE = 90;
+
+    int column = kind % COLUMNS;
+    int row = kind / COLUMNS;
+
+    assert(row < ROWS);
+
+    int x = BORDER + column * (SIZE + BORDER);
+    int y = BORDER + row * (SIZE + BORDER);
+
+    Rect src(x, y, x+SIZE, y+SIZE);
+    Rect dst(pos.x - size() / 2, pos.y - size() / 2,
+             pos.x + size() / 2, pos.y + size() / 2);
+
+    Image icons("icons.png", true);
+    screen.drawAtlas(icons, src, dst);
+}
+
+int
+StockIcon::size()
+{
+    return 80;
 }

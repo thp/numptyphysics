@@ -31,6 +31,31 @@ class Font;
 
 class WidgetParent;
 
+class StockIcon {
+ public:
+  enum Kind {
+   NONE = -1,
+
+   SHARE = 0,
+   UNDO,
+   PEN,
+   RESET,
+   FORWARD,
+   HELP,
+   PLAY,
+   CLOSE,
+   CHOOSE,
+   PAUSE,
+   BLANK,
+   TICK,
+
+   ICON_COUNT,
+  };
+
+  static void draw(Canvas &screen, const Rect &area, enum Kind kind, const Vec2 &pos);
+  static int size();
+};
+
 
 class Widget
 {
@@ -154,6 +179,21 @@ class IconButton : public Button
  protected:
   bool m_vertical;
   Image *m_icon;
+};
+
+
+class StockIconButton : public Button {
+ public:
+  StockIconButton(const std::string &label, enum StockIcon::Kind icon, const Event &ev);
+  ~StockIconButton();
+  void align(int dir) { m_vertical = (dir == 0); }
+  void set(enum StockIcon::Kind icon) { m_icon = icon; }
+
+  const char *name() { return "StockIconButton"; }
+  void draw(Canvas &screen, const Rect &area);
+ protected:
+  enum StockIcon::Kind m_icon;
+  bool m_vertical;
 };
 
 
@@ -285,9 +325,10 @@ class ScrollArea : public Panel
 class MenuItem
 {
 public:
-  MenuItem(const std::string& s, Event ev=Event::NOP)
-  : text(s), event(ev) {}
+  MenuItem(const std::string& s, enum StockIcon::Kind icon=StockIcon::NONE, Event ev=Event::NOP)
+  : text(s), icon(icon), event(ev) {}
   std::string text;
+  enum StockIcon::Kind icon;
   Event event;
 };
 
