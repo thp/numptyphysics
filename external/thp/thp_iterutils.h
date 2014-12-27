@@ -1,5 +1,10 @@
+#if 0
+exec clang++ -std=c++11 -DTHP_ITERUTILS_TEST -o thp_iterutils_test -x c++ $0
+#endif
+
 #ifndef THP_ITERUTILS_H
 #define THP_ITERUTILS_H
+
 
 #include <iostream>
 #include <vector>
