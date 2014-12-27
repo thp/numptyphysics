@@ -219,11 +219,9 @@ public:
   {
     if ( !m_paused ) {
       if ( !m_pauseLabel ) {
-      	m_pauseLabel = new Button("PAUSED",Event::PAUSE);
-	m_pauseLabel->setBg(0xff0000);
-	m_pauseLabel->setFg(0x000000);
+          m_pauseLabel = new Button("Gameplay paused", Event::PAUSE);
       }
-      add( m_pauseLabel, Rect(SCREEN_WIDTH/2-64,16,SCREEN_WIDTH/2+64,64) );
+      add( m_pauseLabel, Rect(SCREEN_WIDTH/2-128, 16, SCREEN_WIDTH/2+128, 64));
       m_paused = true;
     } else {
       remove( m_pauseLabel );
@@ -243,11 +241,9 @@ public:
       m_edit = doEdit;
       if ( m_edit ) {	
 	if ( !m_editLabel ) {
- 	  m_editLabel = new Button("EDIT",Event::DONE);
-	  m_editLabel->setBg(0xff0000);
-	  m_editLabel->setFg(0x000000);
+            m_editLabel = new Button("Edit mode", Event::DONE);
  	}
-	add(m_editLabel, Rect(SCREEN_WIDTH-128,0,SCREEN_WIDTH,32));
+	add(m_editLabel, Rect(SCREEN_WIDTH/2-128, SCREEN_HEIGHT-64, SCREEN_WIDTH/2+128, SCREEN_HEIGHT-16));
 	m_scene.protect(0);
       } else {
 	remove(m_editLabel);
