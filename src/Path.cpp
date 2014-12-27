@@ -83,25 +83,142 @@ Path::Path( const char *s )
   }
 }
 
+class SVGPathTokenizer {
+public:
+    SVGPathTokenizer(const std::string &path);
+
+    bool next(std::string &output);
+
+private:
+    std::string m_path;
+    int m_ipos;
+};
+
+SVGPathTokenizer::SVGPathTokenizer(const std::string &path)
+    : m_path(path)
+    , m_ipos(0)
+{
+}
+
+static bool _isnumber(char c)
+{
+    return ((c >= '0' && c <= '9') || c == '.' || c == '-');
+}
+
+static bool _isspace(char c)
+{
+    return (c == ' ' || c == ',');
+}
+
+static bool _isctrl(char c)
+{
+    return (c == 'm' || c == 'M' || c == 'L' || c == 'l');
+}
+
+bool
+SVGPathTokenizer::next(std::string &output)
+{
+    if (m_ipos < m_path.length()) {
+        // Scan forward to first non-space character
+        while (m_ipos < m_path.length() && _isspace(m_path.at(m_ipos))) {
+            m_ipos++;
+        }
+
+        int start = m_ipos;
+        char c = m_path.at(start);
+        if (_isctrl(c)) {
+            output = m_path.substr(start, 1);
+            m_ipos++;
+            return true;
+        }
+
+        if (_isnumber(c)) {
+            while (m_ipos < m_path.length() && _isnumber(m_path.at(m_ipos))) {
+                m_ipos++;
+            };
+
+            int end = m_ipos;
+            output = m_path.substr(start, end-start);
+            m_ipos++;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+class SVGPathParser {
+public:
+    SVGPathParser(const std::string &path);
+
+    bool next(Vec2 &output);
+
+private:
+    SVGPathTokenizer m_tokenizer;
+    Vec2 m_current;
+    bool m_current_valid;
+    enum Positioning {
+        M_ABSOLUTE,
+        M_RELATIVE,
+    };
+    enum Positioning m_positioning;
+};
+
+SVGPathParser::SVGPathParser(const std::string &path)
+    : m_tokenizer(path)
+    , m_current()
+    , m_positioning(M_ABSOLUTE)
+{
+}
+
+bool
+SVGPathParser::next(Vec2 &output)
+{
+    std::string a, b;
+    if (!m_tokenizer.next(a)) {
+        return false;
+    }
+
+    if (a == "m" || a == "l" || a == "M" || a == "L") {
+        if (a == "m" || a == "l") {
+            m_positioning = M_RELATIVE;
+        } else if (a == "M" || a == "L") {
+            m_positioning = M_ABSOLUTE;
+        }
+
+        if (!m_tokenizer.next(a)) {
+            std::cerr << "Warning: Incomplete coordinate after " << a << std::endl;
+            return false;
+        }
+    }
+
+    if (!m_tokenizer.next(b)) {
+        std::cerr << "Warning: Incomplete coordinate after " << a << std::endl;
+        return false;
+    }
+
+    Vec2 pos(atof(a.c_str()), atof(b.c_str()));
+    if (m_current_valid && m_positioning == M_RELATIVE) {
+        m_current += pos;
+    } else {
+        m_current = pos;
+    }
+
+    output = m_current;
+    m_current_valid = true;
+    return true;
+}
+
 Path
 Path::fromSVG(const std::string &svgpath)
 {
     Path path;
 
-    int start = 1;
-    while (start < svgpath.length()) {
-        int end = svgpath.find("L", start);
-        if (end == std::string::npos) {
-            end = svgpath.length();
-        }
-        std::string part = svgpath.substr(start, end-1);
+    SVGPathParser parser(svgpath);
 
-        int x, y;
-        if (sscanf(part.c_str(), "%d %d", &x, &y) == 2) {
-            path.push_back(Vec2(x, y));
-        }
-
-        start = end + 1;
+    Vec2 pos;
+    while (parser.next(pos)) {
+        path.push_back(pos);
     }
 
     return path;

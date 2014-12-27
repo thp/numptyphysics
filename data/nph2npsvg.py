@@ -84,7 +84,7 @@ class NumptyPhysicsLevel(object):
             print >>fp, '<np:interaction np:color="{}" np:action="{}" />'.format(color, action)
 
         for stroke_flags, stroke_color, stroke_points in self.strokes:
-            node = '<path np:class="{}" fill="none" stroke="{}" stroke-width="{}" d="M{}" />'
+            node = '<path class="{}" fill="none" stroke="{}" stroke-width="{}" d="M{}" />'
             print >>fp, node.format(' '.join(stroke_flags), '#%06x' % COLORS[stroke_color], stroke_width,
                                     'L'.join('%d %d' % (x, y) for x, y in stroke_points))
 

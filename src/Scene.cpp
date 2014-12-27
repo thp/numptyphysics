@@ -22,6 +22,7 @@
 
 #include "tinyxml2.h"
 #include "thp_format.h"
+#include "thp_iterutils.h"
 
 #include <vector>
 #include <list>
@@ -461,13 +462,35 @@ public:
                 std::cerr << "Invalid np:interaction" << std::endl;
             }
         } else if (strcmp(element.Name(), "path") == 0) {
-            const tinyxml2::XMLAttribute *flags = element.FindAttribute("np:class");
-            const tinyxml2::XMLAttribute *rgb = element.FindAttribute("stroke");
+            const tinyxml2::XMLAttribute *flags = element.FindAttribute("class");
+            const tinyxml2::XMLAttribute *stroke = element.FindAttribute("stroke");
             const tinyxml2::XMLAttribute *data = element.FindAttribute("d");
 
-            if (flags && rgb && data) {
+            std::string rgb;
+            if (stroke) {
+                rgb = stroke->Value();
+            } else {
+                stroke = element.FindAttribute("style");
+                if (stroke) {
+                    std::map<std::string, std::string> m;
+
+                    try {
+                        for (auto &entry: thp::map(thp::trim, thp::split(stroke->Value(), ";"))) {
+                            std::string k, v;
+                            thp::unpack({&k, &v}) = thp::map(thp::trim, thp::split(entry, ":"));
+                            m[k] = v;
+                        }
+                    } catch (thp::UnpackException e) {
+                        std::cerr << "Cannot unpack: " << stroke->Value() << std::endl;
+                    }
+
+                    rgb = m["stroke"];
+                }
+            }
+
+            if (flags && rgb.size() > 0 && data) {
                 scene->m_strokes.push_back(new Stroke(flags->Value(),
-                                                      rgb->Value(),
+                                                      rgb,
                                                       data->Value()));
             } else {
                 std::cerr << "Invalid path" << std::endl;
@@ -498,7 +521,7 @@ bool Scene::load(const std::string &level)
     m_dynamicGravity = false;
     m_step = 0;
 
-    if (level.find("<svg") == 0) {
+    if (level.find("<svg") != std::string::npos) {
         tinyxml2::XMLDocument doc;
         doc.Parse(level.c_str());
         SceneSVGVisitor visitor(this);

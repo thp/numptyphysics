@@ -29,7 +29,7 @@
 #define FIXED_TO_INT(iNT) ((iNT)>>FIXED_SHIFT)
 
 struct Vec2 {
-  Vec2() {}
+  Vec2() : x(0), y(0) {}
   Vec2( const Vec2& o ) : x(o.x), y(o.y) {}
   explicit Vec2( const b2Vec2& o ) : x((int)o.x), y((int)o.y) {}
   Vec2( int xx, int yy ) : x(xx), y(yy) {}
