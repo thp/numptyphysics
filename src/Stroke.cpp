@@ -151,7 +151,7 @@ Stroke::asString()
         }
     }
 
-    return thp::format("<path np:class=\"%s\" fill=\"none\" stroke=\"#%06x\" stroke-width=\"%d\" d=\"M%s\" />",
+    return thp::format("<path class=\"%s\" fill=\"none\" stroke=\"#%06x\" stroke-width=\"%d\" d=\"M%s\" />",
                        classes.str().c_str(), m_colour, SVG_STROKE_WIDTH, points.str().c_str());
 }
 

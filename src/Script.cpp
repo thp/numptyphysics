@@ -19,6 +19,7 @@
 #include <sstream>
 #include <cstdio>
 
+#include "thp_format.h"
 
 ScriptEntry::ScriptEntry( const std::string& str )
 {
@@ -50,7 +51,7 @@ std::string ScriptEntry::asString()
   s << t << "," << opcodes[op] << ","
     << stroke << "," << arg1 << "," << arg2 << ","
     << pt.x << "," << pt.y; 
-  return s.str();
+  return thp::format("<np:event value=\"%s\" />", s.str().c_str());
 }
 
 std::string ScriptLog::asString( int i )
@@ -93,9 +94,6 @@ void ScriptRecorder::start( ScriptLog* log )
 void ScriptRecorder::stop()  
 { 
   if ( m_running ) {
-    for ( int i=0; i<m_log->size(); i++ ) {
-      std::string e = m_log->asString(i);
-    }
     m_running = false; 
   }
 }
