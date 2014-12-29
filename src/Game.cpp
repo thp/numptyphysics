@@ -55,6 +55,7 @@ class Game : public GameControl, public Container
   Widget           *m_editLabel;
   Widget           *m_completedDialog;
   Widget           *m_options;
+  Label            *m_clickModeLabel;
   Os               *m_os;
   bool              m_isCompleted;
   Path              m_jointInd;
@@ -69,6 +70,7 @@ public:
     m_editLabel( NULL ),
     m_completedDialog( NULL ),
     m_options( NULL ),
+    m_clickModeLabel(new Label("", nullptr, 0x000000)),
     m_os( Os::get() ),
     m_isCompleted(false),
     m_jointInd(JOINT_IND_PATH)
@@ -77,6 +79,9 @@ public:
   {
     add(m_left_button, Rect(BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE, BUTTON_BORDER + BUTTON_SIZE));
     add(m_right_button, Rect(SCREEN_WIDTH - BUTTON_BORDER - BUTTON_SIZE, BUTTON_BORDER, SCREEN_WIDTH - BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE));
+
+    m_clickModeLabel->setAlignment(Label::ALIGN_RIGHT | Label::ALIGN_BOTTOM);
+    add(m_clickModeLabel, Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT).shrunk(BUTTON_BORDER));
 
     setEventMap(Os::get()->getEventMap(GAME_MAP));
     sizeTo(Vec2(width,height));
@@ -192,9 +197,18 @@ public:
       fprintf(stderr,"clickMode=%d!\n",cm);
       m_clickMode = cm;
       switch (cm) {
-      case 1: setEventMap(Os::get()->getEventMap(GAME_MOVE_MAP)); break;
-      case 2: setEventMap(Os::get()->getEventMap(GAME_ERASE_MAP)); break;
-      default: setEventMap(Os::get()->getEventMap(GAME_MAP)); break;
+          case 1:
+              setEventMap(Os::get()->getEventMap(GAME_MOVE_MAP));
+              m_clickModeLabel->text("Move mode");
+              break;
+          case 2:
+              setEventMap(Os::get()->getEventMap(GAME_ERASE_MAP));
+              m_clickModeLabel->text("Erase mode");
+              break;
+          default:
+              setEventMap(Os::get()->getEventMap(GAME_MAP));
+              m_clickModeLabel->text("");
+              break;
       }
     }
   }

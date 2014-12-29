@@ -153,6 +153,10 @@ WidgetParent* Widget::topLevel()
 
 
 Label::Label()
+    : Widget()
+    , m_text()
+    , m_font(nullptr)
+    , m_alignment(Label::ALIGN_CENTER)
 {
 }
 
@@ -160,13 +164,16 @@ Label::Label()
 Label::Label(const std::string& s, const Font* f, int color)
   : m_text(s)
   , m_font(f?f:Font::blurbFont())
+  , m_alignment(Label::ALIGN_CENTER)
 {
     setFg(color);
 }
 
 void Label::text( const std::string& s )
 {
-  m_text = s;
+    if (m_text != s) {
+        m_text = s;
+    }
 }
 
 void Label::draw( Canvas& screen, const Rect& area )
@@ -176,12 +183,51 @@ void Label::draw( Canvas& screen, const Rect& area )
     }
 
     Widget::draw(screen,area);
-    m_font->drawCenter( &screen, m_pos.centroid(), m_text, m_fg);
+
+    bool align_h_center = ((m_alignment & (ALIGN_LEFT | ALIGN_RIGHT)) == 0);
+    bool align_v_center = ((m_alignment & (ALIGN_TOP | ALIGN_BOTTOM)) == 0);
+
+    if (align_h_center && align_v_center) {
+        m_font->drawCenter( &screen, m_pos.centroid(), m_text, m_fg);
+        return;
+    }
+
+    auto func = &Font::drawCenter;
+
+    Vec2 pos = m_pos.centroid();
+    Vec2 metrics = m_font->metrics(m_text);
+
+    if ((m_alignment & ALIGN_TOP) != 0) {
+        pos.y = m_pos.tl.y;
+        if (align_h_center) {
+            // Will use drawCenter for drawing, need to adjust vertical
+            pos.y += metrics.y / 2;
+        }
+    }
+    if ((m_alignment & ALIGN_BOTTOM) != 0) {
+        pos.y = m_pos.br.y - metrics.y;
+        if (align_h_center) {
+            // Will use drawCenter for drawing, need to adjust vertical
+            pos.y += metrics.y / 2;
+        }
+    }
+    if ((m_alignment & ALIGN_LEFT) != 0) {
+        pos.x = m_pos.tl.x;
+        func = &Font::drawLeft;
+        if (align_v_center) {
+            // TODO: Adjustments needed?
+        }
+    }
+    if ((m_alignment & ALIGN_RIGHT) != 0) {
+        pos.x = m_pos.br.x;
+        func = &Font::drawRight;
+        if (align_v_center) {
+            // TODO: Adjustments needed?
+        }
+    }
+
+    (m_font->*func)(&screen, pos, m_text, m_fg);
 }
-
-void Label::align( int a )
-{}
-
 
 ////////////////////////////////////////////////////////////////
 

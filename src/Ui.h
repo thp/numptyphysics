@@ -126,12 +126,26 @@ class Label : public Widget
   const char* name() {return "Label";}
   virtual void text( const std::string& s );
   const std::string& text() const { return m_text; }
-  void align( int a );
   virtual void draw( Canvas& screen, const Rect& area );
   void font( const Font* f ) { m_font = f; }
+
+  enum Alignment {
+      ALIGN_CENTER = 0,
+
+      ALIGN_LEFT = 1 << 0,
+      ALIGN_RIGHT = 1 << 1,
+
+      ALIGN_TOP = 1 << 2,
+      ALIGN_BOTTOM = 1 << 3,
+  };
+
+  int alignment() { return m_alignment; }
+  void setAlignment(int alignment) { m_alignment = alignment; }
+
  protected:
   std::string m_text;
   const Font *m_font;
+  int m_alignment;
 };
 
 

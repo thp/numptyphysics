@@ -119,6 +119,11 @@ struct Rect {
       br.x += by; br.y += by;
     }
   }
+  Rect shrunk(int by) {
+      Rect o = *this;
+      o.grow(-by);
+      return o;
+  }
   void expand( const Vec2& v ) { tl=Min(tl,v); br=Max(br,v); }
   void expand( const Rect& r ) { 
     if (isEmpty()) {
