@@ -35,7 +35,8 @@ public:
 
 class Os
 {
- public:  
+ public:
+  Os();
   virtual ~Os() {}
   virtual bool nextEvent(ToolkitEvent &ev) = 0;
   virtual long ticks() = 0;
@@ -44,7 +45,6 @@ class Os
   virtual void window(int w, int h) = 0;
   virtual NP::Renderer *renderer() = 0;
   virtual bool  openBrowser( const char* url ) = 0;
-  virtual char* saveDialog( const char* path ) { return NULL; }
   virtual Accelerometer*  getAccelerometer() { return NULL; }
   virtual EventMap* getEventMap( EventMapType type );
   virtual void decorateGame( WidgetParent* game ) {}

@@ -51,11 +51,12 @@ CXXFLAGS += -Iexternal/tinyxml2
 SOURCES += external/tinyxml2/tinyxml2.cpp
 
 # Pick the right OS-specific module here
-SOURCES += platform/sdl2/OsSDL2.cpp
+CXXFLAGS += -Iplatform/freedesktop
+SOURCES += $(wildcard platform/sdl2/*.cpp)
 
 # OpenGL platform integration code (using Glaserl)
-SOURCES += platform/gl/GLRenderer.cpp
 CXXFLAGS += -Iplatform/gl
+SOURCES += $(wildcard platform/gl/*.cpp)
 
 LIBS += $(LOCAL_LIBS)
 

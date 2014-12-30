@@ -170,3 +170,25 @@ bool Os::exists(const std::string& file)
     struct stat st;
     return stat(file.c_str(),&st) == 0;
 }
+
+static Os *
+g_os = nullptr;
+
+const char
+Os::pathSep = '/';
+
+Os::Os()
+{
+    if (g_os != nullptr) {
+        fprintf(stderr, "OS instance already exists!\n");
+        exit(1);
+    }
+
+    g_os = this;
+}
+
+Os *
+Os::get()
+{
+    return g_os;
+}
