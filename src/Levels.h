@@ -20,53 +20,65 @@
 #include <cstdio>
 #include <sstream>
 #include <vector>
+#include <stdlib.h>
+
+template <typename T>
+class SortableVector : public std::vector<T> {
+public:
+    SortableVector() : std::vector<T>() {}
+
+    void sort()
+    {
+        qsort(std::vector<T>::data(), std::vector<T>::size(), sizeof(T),
+              (int (*)(const void *, const void *))T::compare);
+    }
+};
 
 struct LevelDesc {
     LevelDesc()
         : file()
-        , rank()
     {
     }
 
-    LevelDesc(const std::string &file, int rank)
+    LevelDesc(const std::string &file)
         : file(file)
-        , rank(rank)
     {
     }
+
+    static int compare(const LevelDesc *a, const LevelDesc *b);
 
     std::string file;
-    int rank;
 };
 
 struct Collection {
     Collection()
         : file()
         , name()
-        , rank()
         , levels()
     {
     }
 
-    Collection(const std::string &file, const std::string &name, int rank)
+    Collection(const std::string &file, const std::string &name)
         : file(file)
         , name(name)
-        , rank(rank)
         , levels()
     {
     }
+
+    static int compare(const Collection *a, const Collection *b);
 
     std::string file;
     std::string name;
-    int rank;
-    std::vector<LevelDesc> levels;
+    SortableVector<LevelDesc> levels;
 };
 
 class Levels
 {
  public:
   Levels(std::vector<std::string> dirs);
+
   bool addPath(const std::string &path);
-  bool addLevel(const std::string &file, int rank);
+
   int  numLevels();
   std::string load(int i);
   std::string levelName( int i, bool pretty=true );
@@ -84,15 +96,18 @@ class Levels
   std::string demoName(int l);
   bool hasDemo(int l);
 
- private:
+  void sort();
 
-  bool addLevel(Collection &collection, const std::string &file, int rank);
+ private:
+  bool addLevel(const std::string &file);
+
+  bool addLevel(Collection &collection, const std::string &file);
   LevelDesc *findLevel(int i);
   Collection &getCollection(const std::string &file);
-  bool scanCollection( const std::string& file, int rank );
+  bool scanCollection(const std::string& file);
 
   int m_numLevels;
-  std::vector<Collection> m_collections;
+  SortableVector<Collection> m_collections;
 };
 
 #endif //LEVELS_H

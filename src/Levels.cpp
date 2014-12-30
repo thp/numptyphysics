@@ -22,36 +22,16 @@
 #include "Config.h"
 #include "Os.h"
 
-static const char MISC_COLLECTION[] = "My Levels";
-static const char DEMO_COLLECTION[] = "My Solutions";
+#include <iostream>
+#include <string>
+#include "slre.h"
 
-static int rankFromPath( const std::string& p, int defaultrank=9999 )
-{
-  if (p==MISC_COLLECTION) {
-    return 10000;
-  } else if (p==DEMO_COLLECTION) {
-    return 20000;
-  }
-  const char *c = p.data();
-  size_t i = p.rfind(Os::pathSep);
-  if ( i != std::string::npos ) {
-    c += i+1;
-    if ( *c=='L' || *c == 'C' ){
-      c++;
-      int rank=0;
-      while ( *c>='0' && *c<='9' ) {
-	rank = rank*10 + (*c)-'0';
-	c++;
-      }
-      return rank;
-    } else {
-      c++;
-    }
-  }
-  return defaultrank;
-}
 
-std::string nameFromPath(const std::string& path) 
+static const char MISC_COLLECTION[] = "C99_My Levels";
+static const char DEMO_COLLECTION[] = "D00_My Solutions";
+
+
+static std::string nameFromPath(const std::string& path)
 {
   // TODO extract name from collection manifest
   std::string name;
@@ -63,6 +43,8 @@ std::string nameFromPath(const std::string& path)
   }
   if (path[i] == 'C') i++;
   if (path[i] == 'L') i++;
+  if (path[i] == 'D') i++;
+  if (path[i] == 'M') i++;
   while (path[i] >= '0' && path[i] <= '9') i++;
   if (path[i] == '_') i++;
   size_t e = path.rfind('.');
@@ -77,6 +59,71 @@ std::string nameFromPath(const std::string& path)
     }
   }
   return name;
+}
+
+
+static std::vector<std::string>
+match_groups(const std::string &re, const std::string &string, int ncaps, int flags=0)
+{
+    std::vector<std::string> result;
+    slre_cap *caps = new slre_cap[ncaps];
+
+    if (slre_match(re.c_str(), string.c_str(), string.length(), caps, ncaps, flags) > 0) {
+        for (int i=0; i<ncaps; i++) {
+            result.push_back(std::string(caps[i].ptr, caps[i].len));
+        }
+    }
+
+    delete [] caps;
+    return result;
+}
+
+static int
+compare_names(const std::string &a, const std::string &b)
+{
+    const auto RE = "([CDM])(\\d+)_(.*)";
+    const auto GROUPS = 3;
+    auto ma = match_groups(RE, a, GROUPS);
+    auto mb = match_groups(RE, b, GROUPS);
+
+    if (!ma.size() && !mb.size()) {
+        // Simple string comparison
+        return a.compare(b);
+    } else if (!ma.size()) {
+        return -1;
+    } else if (!mb.size()) {
+        return 1;
+    }
+
+    // Compare class character ([C]ollection, [D]emo, [M]enu)
+    char ca = ma[0][0];
+    char cb = mb[0][0];
+    if (ca != cb) {
+        return ca - cb;
+    }
+
+    // Compare order number (00, 01, ...)
+    int oa = atoi(ma[1].c_str());
+    int ob = atoi(mb[1].c_str());
+    if (oa != ob) {
+        return oa - ob;
+    }
+
+    // Compare rest-of-string (C01_foo)
+    //                             ^^^
+    return ma[2].compare(mb[2]);
+}
+
+int
+LevelDesc::compare(const LevelDesc *a, const LevelDesc *b)
+{
+    return compare_names(a->file, b->file);
+}
+
+int
+Collection::compare(const Collection *a, const Collection *b)
+{
+    return compare_names(a->name, b->name);
 }
 
 Levels::Levels(std::vector<std::string> dirs)
@@ -100,45 +147,33 @@ static std::string fileExtension(const std::string &path)
 
 bool Levels::addPath(const std::string &path)
 {
+    bool result = false;
     std::string ext = fileExtension(path);
 
-    if (ext == ".nph" || ext == ".npd" || ext == ".npsvg") {
-        addLevel(path, rankFromPath(path));
-        return true;
-    }
-
-    return scanCollection(path, rankFromPath(path));
-}
-
-bool Levels::addLevel(const std::string& file, int rank)
-{
-    if (fileExtension(file) == ".npd") {
-        return addLevel(getCollection(DEMO_COLLECTION), file, rank);
+    if (ext == ".nph" || ext == ".npd" || ext == ".npsvg" || ext == ".npdsvg") {
+        addLevel(path);
+        result = true;
     } else {
-        return addLevel(getCollection(MISC_COLLECTION), file, rank);
+        result = scanCollection(path);
+    }
+
+    sort();
+    return result;
+}
+
+bool Levels::addLevel(const std::string& file)
+{
+    auto ext = fileExtension(file);
+    if (ext == ".npd" || ext == ".npdsvg") {
+        return addLevel(getCollection(DEMO_COLLECTION), file);
+    } else {
+        return addLevel(getCollection(MISC_COLLECTION), file);
     }
 }
 
-bool Levels::addLevel(Collection &collection, const std::string &file, int rank)
+bool Levels::addLevel(Collection &collection, const std::string &file)
 {
-    auto &levels = collection.levels;
-    for (auto it = levels.begin(); it != levels.end(); ++it) {
-        auto &level = *it;
-
-        if (level.file == file) {
-            //printf("addLevel %s already present!\n",file.c_str());
-            return false;
-        } else if (level.rank > rank) {
-            //printf("insert level %s at %d\n",file.c_str(),i);
-            levels.insert(it, LevelDesc(file, rank));
-            m_numLevels++;
-            return true;
-        }
-    }
-
-    levels.push_back(LevelDesc(file, rank));
-    //printf("add level %s as %s[%d]\n",file.c_str(),
-    // collection->file.c_str(), collection->levels.size());
+    collection.levels.push_back(LevelDesc(file));
     m_numLevels++;
     return true;
 }
@@ -152,20 +187,12 @@ Collection &Levels::getCollection(const std::string &file)
         }
     }
 
-    int rank = rankFromPath(file);
-    for (auto it = m_collections.begin(); it != m_collections.end(); ++it) {
-        auto &collection = *it;
-        if (collection.rank > rank) {
-            return *m_collections.insert(it, Collection(file, file, rank));
-        }
-    }
-
-    m_collections.push_back(Collection(file, file, rank));
+    m_collections.push_back(Collection(file, file));
     return m_collections.back();
 }
 
 
-bool Levels::scanCollection( const std::string& file, int rank )
+bool Levels::scanCollection(const std::string &file)
 {
     std::string collectionName = file.substr(file.find_last_of('/')+1);
     DIR *dir = opendir(file.c_str());
@@ -179,11 +206,11 @@ bool Levels::scanCollection( const std::string& file, int rank )
             std::string filename = file + "/" + entry->d_name;
             std::string ext = fileExtension(filename);
             if (ext == ".nph" || ext == ".npsvg") {
-                if (addLevel(getCollection(collectionName), filename, rank)) {
+                if (addLevel(getCollection(collectionName), filename)) {
                     result = true;
                 }
-            } else if (ext == ".npd") {
-                if (addLevel(getCollection(DEMO_COLLECTION), filename, rank)) {
+            } else if (ext == ".npd" || ext == ".npdsvg") {
+                if (addLevel(getCollection(DEMO_COLLECTION), filename)) {
                     result = true;
                 }
             } else if (addPath(filename)) {
@@ -228,6 +255,15 @@ std::string Levels::levelName( int i, bool pretty )
 }
 
 void
+Levels::sort()
+{
+    m_collections.sort();
+    for (auto &collection: m_collections) {
+        collection.levels.sort();
+    }
+}
+
+void
 Levels::dump()
 {
     for (int i=0; i<m_collections.size(); i++) {
@@ -235,8 +271,8 @@ Levels::dump()
                 collectionName(i, true).c_str());
         for (int j=0; j<m_collections[i].levels.size(); j++) {
             LevelDesc &level = m_collections[i].levels[j];
-            printf(" Level #%d: %s (rank=%d)\n", (j+1),
-                    level.file.c_str(), level.rank);
+            printf(" Level #%d: %s\n", (j+1),
+                    level.file.c_str());
         }
     }
 }
@@ -302,7 +338,7 @@ std::string Levels::demoPath(int l)
 {
   std::string name = levelName(l,false);
   std::string ext = fileExtension(name);
-  if (ext == ".npd") {
+  if (ext == ".npd" || ext == ".npdsvg") {
     /* Kludge: If the level from which we want to save a demo is
      * already a demo file, return an empty string to signal
      * "don't have this demo" - see Game.cpp */
@@ -328,7 +364,11 @@ std::string Levels::demoName(int l)
   if (fileExtension(name) == ".nph") {
       name.resize(name.length()-4);
   }
-  return demoPath(l) + Os::pathSep + name + ".npd";
+  if (fileExtension(name) == ".npsvg") {
+      name.resize(name.length()-6);
+  }
+
+  return demoPath(l) + Os::pathSep + name + ".npdsvg";
 }
 
 bool Levels::hasDemo(int l)

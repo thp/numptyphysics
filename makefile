@@ -50,6 +50,10 @@ SOURCES += $(wildcard external/thp/*.cpp)
 CXXFLAGS += -Iexternal/tinyxml2
 SOURCES += external/tinyxml2/tinyxml2.cpp
 
+# SLRE
+CXXFLAGS += -Iexternal/slre
+SOURCES += external/slre/slre.cpp
+
 # Pick the right OS-specific module here
 CXXFLAGS += -Iplatform/freedesktop
 SOURCES += $(wildcard platform/sdl2/*.cpp)
