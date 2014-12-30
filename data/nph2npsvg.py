@@ -48,6 +48,9 @@ class NumptyPhysicsLevel(object):
 
     def parse_nph(self, fp):
         for line in fp:
+            if not line.strip():
+                # Skip empty lines
+                continue
             key, value = (x.strip() for x in line.split(':', 1))
             if key[0] in ('T', 'A', 'B', 'G'):
                 self.metadata[key] = value
@@ -98,11 +101,12 @@ if __name__ == '__main__':
     for filename in sys.argv[1:]:
         level = NumptyPhysicsLevel()
 
+        base, ext = os.path.splitext(filename)
+        outfile = base + '.npsvg'
+        print filename, '->', outfile
+
         with open(filename) as fp:
             level.parse_nph(fp)
 
-        base, ext = os.path.splitext(filename)
-        outfile = base + '.npsvg'
         with open(outfile, 'w') as fp:
             level.write_svg(fp)
-        print filename, '->', outfile
