@@ -1,0 +1,23 @@
+<svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
+<rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
+<np:meta author="test" background="" title="" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M227 102L273 102L274 148L226 148L227 102" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M327 102L373 102L374 148L326 148L327 102" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M427 102L473 102L474 148L426 148L427 102" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M527 102L573 102L574 148L526 148L527 102" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M227 202L273 202L274 248L226 248L227 202" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M327 202L373 202L374 248L326 248L327 202" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M427 202L473 202L474 248L426 248L427 202" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M527 202L573 202L574 248L526 248L527 202" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M227 302L273 302L274 348L226 348L227 302" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M327 302L373 302L374 348L326 348L327 302" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M427 302L473 302L474 348L426 348L427 302" />
+<path class="fixed" fill="none" stroke="#6c7b8b" stroke-width="2" d="M527 302L573 302L574 348L526 348L527 302" />
+<path class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M277 152L323 152L324 198L276 198L277 152" />
+<path class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M377 152L423 152L424 198L376 198L377 152" />
+<path class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M477 152L523 152L524 198L476 198L477 152" />
+<path class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M277 252L323 252L324 298L276 298L277 252" />
+<path class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M377 252L423 252L424 298L376 298L377 252" />
+<path class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M477 252L523 252L524 298L476 298L477 252" />
+<path class="token" fill="none" stroke="#b80000" stroke-width="2" d="M387 12L413 12L414 38L386 38L387 12" />
+</svg>

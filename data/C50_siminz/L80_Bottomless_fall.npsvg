@@ -1,0 +1,8 @@
+<svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
+<rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
+<np:meta author="Siminz in the House" background="" title="" />
+<path class="fixed" fill="none" stroke="#101010" stroke-width="2" d="M400 136" />
+<path class="goal" fill="none" stroke="#eec900" stroke-width="2" d="M336 6L324 27L312 43L301 57L306 58L333 54L349 53L357 52L353 47L337 36L314 22L298 11L290 6L304 34L314 57L328 78L329 77L328 50L329 14" />
+<path class="goal" fill="none" stroke="#eec900" stroke-width="2" d="M468 5L466 10L455 29L447 42L445 50L444 53L445 55L449 56L461 57L491 57L489 55L480 47L459 35L436 21L429 15L447 39L459 54L463 61L465 66L466 51L468 34L469 22" />
+<path class="token" fill="none" stroke="#b80000" stroke-width="2" d="M398 0L388 0L383 2L377 5L370 11L366 16L361 23L358 31L360 41L365 48L370 52L377 57L385 60L400 60L409 59L414 55L417 51L420 45L423 37L424 32L423 20L419 15L412 10L403 6L394 4L385 3L382 3L380 8L377 17" />
+</svg>

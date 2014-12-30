@@ -1,0 +1,23 @@
+<svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
+<rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
+<np:meta author="test" background="" title="" />
+<path class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M596 391L605 370L604 379L607 389L623 390L619 392L615 399L613 399L617 409L612 407L611 408L612 407L614 409L616 415L606 402L604 402L599 407L598 410L596 410L594 413L593 412L591 405L593 399L587 397L582 391L591 388L598 388" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M634 427L633 424L613 424L610 425L584 425L583 424L582 425L581 431L582 439L583 440L584 442L588 442L591 443L622 443L627 444L631 443L644 443L646 444L647 437L644 429L638 430L633 429L626 429" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M638 436L636 436L640 437L644 440L642 440L636 437L627 434L625 433L624 433L628 436L634 441L638 445L635 445L629 441L624 439L618 436L611 433L605 431L600 431L602 432L608 436L613 440L610 439L602 435L591 431L595 433L600 435L604 439L596 438L591 435" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M36 59L34 59L38 60L62 60L69 59L75 59L78 58L82 56L84 56L86 57L89 70L82 72L77 72L73 73L69 73L64 74L59 74L56 75L49 75L45 76L36 76L35 73L34 72L33 69L32 69L31 66L36 63" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M46 67L49 68L51 67L49 67L43 69L41 72L46 72L51 67L56 67L51 67L47 71L52 70L58 68L66 64L72 62L70 62L66 65L63 66L62 69L63 68L71 65L77 64L80 62L77 63L73 67L71 67L75 68L80 67" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M326 458" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M323 458" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M294 462" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M281 457" />
+<path class="fixed" fill="none" stroke="#8b4513" stroke-width="2" d="M398 237" />
+<path class="fixed" fill="none" stroke="#101010" stroke-width="2" d="M420 227" />
+<path class="token" fill="none" stroke="#b80000" stroke-width="2" d="M62 28L61 26L55 26L51 29L49 33L47 38L46 41L48 49L51 50L55 50L58 47L61 46L62 46L66 41L68 38L67 32L64 30L56 30" />
+<path class="fixed" fill="none" stroke="#101010" stroke-width="2" d="M177 0L582 0" />
+<path class="fixed" fill="none" stroke="#101010" stroke-width="2" d="M181 0L567 0" />
+<path class="fixed" fill="none" stroke="#101010" stroke-width="2" d="M177 20L183 14L197 11L216 11L238 9L262 8L287 8L311 7L360 7L385 6L410 7L435 7L460 9L486 9L531 7L547 5L566 5L578 7L583 7L586 4L588 0" />
+<path class="fixed" fill="none" stroke="#101010" stroke-width="2" d="M186 16L185 11L183 11L180 8L173 7L162 7L133 5" />
+<path class="" fill="none" stroke="#108710" stroke-width="2" d="M229 299L231 284L226 191L225 159L226 79L227 65L231 32L232 28L235 20L237 10" />
+<path class="" fill="none" stroke="#108710" stroke-width="2" d="M314 403L311 398L308 306L302 244L304 161L302 85L304 38L305 30L307 24L306 5" />
+<path class="" fill="none" stroke="#108710" stroke-width="2" d="M393 292L398 273L403 242L411 201L418 164L425 132L431 102L435 80L436 65L437 55L438 27L440 20L441 13L442 8" />
+</svg>

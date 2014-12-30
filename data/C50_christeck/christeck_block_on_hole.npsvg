@@ -1,0 +1,11 @@
+<svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
+<rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
+<np:meta author="test" background="" title="hurtz" />
+<path class="fixed" fill="none" stroke="#000077" stroke-width="2" d="M5 100L349 100L350 150L5 150" />
+<path class="fixed" fill="none" stroke="#000077" stroke-width="2" d="M795 100L450 100L451 150L795 150" />
+<path class="fixed" fill="none" stroke="#000077" stroke-width="2" d="M5 400L349 400L350 450L450 450L451 400L795 400" />
+<path class="" fill="none" stroke="#6c7b8b" stroke-width="2" d="M300 59L500 59L499 30L301 30L300 59" />
+<path class="" fill="none" stroke="#6c7b8b" stroke-width="2" d="M300 229L500 229L499 200L301 200L300 229" />
+<path class="token" fill="none" stroke="#b80000" stroke-width="2" d="M200 20L201 40L219 40L220 20L201 20" />
+<path class="goal sleeping" fill="none" stroke="#eec900" stroke-width="2" d="M375 449L425 449L424 401L376 401L375 449" />
+</svg>
