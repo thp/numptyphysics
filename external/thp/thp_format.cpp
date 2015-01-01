@@ -1,6 +1,8 @@
 #include "thp_format.h"
 
+#include <string>
 #include <cstdarg>
+#include <cstdlib>
 
 
 std::string
