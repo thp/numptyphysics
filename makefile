@@ -11,6 +11,19 @@ CXXFLAGS += -std=c++11 -Wall -DINSTALL_BASE_PATH=\"$(PREFIX)/data\"
 
 GENERATED_MAKEFILES :=
 
+ifeq ($(SILENT),0)
+    SILENTMSG := @true
+    SILENTCMD :=
+else
+    SILENTMSG := @echo
+    SILENTCMD := @
+endif
+
+ifeq ($(V),1)
+    SILENTMSG := @true
+    SILENTCMD :=
+endif
+
 SOURCES = $(wildcard src/*.cpp)
 
 all: $(APP)
@@ -35,7 +48,8 @@ GENERATED_MAKEFILES += $(1)
 endef
 
 %.mk: %.in
-	sed -e 's/^\([^ ]*\)(\(.*\))$$/$$(eval $$(call \1,\2))/g' $< >$@ || rm -f $@
+	$(SILENTMSG) "\tSED\t$@"
+	$(SILENTCMD) sed -e 's/^\([^ ]*\)(\(.*\))$$/$$(eval $$(call \1,\2))/g' $< >$@ || rm -f $@
 
 $(eval $(call add_platform,$(PLATFORM)))
 $(eval $(call include_makefile,platform/$(PLATFORM)/platform.mk))
@@ -79,17 +93,24 @@ CXXFLAGS += -MD
 OBJECTS = $(SOURCES:.cpp=.o)
 
 $(APP): $(OBJECTS) $(LOCAL_LIBS)
-	$(CXX) -o $@ $^ $(LIBS)
+	$(SILENTMSG) "\tLD\t$@"
+	$(SILENTCMD) $(CXX) -o $@ $^ $(LIBS)
+
+%.o: %.cpp
+	$(SILENTMSG) "\tCXX\t$@"
+	$(SILENTCMD) $(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJECTS)
-	rm -f $(DEPENDENCIES)
+	$(SILENTMSG) "\tCLEAN"
+	$(SILENTCMD) rm -f $(OBJECTS)
+	$(SILENTCMD) rm -f $(DEPENDENCIES)
 
 distclean: clean
-	$(MAKE) -C $(BOX2D_SOURCE) clean
-	$(MAKE) -C $(GLASERL_SOURCE) distclean
-	rm -f $(APP)
-	rm -f $(GENERATED_MAKEFILES)
+	$(SILENTMSG) "\tDISTCLEAN"
+	$(SILENTCMD) $(MAKE) -C $(BOX2D_SOURCE) clean
+	$(SILENTCMD) $(MAKE) -C $(GLASERL_SOURCE) distclean
+	$(SILENTCMD) rm -f $(APP)
+	$(SILENTCMD) rm -f $(GENERATED_MAKEFILES)
 
 install: $(APP)
 	mkdir -p $(DESTDIR)/$(PREFIX)/bin
