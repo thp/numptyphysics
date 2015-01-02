@@ -27,14 +27,9 @@ const Rect BOUNDS_RECT( -WORLD_WIDTH/4, -WORLD_HEIGHT,
 int SCREEN_WIDTH = WORLD_WIDTH;
 int SCREEN_HEIGHT = WORLD_HEIGHT;
 
-std::string Config::findFile( const std::string& name )
+std::string Config::findFile(const std::string &name)
 {
-    std::string local_name("data/" + name);
-    if (OS->exists(local_name)) {
-        return local_name;
-    }
-
-    std::string global_name(INSTALL_BASE_PATH "/" + name);
+    std::string global_name(OS->globalDataDir() + Os::pathSep + name);
     if (OS->exists(global_name)) {
         return global_name;
     }
@@ -66,7 +61,7 @@ Config::readFile(const std::string &name)
 std::string
 Config::defaultLevelPath()
 {
-    return INSTALL_BASE_PATH;
+    return OS->globalDataDir();
 }
 
 std::string

@@ -47,6 +47,7 @@ class Os
 
   void init(int argc, char **argv);
   std::string appName();
+  std::string globalDataDir();
 
   virtual bool openBrowser(const char *url) = 0;
   virtual std::string userDataDir() = 0;

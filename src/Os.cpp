@@ -18,8 +18,13 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+#include <limits.h>
 
+#include <cstdlib>
 #include <cstring>
+#include <iostream>
+
+#include "thp_format.h"
 
 OsObj OS;
 
@@ -196,17 +201,50 @@ Os::get()
 }
 
 static std::string
+g_appDir;
+
+static std::string
 g_appName;
 
 void
 Os::init(int argc, char **argv)
 {
-    const char *slash = strrchr(argv[0], '/');
-    g_appName = slash ? (slash + 1) : argv[0];
+    char buf[PATH_MAX];
+
+    const char *progname = argv[0];
+    const char *slash = strrchr(progname, '/');
+
+    if (!slash) {
+        if (readlink("/proc/self/exe", buf, sizeof(buf)) != -1) {
+            progname = buf;
+            slash = strrchr(progname, '/');
+        }
+    }
+
+    if (!slash) {
+        throw "Could not determine application path";
+    }
+
+    g_appName = slash + 1;
+    g_appDir = std::string(progname, slash-progname);
 }
 
 std::string
 Os::appName()
 {
     return g_appName;
+}
+
+std::string
+Os::globalDataDir()
+{
+    std::string sourceData = thp::format("%s/data", g_appDir.c_str());
+
+    // Prefer './data' in the source checkout if available
+    if (exists(sourceData)) {
+        return sourceData;
+    }
+
+    // System-wide installation
+    return thp::format("%s/../share/%s/data", g_appDir.c_str(), appName().c_str());
 }
