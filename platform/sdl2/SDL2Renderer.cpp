@@ -20,17 +20,6 @@
 #include "Os.h"
 #include "Config.h"
 
-#if 0
-#include <stdlib.h>
-#include <string>
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#endif
-
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 
@@ -61,8 +50,9 @@ SDL2Renderer::SDL2Renderer(int w, int h)
     , m_gl_context()
     , m_texture_cache()
 {
-    m_window = SDL_CreateWindow("NumptyPhysics", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+    m_window = SDL_CreateWindow("NumptyPhysics",
+                                SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     m_gl_context = SDL_GL_CreateContext(m_window);
 }
 
@@ -140,7 +130,8 @@ SDL2Renderer::text(const NP::Font &font, const char *text, int rgb)
     };
 
     SDL_Surface *surface = TTF_RenderText_Blended(data->m_font, text, fg);
-    NP::Texture result = GLRenderer::load((unsigned char *)surface->pixels, surface->w, surface->h);
+    NP::Texture result = GLRenderer::load((unsigned char *)surface->pixels,
+                                          surface->w, surface->h);
     SDL_FreeSurface(surface);
 
     return result;
