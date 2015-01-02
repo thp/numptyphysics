@@ -2,5 +2,5 @@
 *.o
 *.a
 numptyphysics
-external.mk
+mk/main.mk
 platform/*/platform.mk

@@ -1,0 +1,2 @@
+OBJECTS := $(SOURCES:.cpp=.o)
+CLEAN_FILES += $(OBJECTS)

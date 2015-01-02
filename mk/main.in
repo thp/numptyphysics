@@ -1,0 +1,10 @@
+PLATFORM ?= sdl2
+add_platform($(PLATFORM))
+include_makefile(platform/$(PLATFORM)/platform.mk)
+
+add_external(thp)
+add_external(tinyxml2)
+add_external(slre)
+
+include mk/box2d.mk
+include mk/glaserl.mk
