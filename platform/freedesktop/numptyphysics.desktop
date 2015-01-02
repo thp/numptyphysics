@@ -5,3 +5,7 @@ Name=NumptyPhysics
 Categories=Game;LogicGame;
 Exec=numptyphysics
 Icon=numptyphysics
+GenericName=Physics puzzle game
+GenericName[ru]=Физическая игра-головоломка
+Comment=A crayon-drawing based physics puzzle game
+Comment[ru]=Физическая игра-головоломка, основанная на рисунке карандашом
