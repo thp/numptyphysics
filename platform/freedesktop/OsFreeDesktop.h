@@ -21,6 +21,18 @@
 #include <gio/gio.h>
 
 
+class GLibString {
+public:
+    GLibString(gchar *value) : value(value) {}
+    ~GLibString() { g_free(value); }
+
+    operator std::string() { return value; }
+
+private:
+    gchar *value;
+};
+
+
 class OsFreeDesktop : public Os {
 public:
     OsFreeDesktop()
@@ -31,5 +43,10 @@ public:
     virtual bool openBrowser(const char *url)
     {
         return g_app_info_launch_default_for_uri (url, NULL, NULL) == TRUE;
+    }
+
+    virtual std::string userDataDir()
+    {
+        return GLibString(g_build_filename(g_get_user_data_dir(), appName().c_str(), NULL));
     }
 };

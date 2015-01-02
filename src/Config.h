@@ -68,7 +68,6 @@ extern int SCREEN_HEIGHT;
 
 class Config {
 public:
-    static std::string userDataDir();
     static std::string defaultLevelPath();
 
     static std::string userLevelFileName(const std::string &name);

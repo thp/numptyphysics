@@ -47,14 +47,14 @@ public:
     , m_window(NULL)
     , m_timestep(ITERATION_RATE)
   {
-      OS->ensurePath(Config::userDataDir());
+      OS->ensurePath(OS->userDataDir());
       OS->init();
       setEventMap(APP_MAP);
 
       m_window = new Window(m_width,m_height,"Numpty Physics");
       sizeTo(Vec2(m_width,m_height));
 
-      Levels *levels = new Levels({"data", Config::defaultLevelPath(), Config::userDataDir()});
+      Levels *levels = new Levels({"data", Config::defaultLevelPath(), OS->userDataDir()});
       levels->dump();
 
       add( createGameLayer( levels, m_width, m_height ), 0, 0 );
@@ -144,5 +144,6 @@ private:
 MainLoop *
 npmain(int argc, char **argv)
 {
+    OS->init(argc, argv);
     return new App(argc, argv);
 }

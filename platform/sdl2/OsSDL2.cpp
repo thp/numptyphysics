@@ -17,6 +17,7 @@
 
 
 #include "OsFreeDesktop.h"
+#include "App.h"
 
 #include "thp_format.h"
 

@@ -19,6 +19,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <cstring>
+
 OsObj OS;
 
 static const BasicEventMap::KeyPair game_keymap[] = {
@@ -191,4 +193,20 @@ Os *
 Os::get()
 {
     return g_os;
+}
+
+static std::string
+g_appName;
+
+void
+Os::init(int argc, char **argv)
+{
+    const char *slash = strrchr(argv[0], '/');
+    g_appName = slash ? (slash + 1) : argv[0];
+}
+
+std::string
+Os::appName()
+{
+    return g_appName;
 }

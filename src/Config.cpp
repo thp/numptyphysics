@@ -64,12 +64,6 @@ Config::readFile(const std::string &name)
 }
 
 std::string
-Config::userDataDir()
-{
-    return std::string(getenv("HOME")) + Os::pathSep + ".numptyphysics";
-}
-
-std::string
 Config::defaultLevelPath()
 {
     return INSTALL_BASE_PATH;
@@ -78,13 +72,13 @@ Config::defaultLevelPath()
 std::string
 Config::userLevelFileName(const std::string &name)
 {
-    return userDataDir() + Os::pathSep + name;
+    return OS->userDataDir() + Os::pathSep + name;
 }
 
 std::string
 Config::userRecordingCollectionDir(const std::string &name)
 {
-    return userDataDir() + Os::pathSep + "Recordings" + Os::pathSep + name;
+    return OS->userDataDir() + Os::pathSep + "Recordings" + Os::pathSep + name;
 }
 
 std::string

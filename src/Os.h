@@ -44,7 +44,13 @@ class Os
   virtual void init() = 0;
   virtual void window(int w, int h) = 0;
   virtual NP::Renderer *renderer() = 0;
-  virtual bool  openBrowser( const char* url ) = 0;
+
+  void init(int argc, char **argv);
+  std::string appName();
+
+  virtual bool openBrowser(const char *url) = 0;
+  virtual std::string userDataDir() = 0;
+
   virtual Accelerometer*  getAccelerometer() { return NULL; }
   virtual EventMap* getEventMap( EventMapType type );
   virtual void decorateGame( WidgetParent* game ) {}
@@ -60,7 +66,5 @@ class OsObj
   Os* operator->() { return Os::get(); }
 };
 extern OsObj OS;
-
-extern MainLoop *npmain(int argc, char** argv);
 
 #endif //OS_H
