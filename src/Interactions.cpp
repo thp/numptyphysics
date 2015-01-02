@@ -1,6 +1,7 @@
 #include "Interactions.h"
 
 #include "thp_format.h"
+#include "petals_log.h"
 
 #include <sstream>
 #include <cctype>
@@ -21,7 +22,7 @@ Interactions::handle(int color)
 {
     auto it = m_interactions.find(color);
     if (it != m_interactions.end()) {
-        printf("EVENT: '%s'\n", it->second.c_str());
+        LOG_INFO("Interaction event: '%s'", it->second.c_str());
         return true;
     }
 

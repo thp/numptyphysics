@@ -19,6 +19,8 @@
 
 #include "Path.h"
 
+#include "petals_log.h"
+
 
 static float32 calcDistanceToLine( const Vec2& pt,
 				 const Vec2& l1, const Vec2& l2,
@@ -187,13 +189,13 @@ SVGPathParser::next(Vec2 &output)
         }
 
         if (!m_tokenizer.next(a)) {
-            std::cerr << "Warning: Incomplete coordinate after " << a << std::endl;
+            LOG_WARNING("Incomplete coordinate after %s", a.c_str());
             return false;
         }
     }
 
     if (!m_tokenizer.next(b)) {
-        std::cerr << "Warning: Incomplete coordinate after " << a << std::endl;
+        LOG_WARNING("Incomplete coordinate after %s", a.c_str());
         return false;
     }
 

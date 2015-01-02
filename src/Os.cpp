@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include "thp_format.h"
+#include "petals_log.h"
 
 OsObj OS;
 
@@ -160,11 +161,11 @@ bool Os::ensurePath(const std::string& path)
         if ( sep != std::string::npos && sep > 0 ) {
             ensurePath(path.substr(0,sep));
         }
-        if ( mkdir( path.c_str(), 0755)!=0 ) {
-            fprintf(stderr,"failed to create dir %s\n", path.c_str());
+        if (mkdir(path.c_str(), 0755) != 0) {
+            LOG_WARNING("Failed to create dir: %s", path.c_str());
             return false;
         } else {
-            fprintf(stderr,"created dir %s\n", path.c_str());
+            LOG_DEBUG("Created dir %s", path.c_str());
             return true;
         }
     }
@@ -187,8 +188,7 @@ Os::pathSep = '/';
 Os::Os()
 {
     if (g_os != nullptr) {
-        fprintf(stderr, "OS instance already exists!\n");
-        exit(1);
+        LOG_FATAL("OS instance already exists!");
     }
 
     g_os = this;
@@ -206,9 +206,17 @@ g_appDir;
 static std::string
 g_appName;
 
+static long
+log_get_ticks()
+{
+    return OS->ticks();
+}
+
 void
 Os::init(int argc, char **argv)
 {
+    PetalsLog::init(log_get_ticks, thp::format);
+
     char buf[PATH_MAX];
 
     const char *progname = argv[0];

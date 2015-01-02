@@ -20,6 +20,7 @@
 #include <cstdio>
 
 #include "thp_format.h"
+#include "petals_log.h"
 
 ScriptEntry::ScriptEntry( const std::string& str )
 {
@@ -34,11 +35,10 @@ ScriptEntry::ScriptEntry( const std::string& str )
     case 'a': op = OP_ACTIVATE; break;
     case 'p': op = OP_PAUSE; break;
     case 'g': op = OP_GOAL; break;
-    default:
-      fprintf(stderr,"bad script op\n");
+    default: LOG_WARNING("Bad script op");
     }
   } else {
-    fprintf(stderr,"badly formed script entry\n");
+    LOG_WARNING("Badly formed script entry");
   }
 }
 
@@ -156,7 +156,7 @@ void ScriptPlayer::start( const ScriptLog* log, Scene* scene )
   m_index = 0;
   m_lastTick = 0;
   m_scene = scene;
-  printf("start playback: %lu events\n",m_log->size());
+  LOG_INFO("Start playback: %lu events", m_log->size());
 }
 
 

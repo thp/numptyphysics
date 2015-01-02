@@ -29,6 +29,8 @@
 #include "Ui.h"
 #include "Colour.h"
 
+#include "petals_log.h"
+
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -153,7 +155,7 @@ public:
       m_levels->addPath( p.c_str() );
       int l = m_levels->findLevel( p.c_str() );
       if ( l >= 0 ) {
-	fprintf(stderr,"setting level to saved index to %d\n", l);
+        LOG_DEBUG("Setting level to saved index to %d", l);
 	m_level = l;
       }
       showMessage(std::string("<P align=center>saved to<BR>")+file);
@@ -168,18 +170,17 @@ public:
     if (path != "") {
       OS->ensurePath(path);
       path = m_levels->demoName(m_level);
-      fprintf(stderr,"saving demo of level %d to %s\n",
-              m_level, path.c_str());
+      LOG_INFO("Saving demo of level %d to %s", m_level, path.c_str());
       m_scene.save(path, true);
     } else {
-      fprintf(stderr,"not saving demo of demo\n");
+      LOG_INFO("Not daving demo of demo");
     }
   }
 
   void clickMode(int cm)
   {
     if (cm != m_clickMode) {
-      fprintf(stderr,"clickMode=%d!\n",cm);
+      LOG_DEBUG("clickMode = %d", cm);
       m_clickMode = cm;
       switch (cm) {
           case 1:
@@ -210,7 +211,7 @@ public:
 
   void showMessage( const std::string& msg )
   {
-    printf("showMessage \"%s\"\n",msg.c_str());
+    LOG_INFO("showMessage \"%s\"", msg.c_str());
     add( new MessageBox(msg) );
   }
 
@@ -290,10 +291,10 @@ public:
 	  //don't overwrite time after replay
 	  m_stats.endTime = OS->ticks();
 	}
-	fprintf(stderr,"STATS:\ttime=%dms\n\t"
-		"strokes=%d (%d paused, %d undone)\n",
-		m_stats.endTime-m_stats.startTime, m_stats.strokeCount,
-		m_stats.pausedStrokes, m_stats.undoCount);
+        LOG_DEBUG("STATS:");
+        LOG_DEBUG("time=%dms", m_stats.endTime-m_stats.startTime);
+        LOG_DEBUG("strokes=%d (%d paused, %d undone)", m_stats.strokeCount,
+                     m_stats.pausedStrokes, m_stats.undoCount);
 	m_completedDialog = createNextLevelDialog(this);
 	add( m_completedDialog );
 	saveDemo();
@@ -346,7 +347,7 @@ public:
       add( createMainMenu(this) );
       break;
     case Event::PAUSE:
-      fprintf(stderr,"Game pause!\n");
+      LOG_DEBUG("Game pause");
       togglePause();
       break;
     case Event::UNDO:
@@ -397,7 +398,7 @@ public:
 	  add(createColourDialog(this, NP::Colour::count, NP::Colour::values)); 
 	  break;
 	default:
-	  fprintf(stderr,"SetTool %d\n",ev.y);
+          LOG_DEBUG("SetTool %d", ev.y);
 	  setTool(ev.y);
 	  break;
 	}

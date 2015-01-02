@@ -23,6 +23,7 @@
 #include "tinyxml2.h"
 #include "thp_format.h"
 #include "thp_iterutils.h"
+#include "petals_log.h"
 
 #include <vector>
 #include <list>
@@ -395,7 +396,7 @@ void Scene::setGravity( const std::string& s )
 	setGravity( g );
     }
   } else {
-    fprintf(stderr,"invalid gravity vector [%s]\n",vector.c_str());
+    LOG_WARNING("Invalid gravity vector [%s]", vector.c_str());
   }
 }
 
@@ -422,7 +423,6 @@ public:
         : tinyxml2::XMLVisitor()
         , scene(scene)
     {
-        std::cout << "SVG Visitor" << std::endl;
     }
 
     virtual bool VisitEnter(const tinyxml2::XMLElement &element, const tinyxml2::XMLAttribute *firstAttribute) {
@@ -455,7 +455,7 @@ public:
             if (color && action) {
                 scene->m_interactions.add(color->Value(), action->Value());
             } else {
-                std::cerr << "Invalid np:interaction" << std::endl;
+                LOG_WARNING("Invalid np:interaction");
             }
         } else if (strcmp(element.Name(), "path") == 0) {
             const tinyxml2::XMLAttribute *flags = element.FindAttribute("class");
@@ -477,7 +477,7 @@ public:
                             m[k] = v;
                         }
                     } catch (thp::UnpackException e) {
-                        std::cerr << "Cannot unpack: " << stroke->Value() << std::endl;
+                        LOG_WARNING("Cannot unpack: %s", stroke->Value());
                     }
 
                     rgb = m["stroke"];
@@ -489,7 +489,7 @@ public:
                                                       rgb,
                                                       data->Value()));
             } else {
-                std::cerr << "Invalid path" << std::endl;
+                LOG_WARNING("Invalid path");
             }
         } else if (strcmp(element.Name(), "np:event") == 0) {
             const tinyxml2::XMLAttribute *attr = element.FindAttribute("value");
@@ -497,10 +497,8 @@ public:
             if (attr) {
                 scene->m_log.push_back(std::string(attr->Value()));
             } else {
-                std::cerr << "Invalid np:event" << std::endl;
+                LOG_WARNING("Invalid np:event");
             }
-        } else {
-            std::cerr << "Unhandled XML element: " << element.Name() << std::endl;
         }
 
         return true;
@@ -549,7 +547,7 @@ bool Scene::load(const std::string &level)
                     m_log.push_back(value);
                     break;
                 default:
-                    printf("Unparsed: '%s'\n", line.c_str());
+                    LOG_WARNING("Unparsed: '%s'", line.c_str());
                     break;
             }
         }
@@ -559,7 +557,7 @@ bool Scene::load(const std::string &level)
 
     int events = m_log.size();
     if (events) {
-        printf("loaded log=%d\n", events);
+        LOG_DEBUG("Loaded log with %d events", events);
     }
 
     return true;
@@ -585,7 +583,7 @@ void Scene::protect( int n )
 
 bool Scene::save( const std::string& file, bool saveLog )
 {
-  printf("saving to %s\n",file.c_str());
+  LOG_INFO("Saving level to %s", file.c_str());
   std::ofstream o( file.c_str(), std::ios::out );
   if ( o.is_open() ) {
     o << thp::format("<svg width=\"%d\" height=\"%d\" xmlns:np=\"%s\">", WORLD_WIDTH, WORLD_HEIGHT, NPSVG_NAMESPACE) << std::endl;

@@ -26,6 +26,8 @@
 #include "Event.h"
 
 #include "thp_timestep.h"
+#include "thp_format.h"
+#include "petals_log.h"
 
 #include <cstdio>
 #include <string>
@@ -89,7 +91,7 @@ private:
                       m_quit = true;
                       return true;
                   case '3':
-                      fprintf(stderr,"UI: %s\n",toString().c_str());
+                      LOG_DEBUG("UI: %s", toString().c_str());
                       return true;
                   default:
                       break;
@@ -130,7 +132,6 @@ private:
       return !m_quit;
   }
 };
-
 
 MainLoop *
 npmain(int argc, char **argv)

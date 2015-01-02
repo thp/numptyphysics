@@ -22,6 +22,8 @@
 #include "Config.h"
 #include "Os.h"
 
+#include "petals_log.h"
+
 #include <iostream>
 #include <string>
 #include "slre.h"
@@ -267,12 +269,12 @@ void
 Levels::dump()
 {
     for (int i=0; i<m_collections.size(); i++) {
-        printf("Collection #%d: %s\n", (i+1),
-                collectionName(i, true).c_str());
+        LOG_INFO("Collection #%d: %s", (i+1),
+                    collectionName(i, true).c_str());
         for (int j=0; j<m_collections[i].levels.size(); j++) {
             LevelDesc &level = m_collections[i].levels[j];
-            printf(" Level #%d: %s\n", (j+1),
-                    level.file.c_str());
+            LOG_INFO(" Level #%d: %s\n", (j+1),
+                        level.file.c_str());
         }
     }
 }

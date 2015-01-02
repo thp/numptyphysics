@@ -21,6 +21,8 @@
 #include "Config.h"
 #include "Colour.h"
 
+#include "petals_log.h"
+
 #include <iostream>
 #include <algorithm>
 
@@ -1270,7 +1272,7 @@ void
 StockIcon::draw(Canvas &screen, const Rect &area, enum Kind kind, const Vec2 &pos)
 {
     if (kind < 0 || kind >= ICON_COUNT) {
-        std::cerr << "Invalid icon kind!" << std::endl;
+        LOG_WARNING("Invalid icon kind: %d", kind);
         return;
     }
 

@@ -23,6 +23,8 @@
 #include "Scene.h"
 #include "Colour.h"
 
+#include "petals_log.h"
+
 #include <vector>
 #include <algorithm>
 
@@ -294,7 +296,7 @@ public:
       }
       return true;
     case Event::SELECT:
-      fprintf(stderr,"select level %d\n",ev.x);
+      LOG_INFO("Select level %d", ev.x);
       m_chosenLevel = ev.x;
       content()->empty();
       content()->add(new LevelLauncher(m_chosenLevel, NULL));

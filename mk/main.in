@@ -5,6 +5,7 @@ include_makefile(platform/$(PLATFORM)/platform.mk)
 add_external(thp)
 add_external(tinyxml2)
 add_external(slre)
+add_external(petals_log)
 
 include mk/box2d.mk
 include mk/glaserl.mk
