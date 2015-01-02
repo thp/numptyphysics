@@ -15,3 +15,5 @@ LIBS += -framework OpenGL
 else
 add_pkgconfig(gl)
 endif
+
+include platform/freedesktop/install.mk
