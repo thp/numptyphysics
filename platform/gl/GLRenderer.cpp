@@ -15,6 +15,8 @@
 
 #include "GLRenderer.h"
 
+#include "Config.h"
+
 class GLRendererPriv {
 public:
     GLRendererPriv(int width, int height);
@@ -52,6 +54,7 @@ private:
     enum ProgramType active_program;
     int width;
     int height;
+    Rect last_clip;
 
     friend class GLRenderer;
 };
@@ -173,6 +176,7 @@ GLRendererPriv::GLRendererPriv(int width, int height)
     , active_program(NONE)
     , width(width)
     , height(height)
+    , last_clip(Rect(0, 0, width, height))
 {
     flipVertically(false);
 }
@@ -294,6 +298,7 @@ GLRenderer::init()
     priv = new GLRendererPriv(m_width, m_height);
     glClearColor(1.f, 1.f, 1.f, 1.f);
     Glaserl::Util::default_blend();
+    Glaserl::Util::enable_scissor();
 }
 
 void
@@ -336,6 +341,16 @@ GLRenderer::retrieve(NP::Framebuffer &rendertarget)
 {
     GLFramebufferData *data = static_cast<GLFramebufferData *>(rendertarget.get());
     return NP::Texture(new GLTextureData(data->framebuffer->texture));
+}
+
+Rect
+GLRenderer::clip(Rect rect)
+{
+    Glaserl::Util::set_scissor(rect.tl.x, SCREEN_HEIGHT - rect.tl.y - rect.height(),
+                               rect.width(), rect.height());
+
+    std::swap(rect, priv->last_clip);
+    return rect;
 }
 
 void

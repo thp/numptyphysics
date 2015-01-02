@@ -97,6 +97,13 @@ void Canvas::drawRect( const Rect& r, int c, bool fill, int a )
     RENDERER->rectangle(r, c | (a << 24), fill);
 }
 
+Rect
+Canvas::clip(const Rect &r)
+{
+    EVAL_LOCAL(RENDERER);
+    return RENDERER->clip(r);
+}
+
 
 Window::Window(int w, int h, const char *title)
     : Canvas(w, h)

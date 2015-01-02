@@ -31,6 +31,23 @@ static int indent = 0;
 
 ////////////////////////////////////////////////////////////////
 
+struct TemporaryClip {
+    TemporaryClip(Canvas &screen, const Rect &r)
+        : screen(screen)
+        , r(screen.clip(r))
+    {
+    }
+
+    ~TemporaryClip()
+    {
+        screen.clip(r);
+    }
+
+    Canvas &screen;
+    Rect r;
+};
+
+
 
 Widget::Widget(WidgetParent *p) 
   : m_parent(p),
@@ -774,6 +791,8 @@ void ScrollArea::virtualSize( const Vec2& size )
 
 void ScrollArea::draw( Canvas& screen, const Rect& area )
 {
+  TemporaryClip clip(screen, m_pos);
+
   Rect cpos = m_contents->position();
   if (cpos.tl.y > m_pos.tl.y) {
     m_contents->moveTo(Vec2(cpos.tl.x,m_pos.tl.y));

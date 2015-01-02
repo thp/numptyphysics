@@ -73,6 +73,7 @@ private:
 
   void render()
   {
+      m_window->clip(FULLSCREEN_RECT);
       m_window->clear();
       draw(*m_window, FULLSCREEN_RECT);
       m_window->update();

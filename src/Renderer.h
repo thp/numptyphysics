@@ -68,6 +68,8 @@ public:
     virtual void end(Framebuffer &rendertarget) = 0;
     virtual Texture retrieve(Framebuffer &rendertarget) = 0;
 
+    virtual Rect clip(Rect rect) = 0;
+
     virtual void image(const Texture &texture, int x, int y, int w, int h) = 0;
     virtual void subimage(const Texture &texture, const Rect &src, const Rect &dst) = 0;
     virtual void blur(const Texture &texture, const Rect &src, const Rect &dst, float rx, float ry) = 0;

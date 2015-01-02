@@ -54,6 +54,8 @@ public:
     virtual void end(NP::Framebuffer &rendertarget);
     virtual NP::Texture retrieve(NP::Framebuffer &rendertarget);
 
+    virtual Rect clip(Rect rect);
+
     virtual void image(const NP::Texture &texture, int x, int y, int w, int h);
     virtual void subimage(const NP::Texture &texture, const Rect &src, const Rect &dst);
     virtual void blur(const NP::Texture &texture, const Rect &src, const Rect &dst, float rx, float ry);

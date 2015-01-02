@@ -203,6 +203,18 @@ default_blend()
     glaserl_util_default_blend();
 }
 
+static inline void
+enable_scissor()
+{
+    glaserl_util_enable_scissor();
+}
+
+static inline void
+set_scissor(int x, int y, int w, int h)
+{
+    glaserl_util_set_scissor(x, y, w, h);
+}
+
 }; // Util
 
 }; /* Glaserl */

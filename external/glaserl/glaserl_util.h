@@ -33,6 +33,12 @@ glaserl_util_load_matrix(glaserl_program_t *program, const char *uniform, glaser
 void
 glaserl_util_default_blend();
 
+void
+glaserl_util_enable_scissor();
+
+void
+glaserl_util_set_scissor(int x, int y, int w, int h);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

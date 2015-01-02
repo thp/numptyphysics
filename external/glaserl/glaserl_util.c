@@ -44,3 +44,15 @@ glaserl_util_default_blend()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
+
+void
+glaserl_util_enable_scissor()
+{
+    glEnable(GL_SCISSOR_TEST);
+}
+
+void
+glaserl_util_set_scissor(int x, int y, int w, int h)
+{
+    glScissor(x, y, w, h);
+}
