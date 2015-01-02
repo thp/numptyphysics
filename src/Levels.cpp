@@ -346,20 +346,14 @@ std::string Levels::demoPath(int l)
   }
 
   int c = collectionFromLevel(l);
-  std::string path = Config::userDataDir() + Os::pathSep
-    + "Recordings" + Os::pathSep
-    + collectionName(c,false);
-  return path;
+  return Config::userRecordingCollectionDir(collectionName(c, false));
 }
 
 std::string Levels::demoName(int l)
 {
   std::string name = levelName(l,false);
 
-  size_t sep = name.rfind(Os::pathSep);
-  if (sep != std::string::npos) {
-    name = name.substr(sep);
-  }
+  name = Config::baseName(name);
 
   if (fileExtension(name) == ".nph") {
       name.resize(name.length()-4);
@@ -368,7 +362,7 @@ std::string Levels::demoName(int l)
       name.resize(name.length()-6);
   }
 
-  return demoPath(l) + Os::pathSep + name + ".npdsvg";
+  return Config::joinPath(demoPath(l), name + ".npdsvg");
 }
 
 bool Levels::hasDemo(int l)

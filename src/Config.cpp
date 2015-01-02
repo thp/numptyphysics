@@ -74,3 +74,28 @@ Config::defaultLevelPath()
 {
     return INSTALL_BASE_PATH;
 }
+
+std::string
+Config::userLevelFileName(const std::string &name)
+{
+    return userDataDir() + Os::pathSep + name;
+}
+
+std::string
+Config::userRecordingCollectionDir(const std::string &name)
+{
+    return userDataDir() + Os::pathSep + "Recordings" + Os::pathSep + name;
+}
+
+std::string
+Config::joinPath(const std::string &dir, const std::string &name)
+{
+    return dir + Os::pathSep + name;
+}
+
+std::string
+Config::baseName(const std::string &name)
+{
+    size_t sep = name.rfind(Os::pathSep);
+    return (sep == std::string::npos) ? name : name.substr(sep);
+}

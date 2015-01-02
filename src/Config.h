@@ -71,6 +71,12 @@ public:
     static std::string userDataDir();
     static std::string defaultLevelPath();
 
+    static std::string userLevelFileName(const std::string &name);
+    static std::string userRecordingCollectionDir(const std::string &name);
+
+    static std::string joinPath(const std::string &dir, const std::string &name);
+    static std::string baseName(const std::string &name);
+
     static std::string findFile(const std::string &name);
     static std::string readFile(const std::string &name);
 };

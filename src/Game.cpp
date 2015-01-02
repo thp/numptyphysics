@@ -146,8 +146,8 @@ public:
     if ( file ) {
       p = file;
     } else {
-      p = Config::userDataDir() + Os::pathSep + "L99_saved.npsvg";
       file = "L99_saved.npsvg";
+      p = Config::userLevelFileName(file);
     }
     if ( m_scene.save( p ) ) {
       m_levels->addPath( p.c_str() );
