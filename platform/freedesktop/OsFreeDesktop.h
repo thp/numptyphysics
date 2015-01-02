@@ -18,7 +18,7 @@
 
 #include "Os.h"
 
-#include "thp_format.h"
+#include <gio/gio.h>
 
 
 class OsFreeDesktop : public Os {
@@ -30,10 +30,6 @@ public:
 
     virtual bool openBrowser(const char *url)
     {
-        if (url && system(thp::format("xdg-open '%s'", url).c_str()) == 0) {
-            return true;
-        }
-
-        return false;
+        return g_app_info_launch_default_for_uri (url, NULL, NULL) == TRUE;
     }
 };
