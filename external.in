@@ -1,0 +1,5 @@
+# List of included external libraries
+# Will be processed by makefile
+add_external(thp)
+add_external(tinyxml2)
+add_external(slre)
