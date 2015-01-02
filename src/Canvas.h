@@ -39,7 +39,6 @@ public:
   void drawPath( const Path& path, int color, int a=255 );
   void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
   void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
-  int writeBMP( const char* filename ) const;
 protected:
   int m_width;
   int m_height;

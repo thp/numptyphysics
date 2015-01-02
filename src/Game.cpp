@@ -152,31 +152,6 @@ public:
     return false;
   }
 
-
-  bool send()
-  {
-#if 0
-    if ( save( SEND_TEMP_FILE ) ) {
-      Http h;
-      if ( h.post( (Config::planetRoot()+"/upload").c_str(),
-		   "data", SEND_TEMP_FILE, "type=1" ) ) {
-	std::string id = h.getHeader("NP-Upload-Id");
-	if ( id.length() > 0 ) {
-	  printf("uploaded as id %s\n",id.c_str());
-	  if ( !m_os->openBrowser((Config::planetRoot()+"/editlevel?id="+id).c_str()) ) {
-	    showMessage("Unable to launch browser");
-	  }
-	} else {
-	  showMessage("UploadFailed: unknown error");
-	}
-      } else {
-	showMessage(std::string("UploadFailed: ")+h.errorMessage());
-      }
-    }
-#endif
-    return false;
-  }
-
   void saveDemo()
   {
     std::string path = m_levels->demoPath(m_level);
