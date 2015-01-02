@@ -21,12 +21,10 @@
 #include <vector>
 
 #define ARRAY_SIZE(aRR) (sizeof(aRR)/sizeof((aRR)[0]))
-#define ASSERT(a)
 
-#define FIXED_SHIFT 16
-#define FIXED_ONE (1<<FIXED_SHIFT)
-#define FLOAT32_TO_FIXED(float32) ((int)(float32*(float32)FIXED_ONE))
-#define FIXED_TO_INT(iNT) ((iNT)>>FIXED_SHIFT)
+// Define a local variable that is the result of calling
+// a global function of the same name (only once)
+#define EVAL_LOCAL(x) auto x = ::x()
 
 struct Vec2 {
   Vec2() : x(0), y(0) {}
@@ -97,10 +95,6 @@ inline void clearWithDelete(std::vector<T> &collection)
     }
     collection.clear();
 }
-
-#define Sgn(a) ((a)<0?-1:1)
-#define Abs(a) ((a)<0?-(a):(a))
-
 
 
 struct Rect {

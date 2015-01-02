@@ -19,9 +19,10 @@
 
 #include "thp_format.h"
 
+#include <sstream>
 #include <string>
 
-#define SVG_STROKE_WIDTH 3
+static constexpr const int SVG_STROKE_WIDTH = 3;
 
 static struct {
     const char *name;

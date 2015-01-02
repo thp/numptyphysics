@@ -21,7 +21,9 @@
 #include "Path.h"
 #include "Renderer.h"
 
-#define RENDERER  (OS->renderer())
+
+static NP::Renderer *RENDERER() { return OS->renderer(); }
+
 
 Canvas::Canvas( int w, int h )
   : m_width(w)
@@ -56,26 +58,31 @@ int Canvas::makeColour( int c ) const
 
 void Canvas::clear()
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->clear();
 }
 
 void Canvas::drawImage(Image &image, int x, int y)
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->image(image.texture(), x, y, image.width(), image.height());
 }
 
 void Canvas::drawAtlas(Image &image, const Rect &src, const Rect &dst)
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->subimage(image.texture(), src, dst);
 }
 
 void Canvas::drawBlur(Image &image, const Rect &src, const Rect &dst, float rx, float ry)
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->blur(image.texture(), src, dst, rx, ry);
 }
 
 void Canvas::drawPath( const Path& path, int color, int a )
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->path(path, color | ((a & 0xff) << 24));
 }
 
@@ -86,6 +93,7 @@ void Canvas::drawRect( int x, int y, int w, int h, int c, bool fill, int a )
 
 void Canvas::drawRect( const Rect& r, int c, bool fill, int a )
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->rectangle(r, c | (a << 24), fill);
 }
 
@@ -97,6 +105,8 @@ Window::Window(int w, int h, const char *title)
     , m_title(title)
 {
     OS->window(w, h);
+
+    EVAL_LOCAL(RENDERER);
     RENDERER->size(&m_width, &m_height);
 
     m_offscreen_target = new RenderTarget(w, h);
@@ -111,6 +121,7 @@ Window::~Window()
 
 void Window::update()
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->flush();
     RENDERER->swap();
 }
@@ -135,7 +146,7 @@ Window::offscreen()
 
 RenderTarget::RenderTarget(int w, int h)
     : Canvas(w, h)
-    , m_framebuffer(RENDERER->framebuffer(w, h))
+    , m_framebuffer(RENDERER()->framebuffer(w, h))
 {
 }
 
@@ -146,6 +157,7 @@ RenderTarget::~RenderTarget()
 void
 RenderTarget::begin()
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->begin(m_framebuffer);
     clear();
 }
@@ -153,6 +165,7 @@ RenderTarget::begin()
 void
 RenderTarget::end()
 {
+    EVAL_LOCAL(RENDERER);
     RENDERER->flush();
     RENDERER->end(m_framebuffer);
 }
@@ -160,6 +173,7 @@ RenderTarget::end()
 NP::Texture
 RenderTarget::contents()
 {
+    EVAL_LOCAL(RENDERER);
     return RENDERER->retrieve(m_framebuffer);
 }
 
@@ -172,14 +186,14 @@ Image::Image(NP::Texture texture)
 }
 
 Image::Image(std::string filename, bool cache)
-    : m_texture(RENDERER->load(filename.c_str(), cache))
+    : m_texture(RENDERER()->load(filename.c_str(), cache))
     , m_width(m_texture->w)
     , m_height(m_texture->h)
 {
 }
 
 Image::Image(NP::Font font, const char *text, int rgb)
-    : m_texture(RENDERER->text(font, text, rgb))
+    : m_texture(RENDERER()->text(font, text, rgb))
     , m_width(m_texture->w)
     , m_height(m_texture->h)
 {

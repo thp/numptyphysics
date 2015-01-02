@@ -16,6 +16,7 @@
 
 #include "Config.h"
 
+#include <sstream>
 #include <fstream>
 
 
@@ -33,7 +34,7 @@ std::string Config::findFile( const std::string& name )
         return local_name;
     }
 
-    std::string global_name(DEFAULT_RESOURCE_PATH "/" + name);
+    std::string global_name(INSTALL_BASE_PATH "/" + name);
     if (OS->exists(global_name)) {
         return global_name;
     }
@@ -60,4 +61,16 @@ Config::readFile(const std::string &name)
     delete[] buffer;
 
     return result;
+}
+
+std::string
+Config::userDataDir()
+{
+    return std::string(getenv("HOME")) + Os::pathSep + ".numptyphysics";
+}
+
+std::string
+Config::defaultLevelPath()
+{
+    return INSTALL_BASE_PATH;
 }

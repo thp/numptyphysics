@@ -128,7 +128,7 @@ void Widget::onTick(int tick)
     if (m_animating && m_pos.tl != m_targetPos) {
         const int RATE = 3;
         Vec2 diff = m_targetPos - m_pos.tl;
-        if (Abs(diff.x) <= RATE && Abs(diff.y) <= RATE) {
+        if (std::abs(diff.x) <= RATE && std::abs(diff.y) <= RATE) {
             moveTo(m_targetPos);
             m_animating = false;
             m_animation_done();
@@ -678,8 +678,8 @@ bool Draggable::onPreEvent( Event& ev )
     return true;
   case Event::MOVEMORE:
     if (m_dragMaybe && !m_dragging
-	&& ( Abs(ev.x-m_dragOrg.x) >= CLICK_TOLERANCE
-	     || Abs(ev.y-m_dragOrg.y) >= CLICK_TOLERANCE ) ) {
+	&& ( std::abs(ev.x-m_dragOrg.x) >= CLICK_TOLERANCE
+	     || std::abs(ev.y-m_dragOrg.y) >= CLICK_TOLERANCE ) ) {
       m_dragging = true;
     }
     if (m_dragging) {

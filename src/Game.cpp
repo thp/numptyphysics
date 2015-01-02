@@ -39,11 +39,18 @@
 using namespace std;
 
 
-#define JOINT_IND_PATH "282,39 280,38 282,38 285,39 300,39 301,60 303,66 302,64 301,63 300,48 297,41 296,42 294,43 293,45 291,46 289,48 287,49 286,52 284,53 283,58 281,62 280,66 282,78 284,82 287,84 290,85 294,88 297,88 299,89 302,90 308,90 311,89 314,89 320,85 321,83 323,83 324,81 327,78 328,75 327,63 326,58 325,55 323,54 321,51 320,49 319,48 316,46 314,44 312,43 314,43"
+static constexpr const char *JOINT_IND_PATH =
+    "282,39 280,38 282,38 285,39 300,39 301,60 303,66 302,64 "
+    "301,63 300,48 297,41 296,42 294,43 293,45 291,46 289,48 "
+    "287,49 286,52 284,53 283,58 281,62 280,66 282,78 284,82 "
+    "287,84 290,85 294,88 297,88 299,89 302,90 308,90 311,89 "
+    "314,89 320,85 321,83 323,83 324,81 327,78 328,75 327,63 "
+    "326,58 325,55 323,54 321,51 320,49 319,48 316,46 314,44 "
+    "312,43 314,43";
 
 
-#define BUTTON_BORDER (SCREEN_WIDTH * 0.02)
-#define BUTTON_SIZE (SCREEN_WIDTH * 0.1)
+static float BUTTON_BORDER() { return SCREEN_WIDTH * 0.02f; }
+static float BUTTON_SIZE() { return SCREEN_WIDTH * 0.1f; }
 
 class Game : public GameControl, public Container
 {
@@ -77,6 +84,9 @@ public:
   , m_left_button(new Button("MENU", Event(Event::OPTION, 1)))
   , m_right_button(new Button("TOOL", Event(Event::OPTION, 2)))
   {
+    EVAL_LOCAL(BUTTON_BORDER);
+    EVAL_LOCAL(BUTTON_SIZE);
+
     add(m_left_button, Rect(BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE, BUTTON_BORDER + BUTTON_SIZE));
     add(m_right_button, Rect(SCREEN_WIDTH - BUTTON_BORDER - BUTTON_SIZE, BUTTON_BORDER, SCREEN_WIDTH - BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE));
 
@@ -326,6 +336,10 @@ public:
   virtual bool onEvent( Event& ev )
   {
     bool used = true;
+
+    EVAL_LOCAL(BUTTON_BORDER);
+    EVAL_LOCAL(BUTTON_SIZE);
+
     switch (ev.code) {
     case Event::MENU:
       remove( m_completedDialog );

@@ -17,52 +17,47 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <sstream>
 #include "Common.h"
 #include "Os.h"
 
-#define PROJECT_HOMEPAGE "http://github.com/harmattan/numptyphysics"
-#define NPSVG_NAMESPACE "http://numptyphysics.garage.maemo.org/"
+constexpr const char *PROJECT_HOMEPAGE = "http://github.com/harmattan/numptyphysics";
+constexpr const char *NPSVG_NAMESPACE = "http://numptyphysics.garage.maemo.org/";
 
-#define WORLD_WIDTH  800
-#define WORLD_HEIGHT 480
-#define PIXELS_PER_METREf 10.0f
-#define GRAVITY_ACCELf 9.8f // m/s/s
-#define GRAVITY_FUDGEf 5.0f
-#define CLOSED_SHAPE_THREHOLDf 0.4f
-#define SIMPLIFY_THRESHOLDf 1.0f //PIXELs //(1.0/PIXELS_PER_METREf)
-#define MULTI_VERTEX_LIMIT 64
+constexpr const int WORLD_WIDTH = 800;
+constexpr const int WORLD_HEIGHT = 480;
 
-#define ITERATION_RATE    60 //fps
-#define SOLVER_ITERATIONS 8
+constexpr const float PIXELS_PER_METREf = 10.f;
+constexpr const float GRAVITY_ACCELf = 9.8f /* m/(s^2) */;
+constexpr const float GRAVITY_FUDGEf = 5.0f;
+constexpr const float CLOSED_SHAPE_THREHOLDf = 0.4f;
+constexpr const float SIMPLIFY_THRESHOLDf = 1.0f /* pixels */;
+constexpr const int MULTI_VERTEX_LIMIT = 64;
 
-#define MIN_RENDER_RATE   10 //fps
-#define MAX_RENDER_RATE   ITERATION_RATE //fps
-#define AVG_RENDER_RATE   ((MIN_RENDER_RATE+MAX_RENDER_RATE)/2)
-#define JOINT_TOLERANCE   4.0f //PIXELs
-#define SELECT_TOLERANCE  5.0f //PIXELS_PER_METREf)
-#define CLICK_TOLERANCE   4 //PIXELs
+constexpr const int ITERATION_RATE = 60 /* fps */;
+constexpr const int SOLVER_ITERATIONS = 8;
 
-#define ITERATION_TIMESTEPf  (1.0f / (float)ITERATION_RATE)
+constexpr const int MIN_RENDER_RATE = 10 /* fps */;
+constexpr const int MAX_RENDER_RATE = ITERATION_RATE /* fps */;
+constexpr const int AVG_RENDER_RATE = (MIN_RENDER_RATE + MAX_RENDER_RATE) / 2;
+constexpr const int HIDE_STEPS = AVG_RENDER_RATE * 4;
 
-#define HIDE_STEPS (AVG_RENDER_RATE*4)
+constexpr const float JOINT_TOLERANCE = 4.0f /* pixels */;
+constexpr const float SELECT_TOLERANCE = 5.0f /* pixels */;
+constexpr const float CLICK_TOLERANCE = 4.0f /* pixels */;
 
-#ifndef INSTALL_BASE_PATH
-#  define INSTALL_BASE_PATH "/usr/share/numptyphysics"
-#endif
-#define DEFAULT_LEVEL_PATH INSTALL_BASE_PATH
-#define DEFAULT_RESOURCE_PATH DEFAULT_LEVEL_PATH
+constexpr const float ITERATION_TIMESTEPf = 1.0f / float(ITERATION_RATE);
 
-#ifndef USER_BASE_PATH
-#  define USER_BASE_PATH ".numptyphysics"
-#endif
-#define USER_LEVEL_PATH USER_BASE_PATH
+constexpr const float ICON_SCALE_FACTOR = 6.0f;
 
-#define ICON_SCALE_FACTOR 6
+constexpr const int BUTTON_WIDTH = 140;
+constexpr const int BUTTON_HEIGHT = 60;
+constexpr const int BUTTON_SPACING = 8;
 
-#define VIDEO_FPS 20
-#define VIDEO_MAX_LEN 20  //seconds
+constexpr const int TAB_WIDTH = 160;
+constexpr const int TAB_HEIGHT = 40;
 
+constexpr const int DIALOG_TITLE_HEIGHT = 48;
+constexpr const int MENU_COLUMNS = 1;
 
 
 extern Rect FULLSCREEN_RECT;
@@ -70,30 +65,14 @@ extern const Rect BOUNDS_RECT;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 
-#define BUTTON_WIDTH 140
-#define BUTTON_HEIGHT 60
-#define BUTTON_SPACING 8
-#define TAB_WIDTH 160
-#define TAB_HEIGHT 40
-#define DIALOG_TITLE_HEIGHT 48
-#define MENU_COLUMNS 1
 
+class Config {
+public:
+    static std::string userDataDir();
+    static std::string defaultLevelPath();
 
-class Config
-{
- public:
-  static const std::string& userDataDir()
-  {
-    static const std::string d = std::string(getenv("HOME")) + Os::pathSep + USER_BASE_PATH;
-    return d;
-  }
-  static const std::string& planetRoot()
-  {
-    static const std::string d("http://10.10.10.10:8080");
-    return d;
-  }
-  static std::string findFile( const std::string& name );
-  static std::string readFile(const std::string &name);
+    static std::string findFile(const std::string &name);
+    static std::string readFile(const std::string &name);
 };
 
 #endif //CONFIG_H
