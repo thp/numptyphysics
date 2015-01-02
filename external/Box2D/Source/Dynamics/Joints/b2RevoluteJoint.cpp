@@ -62,6 +62,7 @@ b2RevoluteJoint::b2RevoluteJoint(const b2RevoluteJointDef* def)
 	m_motorSpeed = def->motorSpeed;
 	m_enableLimit = def->enableLimit;
 	m_enableMotor = def->enableMotor;
+        m_limitState = e_inactiveLimit;
 }
 
 void b2RevoluteJoint::InitVelocityConstraints(const b2TimeStep& step)

@@ -38,6 +38,7 @@ static struct {
 
 Stroke::Stroke(const Path &path)
     : m_rawPath(path)
+    , m_body(nullptr)
 {
     m_colour = NP::Colour::DEFAULT;
     m_attributes = 0;
@@ -47,6 +48,7 @@ Stroke::Stroke(const Path &path)
 }
 
 Stroke::Stroke(const std::string &str)
+    : m_body(nullptr)
 {
     int col = 0;
     m_colour = NP::Colour::DEFAULT;
@@ -86,6 +88,7 @@ Stroke::Stroke(const std::string &str)
 }
 
 Stroke::Stroke(const std::string &flags, const std::string &rgb, const std::string &svgpath)
+    : m_body(nullptr)
 {
     m_colour = NP::Colour::DEFAULT;
     m_attributes = 0;
