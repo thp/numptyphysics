@@ -12,8 +12,6 @@ includes a built-in editor so that you may build (and submit) your own levels.
 
 Numpty Physics is released under the GPL.
 
-Comments, questions, flames and levels to numptyphysics@gmail.com.
-
  * Home page: http://thp.io/2015/numptyphysics/
  * Project page: http://github.com/thp/numptyphysics/
 
