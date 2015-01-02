@@ -24,7 +24,6 @@
 ScriptEntry::ScriptEntry( const std::string& str )
 {
   char opc;
-  printf("log: %s\n",str.c_str());
   if ( sscanf(str.c_str(), "%d,%c,%d,%d,%d,%d,%d",
 	      &t, &opc, &stroke, &arg1, &arg2, &pt.x, &pt.y)==7 ) {
     switch (opc) {

@@ -277,7 +277,6 @@ void Path::simplify( float32 threshold )
       at(k++) = at(i);
     }
   }
-  //printf("simplify %f %dpts to %dpts\n",threshold,size(),k);
   resize(k);
 
   // remove duplicate points (shouldn't be any)

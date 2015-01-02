@@ -178,7 +178,6 @@ void Scene::createJoints( Stroke *s )
   std::vector<Joint> joints;
   for ( int j=m_strokes.size()-1; j>=0; j-- ) {      
     if ( s != m_strokes[j] && m_strokes[j]->body() ) {
-	//printf("try join to %d\n",j);
       s->determineJoints( m_strokes[j], joints );
       m_strokes[j]->determineJoints( s, joints );
       for ( int i=0; i<joints.size(); i++ ) {
@@ -200,7 +199,6 @@ void Scene::step( bool isPaused )
       if ( m_accelerometer->poll( gx, gy, gz ) ) {
 	
 	if (m_dynamicGravity || gx*gx+gy*gy > 1.2*1.2)  {
-	  //fprintf(stderr,"dynamic grav = %f,%f\n", gx, gy );
 	  const float32 factor = GRAVITY_ACCELf*PIXELS_PER_METREf/GRAVITY_FUDGEf;
 	  m_currentGravity = b2Vec2( m_gravity.x + gx*factor, 
 				     m_gravity.y + gy*factor );
@@ -263,7 +261,6 @@ bool Scene::isCompleted()
 	return false;
     }
   }
-  //printf("completed!\n");
   return true;
 }
 
@@ -352,7 +349,6 @@ Stroke* Scene::strokeAtPoint( const Vec2 pt, float32 max )
   Stroke* best = NULL;
   for ( int i=0; i<m_strokes.size(); i++ ) {
     float32 d = m_strokes[i]->distanceTo( pt );
-    //printf("stroke %d dist %f\n",i,d);
     if ( d < max ) {
 	max = d;
 	best = m_strokes[i];

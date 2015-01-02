@@ -486,7 +486,6 @@ public:
       }
       break;
     case Event::MOVEBEGIN:
-      fprintf(stderr,"MOVING!\n");
       if ( !m_replaying && !m_moveStroke ) {
           Vec2 point(mousePoint(ev));
           m_moveStroke = m_scene.strokeAtPoint(point, SELECT_TOLERANCE);
@@ -497,7 +496,6 @@ public:
       break;
     case Event::MOVEMORE:
       if ( m_moveStroke ) {
-	fprintf(stderr,"MOVING MORE!\n");
 	m_scene.moveStroke( m_moveStroke, mousePoint(ev) - m_moveOffset);
       }
       break;
@@ -505,7 +503,6 @@ public:
       m_moveStroke = NULL;
       break;
     case Event::DELETE:
-      fprintf(stderr,"DELETEING!\n");
       m_scene.deleteStroke( m_scene.strokeAtPoint( mousePoint(ev),
 						   SELECT_TOLERANCE ) );
       m_refresh = true;

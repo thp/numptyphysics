@@ -81,7 +81,6 @@ Stroke::Stroke(const std::string &str)
     if ( m_rawPath.size() < 2 ) {
         throw "invalid stroke def";
     }
-    //fprintf(stderr,"created stroke with %d points\n",m_rawPath.size());
     m_origin = m_rawPath.point(0);
     m_rawPath.translate( -m_origin );
     setAttribute( ATTRIB_DUMMY );
@@ -263,7 +262,6 @@ Stroke::maybeCreateJoint(b2World &world, Stroke *other)
             if ( !m_jointed[end] ) {
                 const Vec2& p = m_xformedPath.point( end ? n-1 : 0 );
                 if ( other->distanceTo( p ) <= JOINT_TOLERANCE ) {
-                    //printf("jointed end %d d=%f\n",end,other->distanceTo( p ));
                     b2Vec2 pw = p;
                     pw *= 1.0f/PIXELS_PER_METREf;
                     JointDef j( m_body, other->m_body, pw );
@@ -358,7 +356,6 @@ Stroke::distanceTo(const Vec2 &pt)
     for ( int i=1; i<m_xformedPath.numPoints(); i++ ) {
         Segment s( m_xformedPath.point(i-1), m_xformedPath.point(i) );
         float32 d = s.distanceTo( pt );
-        //printf("  d[%d]=%f %d,%d\n",i,d,m_rawPath.point(i-1).x,m_rawPath.point(i-1).y);
         if ( d < best ) {
             best = d;
         }
@@ -418,7 +415,6 @@ Stroke::process()
     float32 thresh = SIMPLIFY_THRESHOLDf;
     m_rawPath.simplify( thresh );
     m_shapePath = m_rawPath;
-    //fprintf(stderr,"simplified stroke to %d points\n",m_rawPath.size());
 
     while ( m_shapePath.numPoints() > MULTI_VERTEX_LIMIT ) {
         thresh += SIMPLIFY_THRESHOLDf;
@@ -432,7 +428,6 @@ Stroke::transform()
     // distinguish between xformed raw and shape path as needed
     if ( m_hide ) {
         if ( m_hide < HIDE_STEPS ) {
-            //printf("hide %d\n",m_hide);
             Vec2 o = m_screenBbox.centroid();
             m_screenPath -= o;
             m_screenPath.scale( 0.99 );
@@ -449,7 +444,6 @@ Stroke::transform()
             return false; // ground strokes never move.
         } else if ( m_xformAngle != m_body->GetAngle()
                 ||  ! (m_xformPos == m_body->GetPosition()) ) {
-            //printf("transform stroke - rot or pos\n");
             b2Mat22 rot( m_body->GetAngle() );
             b2Vec2 orig = PIXELS_PER_METREf * m_body->GetPosition();
             m_xformedPath = m_rawPath;
@@ -460,11 +454,9 @@ Stroke::transform()
             m_screenPath = m_xformedPath;
             m_screenBbox = m_screenPath.bbox();
         } else {
-            //printf("transform none\n");
             return false;
         }
     } else {
-        //printf("transform no body\n");
         m_xformedPath = m_rawPath;
         m_xformedPath.translate( m_origin );
         m_screenPath = m_xformedPath;

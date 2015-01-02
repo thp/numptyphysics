@@ -52,7 +52,6 @@ std::string Widget::toString()
   char buf[32];
   char ind[] = "                                                         "
     "                                                         ";
-  //fprintf(stderr,"[%d,%d-%d,%d]\n",m_pos.tl.x,m_pos.tl.y,m_pos.br.x,m_pos.br.y);
   sprintf(buf,"[%d,%d-%d,%d]\n",m_pos.tl.x,m_pos.tl.y,m_pos.br.x,m_pos.br.y);
   ind[indent] = '\0';
   std::string s(ind);
@@ -87,10 +86,8 @@ bool Widget::processEvent(ToolkitEvent &ev)
 bool Widget::dispatchEvent( Event& ev )
 {
   if (m_visible && onEvent(ev)) {
-    //fprintf(stderr,"event %d consumed by %s\n", ev.code, name());    
     return true;
   } else if (m_parent) {
-    //fprintf(stderr,"toparent %s event %d\n", m_parent->name(), ev.code);
     return m_parent->dispatchEvent(ev);
   }
   return false;
@@ -257,16 +254,12 @@ void Button::draw( Canvas& screen, const Rect& area )
 
 bool Button::onEvent( Event& ev )
 {
-  //fprintf(stderr,"Button::onEvent %d\n",ev.code);
   switch (ev.code) {
   case Event::SELECT:
     if (m_focussed) {
-      // fprintf(stderr,"button press translate %d -> %d/%d,%d\n",
-      //    ev.code,m_selEvent.code,m_selEvent.x,m_selEvent.y);
       m_focussed = false;
       onSelect();
       if (m_parent && m_selEvent.code != Event::NOP) {
-	//fprintf(stderr,"button press event dispatch %d\n",m_selEvent.code);
 	m_parent->dispatchEvent(m_selEvent);
       }
     }
@@ -531,7 +524,6 @@ int RichText::layout(int w)
   Vec2 wordmetrics;
   m_snippets.clear();
   m_snippets.push_back(snippet);
-  //fprintf(stderr,"layout w=%d \"%s\"\n",w,m_text.c_str());
 
   while (p != std::string::npos) {
     bool newline = false;
@@ -542,7 +534,6 @@ int RichText::layout(int w)
     } else {
       wordmetrics = snippet.font->metrics(m_text.substr(p,e-p));
     }
-    //fprintf(stderr,"word \"%s\" w=%d\n",m_text.substr(p,e-p).c_str(),wordmetrics.x);
     if (x!=margin) {
       // space
       wordmetrics.x += spacewidth;
@@ -559,7 +550,6 @@ int RichText::layout(int w)
     if (e!=std::string::npos && m_text[e]=='<') {
       size_t f = m_text.find('>',e);
       Tag tag(m_text,e,f);
-      //fprintf(stderr,"got tag \"%s\"\n",tag.tag().c_str());
       if (tag.tag() == "H1") {
 	newline = true;
 	if (tag.closed()) {
@@ -591,7 +581,6 @@ int RichText::layout(int w)
 	x += margin;
       } else if (tag.tag() == "IMG") {
       }
-      //fprintf(stderr,"skip %d chars \n",f+1-e);
       e = f + 1;
     }
 
@@ -603,8 +592,6 @@ int RichText::layout(int w)
 	m_snippets[l].pos.y = y;
 	snippet.textoff = e;
 	m_snippets.push_back(snippet);
-	//fprintf(stderr,"new line %d w=%d, \"%s\"\n", y, x+wordmetrics.x,
-	// m_text.substr(m_snippets[l].textoff,m_snippets[l].textlen).c_str());
 	y += m_snippets[l].font->height();
 	l++;
 	x = margin + indent;
@@ -621,8 +608,6 @@ int RichText::layout(int w)
       m_snippets[l].textlen = m_text.length() - m_snippets[l].textoff;
       m_snippets[l].pos = Vec2(0,y);
       y += m_snippets[l].font->height();
-      //fprintf(stderr,"last line %d \"%s\"\n", y,
-      //      m_text.substr(m_snippets[l].textoff,m_snippets[l].textlen).c_str());
     } else {
       while (m_text[p] == ' '
 	     || m_text[p] == '\n'
@@ -670,7 +655,6 @@ bool Draggable::processEvent(ToolkitEvent &ev)
 
 bool Draggable::onPreEvent( Event& ev )
 {
-  //fprintf(stderr,"draggable event %d %d,%d\n",ev.code,ev.x,ev.y);      
   switch (ev.code) {
   case Event::MOVEBEGIN:
     m_dragMaybe = true;
@@ -718,7 +702,6 @@ bool Draggable::onPreEvent( Event& ev )
 
 bool Draggable::onEvent( Event& ev )
 {
-  //fprintf(stderr,"draggable event %d %d,%d\n",ev.code,ev.x,ev.y);      
   switch (ev.code) {
   case Event::UP:
     m_dragging = m_dragMaybe = false;
@@ -745,7 +728,6 @@ bool Draggable::onEvent( Event& ev )
 void Draggable::onTick( int tick )
 {
   if (!m_dragging && (m_delta.x != 0 || m_delta.y != 0)) {
-    //fprintf(stderr, "Draggable::onTick glide %d, %d\n",m_delta.x,m_delta.y);
     move(m_delta);
     m_delta = m_delta * 50 / 51;
   }
@@ -901,7 +883,6 @@ bool Container::processEvent(ToolkitEvent &ev)
           break;
       default:
           for (int i=m_children.size()-1; i>=0; --i) {
-              //fprintf(stderr," ev to: %s\n",m_children[i]->toString().c_str());
               if (m_children[i]->processEvent(ev)) {
                   return true;
               }
@@ -976,7 +957,6 @@ void Box::onResize()
   Vec2 org(m_pos.tl);
 
   for (int i=0; i<m_sizes.size(); ++i) {
-    //fprintf(stderr,"box hild %d at %d,%d\n",i,org.x,org.y);
     m_children[i]->moveTo(org);
     int incr = totalg>0 ? m_growths[i] * extra / totalg : 0;
     if (m_vertical) {
@@ -1160,7 +1140,6 @@ bool Dialog::processEvent(ToolkitEvent &ev)
 
 bool Dialog::onEvent( Event& ev )
 {
-  //fprintf(stderr,"dialog event %d\n",ev.code);      
   if ( ev.code == Event::CLOSE ) {
     close();
     return true;
@@ -1195,7 +1174,6 @@ void Dialog::draw(Canvas &screen, const Rect &area)
 bool Dialog::close()
 {
   if (m_parent) {
-    //fprintf(stderr,"close dialog\n");    
     m_closeRequested = true;
   }
   return false; // ??
@@ -1229,7 +1207,6 @@ bool MenuDialog::onEvent( Event& ev )
       && ev.y == -777
       && m_target
       && m_target->dispatchEvent(m_items[ev.x]->event)) {
-    //fprintf(stderr,"MenuDialog event translate[%d] -> %d\n",ev.x,m_items[ev.x]->event.code);    
     Event closeEvent(Event::CLOSE);
     onEvent(closeEvent);
     return true;
@@ -1239,7 +1216,6 @@ bool MenuDialog::onEvent( Event& ev )
 
 Widget* MenuDialog::makeButton( MenuItem* item, const Event& ev )
 {
-  //fprintf(stderr,"MenuDialog::makeButton %s\n",item->text.c_str());
   return new Button(item->text,ev);
 }
 

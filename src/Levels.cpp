@@ -376,7 +376,6 @@ LevelDesc* Levels::findLevel( int i )
   if (i < m_numLevels) {
     for ( int c=0; c<m_collections.size(); c++ ) {
       if ( i >= m_collections[c].levels.size() ) {
-	//fprintf(stderr,"index %d not in c%d (size=%d)\n",i,c,m_collections[c]->levels.size());
 	i -= m_collections[c].levels.size();
       } else {
 	return &(m_collections[c].levels[i]);

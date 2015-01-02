@@ -72,16 +72,7 @@ private:
   void render()
   {
       m_window->clear();
-
       draw(*m_window, FULLSCREEN_RECT);
-
-#if DO_DRAW_FPS
-          m_window->drawRect(Rect(0, 0, 50, 50), m_window->makeColour(0xbfbf8f), true);
-          char buf[32];
-          sprintf(buf,"%d", XXX);
-          Font::headingFont()->drawLeft(m_window, Vec2(20,20), buf, 0);
-#endif
-
       m_window->update();
   }
 
