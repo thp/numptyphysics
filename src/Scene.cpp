@@ -189,47 +189,51 @@ void Scene::createJoints( Stroke *s )
   }    
 }
 
-void Scene::step( bool isPaused )
+bool
+Scene::introCompleted()
 {
-  m_recorder.tick(isPaused);
-  isPaused |= m_player.tick();
+    return m_step >= m_strokes.size();
+}
 
-  if ( (m_step++ >= m_strokes.size()) && !isPaused ) {
-    if (m_accelerometer && m_dynamicGravity) {
-      float32 gx, gy, gz;
-      if ( m_accelerometer->poll( gx, gy, gz ) ) {
-	
-	if (m_dynamicGravity || gx*gx+gy*gy > 1.2*1.2)  {
-	  const float32 factor = GRAVITY_ACCELf*PIXELS_PER_METREf/GRAVITY_FUDGEf;
-	  m_currentGravity = b2Vec2( m_gravity.x + gx*factor, 
-				     m_gravity.y + gy*factor );
-	  m_world->SetGravity( m_currentGravity );
-	} else if (!(m_currentGravity == m_gravity)) {
-	  m_currentGravity += m_gravity;
-	  m_currentGravity *= 0.5;
-	  m_world->SetGravity( m_currentGravity );
-	}
-	//TODO record gravity
-      }
-    }
+void Scene::step(bool isPaused)
+{
+    m_recorder.tick(isPaused);
+    isPaused |= m_player.tick();
+    m_step++;
 
-    m_world->Step( ITERATION_TIMESTEPf, SOLVER_ITERATIONS );
-    // clean up delete strokes
-    for ( int i=0; i< m_strokes.size(); i++ ) {
-      if ( m_strokes[i]->hasAttribute(ATTRIB_DELETED) ) {
-	m_strokes[i]->clearAttribute(ATTRIB_DELETED);
-	m_strokes[i]->hide();
-      }	   
+    if (introCompleted() && !isPaused) {
+        if (m_accelerometer && m_dynamicGravity) {
+            float32 gx, gy, gz;
+            if (m_accelerometer->poll(gx, gy, gz)) {
+                if (m_dynamicGravity || gx*gx+gy*gy > 1.2*1.2)  {
+                    const float32 factor = GRAVITY_ACCELf*PIXELS_PER_METREf/GRAVITY_FUDGEf;
+                    setGravity(b2Vec2(m_gravity.x + gx*factor, m_gravity.y + gy*factor));
+                } else if (m_currentGravity != m_gravity) {
+                    setGravity((m_currentGravity + m_gravity) * 0.5);
+                }
+                // TODO: record gravity
+            }
+        }
+
+        m_world->Step(ITERATION_TIMESTEPf, SOLVER_ITERATIONS);
+
+        // clean up delete strokes
+        for (auto &stroke: m_strokes) {
+            if (stroke->hasAttribute(ATTRIB_DELETED)) {
+                stroke->clearAttribute(ATTRIB_DELETED);
+                stroke->hide();
+            }
+        }
+
+        // check for token respawn
+        for (auto &stroke: m_strokes) {
+            // TODO: also respawn goal if it's not shrinking yet
+            if (stroke->hasAttribute(ATTRIB_TOKEN) && !BOUNDS_RECT.intersects(stroke->worldBbox())) {
+                reset(stroke);
+                activate(stroke);
+            }
+        }
     }
-    // check for token respawn
-    for ( int i=0; i < m_strokes.size(); i++ ) {
-      if ( m_strokes[i]->hasAttribute( ATTRIB_TOKEN )
-	   && !BOUNDS_RECT.intersects( m_strokes[i]->worldBbox() ) ) {
-	reset( m_strokes[i] );
-	activate( m_strokes[i] );	  
-      }
-    }
-  }
 
     // Update bounding boxes for interactive elements
     m_color_rects = calcColorRects();

@@ -456,13 +456,6 @@ GLRenderer::rectangle(const Rect &rect, int rgba, bool fill)
     priv->submitPath(vtxcoords, sizeof(vtxcoords));
 }
 
-static b2Vec2 operator*(b2Vec2 v, float m)
-{
-    b2Vec2 x = v;
-    x *= m;
-    return x;
-}
-
 static float *
 make_segment(b2Vec2 aa, b2Vec2 a, b2Vec2 b, b2Vec2 bb)
 {

@@ -60,6 +60,7 @@ public:
   bool interact(const Vec2 &pos);
 
   void step( bool isPaused=false );
+  bool introCompleted();
   bool isCompleted();
   void draw(Canvas &canvas, bool everything=false);
   void reset( Stroke* s=NULL,  bool purgeUnprotected=false );

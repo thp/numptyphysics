@@ -151,5 +151,18 @@ struct Rect {
   Vec2 bl() const { return Vec2(tl.x, br.y); }
 };
 
+inline b2Vec2
+operator*(const b2Vec2 &v, float m)
+{
+    b2Vec2 x = v;
+    x *= m;
+    return x;
+}
+
+inline bool
+operator!=(const b2Vec2 &a, const b2Vec2 &b)
+{
+    return !(a == b);
+}
 
 #endif //COMMON_H
