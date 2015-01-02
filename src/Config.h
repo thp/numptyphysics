@@ -20,7 +20,7 @@
 #include "Common.h"
 #include "Os.h"
 
-constexpr const char *PROJECT_HOMEPAGE = "http://github.com/harmattan/numptyphysics";
+constexpr const char *PROJECT_HOMEPAGE = "http://thp.io/2015/numptyphysics/";
 constexpr const char *NPSVG_NAMESPACE = "http://numptyphysics.garage.maemo.org/";
 
 constexpr const int WORLD_WIDTH = 800;
