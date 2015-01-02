@@ -1,0 +1,80 @@
+.TH numptyphysics 6 "December 30, 2009" "" "Numpty Physics"
+.SH NAME
+numptyphysics \- Crayon-based physics puzzle game
+.SH SYNOPSIS
+.B numptyphysics\fR
+.SH DESCRIPTION
+\fBNumpty Physics\fR is a Crayon-drawing puzzle game in the spirit of
+Crayon Physics using the same excellent Box2D engine. It melds
+cute schoolbook-style graphics with a kind of realistic physics
+engine. It includes a built-in editor so that you may build
+(and submit) your own levels.
+
+A summary of the keys supported is included below.
+.SH PLAY KEYS
+.PP
+.B stylus\fR			draw a new stroke
+.PP
+.B space or enter\fR		pause/unpause physics
+.PP
+.B esc or backspace\fR	undo last stroke
+.PP
+.B q\fR				quit
+.PP
+.B r or up\fR			reset level to initial state
+.PP
+.B n or right\fR		skip to next level
+.PP
+.B p or left\fR			go to previous level
+.PP
+.B e or fullscreen\fR	edit mode
+
+Hints:
+
+Each stroke is like a rigid piece of wire with a mass proportional to its length. A closed stroke is just a wire bent into a shape, it has no substance apart from its perimeter.
+
+The ends of a strokes can (and will) join onto other strokes when drawn near enough to another stroke. These joints are pivots so you can use this to build levers, pendulums and other mechanical wonders.
+
+Jointed strokes don't collide with each other. Join both ends to make a rigid structure
+
+Play bugs: goal item does not respawn if lost.
+
+.SH EDITOR KEYS
+Keys: (as per play mode plus the following)
+
+.PP
+.B e or fullscreen\fR		leave edit mode
+.PP
+.B s or menu\fR				save to ~/.numptyphysics/L99_saved.nph
+.PP
+.B zoom-minus + stylus\fR		delete stroke at point
+.PP
+.B zoom-plus + stylus\fR		drag stroke at point
+
+Hints:
+
+It's handy to pause the physics when making a new level though this is by no means necessary. Sometimes it is handy to let the physics run for a little bit just to let the items settle down.
+
+From the editor palette you can choose the crayon colour and then additional properties such as:
+
+    * ground (earth arrow) - stroke is fixed in place.
+    * sleeping (Zzz) - stroke is not subject to physics until bumped by something else.
+    * decorator (dashed D) - stroke is not part of the physical world. eg: tutorial text.
+
+You should make sure that your level has at least one red item (player token) and at least one yellow item (goal item).
+
+Token strokes will only join to other token strokes. Goal strokes will only join to goal strokes. Other strokes will happily join to any non-token non-goal strokes.
+
+If this is your first time, you may need to restart the game for your saved L99 to show up.
+
+If you wish to be clever, edit the level file directly - it's just a simple text format.
+
+Editor bugs: There is not yet any provision to name your level but you can just rename the file to anything.
+
+.SH AUTHOR
+.PP
+This manual page was written by Gabriele Giacone <1o5g4r8o@gmail.com>
+for the \fBDebian\fP system (but may be used by others).  Permission
+is granted to copy, distribute and/or modify this document under
+the terms of the GNU General Public License, Version 3 any
+later version published by the Free Software Foundation.
