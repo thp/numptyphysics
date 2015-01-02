@@ -1,6 +1,6 @@
 /*
- * This file is part of NumptyPhysics
- * Copyright (C) 2008 Tim Edmonds
+ * This file is part of NumptyPhysics <http://thp.io/2015/numptyphysics/>
+ * Coyright (c) 2014, 2015 Thomas Perl <m@thp.io>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -11,7 +11,6 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
  */
 
 #include "Stroke.h"

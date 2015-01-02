@@ -1,3 +1,18 @@
+/*
+ * This file is part of NumptyPhysics <http://thp.io/2015/numptyphysics/>
+ * Coyright (c) 2014 Thomas Perl <m@thp.io>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ */
+
 #if 0
 exec clang++ -std=c++11 -DTHP_ITERUTILS_TEST -o thp_iterutils_test -x c++ $0
 #endif
