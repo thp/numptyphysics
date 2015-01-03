@@ -61,6 +61,7 @@ constexpr const int MENU_COLUMNS = 1;
 
 constexpr const int REWIND_TICKS = 40;
 
+constexpr const float ROPE_SEGMENT_LENGTHf = 15.f;
 
 extern Rect FULLSCREEN_RECT;
 extern const Rect BOUNDS_RECT;

@@ -20,6 +20,7 @@
 #include "Common.h"
 
 #include <vector>
+#include <functional>
 
 
 class Segment
@@ -100,7 +101,10 @@ public:
   inline Vec2& endpt(unsigned char end) { return end?last():first(); }
 
   void simplify( float32 threshold );
+  void segmentize(float length);
   Rect bbox() const;
+
+  void withSegments(std::function<void(const Vec2 &a, const Vec2 &b)> fn);
 
  private:
   void simplifySub( int first, int last, float32 threshold, bool* keepflags );  

@@ -42,6 +42,7 @@ struct Vec2 {
   Vec2 operator-( const Vec2& b ) const { return Vec2(x-b.x,y-b.y); }
   Vec2 operator/( int r ) const { return Vec2(x/r,y/r); }
   Vec2 operator*( int r ) const { return Vec2(x*r,y*r); }
+  float Length() const { return sqrtf(x*x + y*y); }
   int x,y;
 };
 

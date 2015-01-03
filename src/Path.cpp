@@ -295,6 +295,51 @@ void Path::simplify( float32 threshold )
   std::swap(*this, result);
 }
 
+void
+Path::withSegments(std::function<void(const Vec2 &a, const Vec2 &b)> fn)
+{
+    for (int i=0; i<size()-1; i++) {
+        fn(at(i), at(i+1));
+    }
+}
+
+void
+Path::segmentize(float length)
+{
+    std::vector<Vec2> result;
+
+    float lastPoint = 0.f;
+    float totalLength = 0.f;
+
+    result.push_back(at(0));
+
+    withSegments([&result, &lastPoint, &totalLength, length] (const Vec2 &a, const Vec2 &b) {
+        float start = totalLength;
+        float end = start + (b - a).Length();
+
+        float nextPoint = lastPoint + length;
+        while (nextPoint >= start && nextPoint <= end) {
+            float alpha = (nextPoint - start) / (end - start);
+
+            float x = (1.f - alpha) * a.x + alpha * b.x;
+            float y = (1.f - alpha) * a.y + alpha * b.y;
+
+            result.push_back(Vec2(x, y));
+
+            lastPoint = nextPoint;
+            nextPoint += length;
+        }
+
+        totalLength = end;
+    });
+
+    if (lastPoint < totalLength - 1.f) {
+        result.push_back(at(size()-1));
+    }
+
+    std::swap(*this, result);
+}
+
 void Path::simplifySub( int first, int last, float32 threshold, bool* keepflags )
 {
   float32 furthestDist = threshold;

@@ -308,7 +308,7 @@ Stroke::ropeify(Scene &scene)
 {
     Path path = m_rawPath;
     path.simplify(SIMPLIFY_THRESHOLDf);
-    // TODO: Split path up if its parts are too long
+    path.segmentize(ROPE_SEGMENT_LENGTHf);
 
     int color = NP::Colour::toIndex(m_colour);
     int attr = m_attributes | ATTRIB_ROPE;
