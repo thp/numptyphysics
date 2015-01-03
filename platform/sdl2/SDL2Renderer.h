@@ -42,6 +42,7 @@ public:
 
 private:
     SDL_Window *m_window;
+    SDL_PixelFormat *m_pixelformat;
     SDL_GLContext m_gl_context;
     std::map<std::string, NP::Texture> m_texture_cache;
 };

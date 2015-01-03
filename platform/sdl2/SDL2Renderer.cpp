@@ -44,19 +44,22 @@ SDLFontData::~SDLFontData()
 
 SDL2Renderer::SDL2Renderer(int w, int h)
     : GLRenderer(w, h)
-    , m_window(NULL)
+    , m_window(nullptr)
+    , m_pixelformat(nullptr)
     , m_gl_context()
     , m_texture_cache()
 {
     m_window = SDL_CreateWindow("NumptyPhysics",
                                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                 w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+    m_pixelformat = SDL_AllocFormat(SDL_GetWindowPixelFormat(m_window));
     m_gl_context = SDL_GL_CreateContext(m_window);
 }
 
 SDL2Renderer::~SDL2Renderer()
 {
     SDL_GL_DeleteContext(m_gl_context);
+    SDL_FreeFormat(m_pixelformat);
     SDL_DestroyWindow(m_window);
 }
 
@@ -121,13 +124,18 @@ SDL2Renderer::text(const NP::Font &font, const char *text, int rgb)
 
     SDLFontData *data = static_cast<SDLFontData *>(font.get());
 
-    SDL_Color fg = {
-        (Uint8)((rgb >> 16) & 0xff),
-        (Uint8)((rgb >> 8) & 0xff),
-        (Uint8)((rgb) & 0xff)
-    };
+    int r = (Uint8)((rgb >> 16) & 0xff);
+    int g = (Uint8)((rgb >> 8) & 0xff);
+    int b = (Uint8)((rgb) & 0xff);
 
-    SDL_Surface *surface = TTF_RenderText_Blended(data->m_font, text, fg);
+    union {
+        Uint32 value;
+        SDL_Color color;
+    } fg;
+
+    fg.value = SDL_MapRGB(m_pixelformat, r, g, b);
+
+    SDL_Surface *surface = TTF_RenderText_Blended(data->m_font, text, fg.color);
     NP::Texture result = GLRenderer::load((unsigned char *)surface->pixels,
                                           surface->w, surface->h);
     SDL_FreeSurface(surface);
