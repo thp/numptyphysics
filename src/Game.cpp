@@ -70,6 +70,7 @@ class Game : public GameControl, public Container
   Path              m_jointInd;
   Widget           *m_left_button;
   Widget           *m_right_button;
+  int               m_reset_countdown;
 public:
   Game( Levels* levels, int width, int height ) 
   : m_createStroke(NULL),
@@ -85,6 +86,7 @@ public:
     m_jointInd(JOINT_IND_PATH)
   , m_left_button(new Button("MENU", Event(Event::OPTION, 1)))
   , m_right_button(new Button("TOOL", Event(Event::OPTION, 2)))
+  , m_reset_countdown(0)
   {
     EVAL_LOCAL(BUTTON_BORDER);
     EVAL_LOCAL(BUTTON_SIZE);
@@ -133,7 +135,6 @@ public:
 	m_scene.protect(0);
       } else {
       }
-      m_refresh = true;
       m_level = level;
       if (!m_replaying) {
 	m_stats.reset(OS->ticks());
@@ -279,6 +280,13 @@ public:
   {
     m_scene.step( isPaused() );
 
+    if (m_reset_countdown > 0) {
+        m_reset_countdown--;
+        if (m_reset_countdown == REWIND_TICKS / 2) {
+            gotoLevel(m_level);
+        }
+    }
+
     if ( m_isCompleted && m_completedDialog && m_edit ) {
       remove( m_completedDialog );
       m_completedDialog = NULL;
@@ -310,14 +318,46 @@ public:
   virtual void draw( Canvas& screen, const Rect& area )
   {
       Window *window = dynamic_cast<Window *>(&screen);
+
       if (window) {
+          // If we draw an effect
+          std::function<void(Image *, const Rect &src, const Rect &dst)> effect;
+
+          if (m_reset_countdown > 0) {
+              effect = [this, window] (Image *img, const Rect &src, const Rect &dst) {
+                  float alpha = powf(1.f - fabsf(2.f * (float(m_reset_countdown) / float(REWIND_TICKS) - 0.5f)), 0.4f);
+                  window->drawRewind(*img, src, dst, OS->ticks(), alpha);
+              };
+          } else if (m_paused) {
+              effect = [window] (Image *img, const Rect &src, const Rect &dst) {
+                  window->drawSaturation(*img, src, dst, 0.7f);
+              };
+          }
+
+          std::unique_ptr<Image> img = nullptr;
+
+          if (effect) {
+              // If we want to draw an effect, render to a texture as input for the effect
+              RenderTarget target(SCREEN_WIDTH, SCREEN_HEIGHT);
+              target.begin();
+              m_scene.draw(target);
+              target.end();
+              img.reset(new Image(target.contents()));
+          } else {
+              // Default "effect" is drawing the scene directly to the window's offscreen
+              effect = [this, window] (Image *img, const Rect &src, const Rect &dst) {
+                  m_scene.draw(*window);
+              };
+          }
+
+          // Now we can draw the sceen into the offscreen buffer
           window->beginOffscreen();
-          m_scene.draw(*window);
+          effect(img.get(), FULLSCREEN_RECT, FULLSCREEN_RECT);
           window->endOffscreen();
       }
 
-    m_refresh = false;
-    m_scene.draw(screen);
+      // Draw the whole backbuffer to the screen
+      screen.drawImage(*window->offscreen(), 0, 0);
 
     if (m_createStroke) {
         b2Mat22 rot(0.01 * OS->ticks());
@@ -360,7 +400,6 @@ public:
 	  m_stats.undoCount++;
 	}
       }
-      m_refresh = true;
       break;
     case Event::SAVE:
       save();
@@ -424,7 +463,7 @@ public:
       }
       break;
     case Event::RESET:
-      gotoLevel( m_level );
+      m_reset_countdown = REWIND_TICKS;
       break;
     case Event::NEXT:
       if (m_level==0 && m_isCompleted) {
@@ -506,7 +545,6 @@ public:
     case Event::DELETE:
       m_scene.deleteStroke( m_scene.strokeAtPoint( mousePoint(ev),
 						   SELECT_TOLERANCE ) );
-      m_refresh = true;
       break;
     default:
       used = Container::onEvent(ev);

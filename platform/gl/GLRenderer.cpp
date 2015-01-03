@@ -17,13 +17,87 @@
 
 #include "Config.h"
 
+#include <initializer_list>
+#include <cstring>
+#include <cstdlib>
+
+
+struct fRect {
+    fRect(float x1, float y1, float x2, float y2) : x1(x1), y1(y1), x2(x2), y2(y2) {}
+    fRect(const Rect &r) : x1(r.tl.x), y1(r.tl.y), x2(r.br.x), y2(r.br.y) {}
+
+    float x1, y1, x2, y2;
+};
+
+struct FloatArray {
+    FloatArray(const std::initializer_list<float> &values)
+        : data(static_cast<float *>(calloc(values.size(), sizeof(float))))
+        , size(values.size() * sizeof(float))
+    {
+        int i = 0;
+        for (auto &v: values) {
+            data[i++] = v;
+        }
+    }
+
+    FloatArray(float *data, size_t size)
+        : data(static_cast<float *>(malloc(size)))
+        , size(size)
+    {
+        memcpy(this->data, data, size);
+    }
+
+    FloatArray(const FloatArray &other)
+        : data(static_cast<float *>(malloc(other.size)))
+        , size(other.size)
+    {
+        memcpy(this->data, data, size);
+    }
+
+    FloatArray &operator=(const FloatArray &other)
+    {
+        free(data);
+        this->data = static_cast<float *>(malloc(other.size));
+        memcpy(this->data, other.data, other.size);
+        this->size = other.size;
+
+        return *this;
+    }
+
+    ~FloatArray()
+    {
+        free(data);
+    }
+
+    float *data;
+    size_t size;
+};
+
+template <typename T>
+struct Use {
+    Use(const T &v) : v(v) { v->enable(); }
+    ~Use() { v->disable(); }
+
+    const T &v;
+};
+
+template <typename T, typename C>
+void
+with(const T &v, C callback)
+{
+    Use<T> use(v);
+    callback(v);
+}
+
 class GLRendererPriv {
 public:
     GLRendererPriv(int width, int height);
     ~GLRendererPriv();
 
-    void submitTextured(Glaserl::Texture &texture, float *data, size_t size);
-    void submitBlur(Glaserl::Texture &texture, float *data, size_t size);
+    void submitTextured(Glaserl::Texture &texture, const FloatArray &data);
+    void submitRewind(Glaserl::Texture &texture, const FloatArray &data);
+    void submitSaturation(Glaserl::Texture &texture, const FloatArray &data);
+    void submitBlur(Glaserl::Texture &texture, const FloatArray &data);
     void submitPath(float *data, size_t size);
     void flush();
 
@@ -44,11 +118,18 @@ private:
     Glaserl::Program path_program;
     Glaserl::Buffer path_buffer;
 
+    Glaserl::Program rewind_program;
+    Glaserl::Buffer rewind_buffer;
+
+    Glaserl::Program saturation_program;
+    Glaserl::Buffer saturation_buffer;
+
     enum ProgramType {
         NONE,
         TEXTURED,
         BLUR,
         PATH,
+        REWIND,
     };
 
     enum ProgramType active_program;
@@ -77,6 +158,18 @@ const char *textured_fragment_shader_src =
 "\n"
 "void main() {\n"
 "    gl_FragColor = texture2D(texture, tex);\n"
+"}\n"
+;
+
+const char *saturation_fragment_shader_src =
+"varying vec2 tex;\n"
+"uniform sampler2D texture;\n"
+"uniform float alpha;\n"
+"\n"
+"void main() {\n"
+"    vec4 col = texture2D(texture, tex);\n"
+"    float g = (col.r + col.g + col.b) / 3.0;\n"
+"    gl_FragColor = alpha * col + (1.0 -alpha) * vec4(g, g, g, col.a);\n"
 "}\n"
 ;
 
@@ -112,6 +205,40 @@ const char *blur_fragment_shader_src =
 "                       texture2D(texture, sample[5]).rgb * 0.061 +\n"
 "                       texture2D(texture, sample[6]).rgb * 0.006;\n"
 "    gl_FragColor.a = 1.0;\n"
+"}\n"
+;
+
+const char *rewind_vertex_shader_src =
+"attribute vec4 vtxcoord;\n"
+"attribute vec2 texcoord;\n"
+"uniform mat4 projection;\n"
+"varying vec2 tex;\n"
+"varying vec2 vtx;\n"
+"\n"
+"void main() {\n"
+"    gl_Position = projection * vtxcoord;\n"
+"    tex = texcoord;\n"
+"    vtx = vtxcoord.xy;\n"
+"}\n"
+;
+
+const char *rewind_fragment_shader_src =
+"varying vec2 tex;\n"
+"varying vec2 vtx;\n"
+"uniform sampler2D texture;\n"
+"uniform float time;\n"
+"uniform float alpha;\n"
+"uniform vec2 texsize;\n"
+"\n"
+"void main() {\n"
+"    vec2 offset = tex;\n"
+// Wobbly
+"    offset.x += alpha * 0.09 * pow(sin(vtx.y * 0.04 + time * 0.004), 30.0);\n"
+// Noise
+"    offset.x += alpha * 0.003 * sin((vtx.y * 10000.0 + time * 100.0));\n"
+// Don't go offscreen left and right
+"    offset.x = max(0.0, min(texsize.x - 0.01, offset.x));\n"
+"    gl_FragColor = texture2D(texture, offset);\n"
 "}\n"
 ;
 
@@ -173,6 +300,34 @@ GLRendererPriv::GLRendererPriv(int width, int height)
                 "projection",
                 NULL))
     , path_buffer(Glaserl::buffer())
+    , rewind_program(Glaserl::program(
+                rewind_vertex_shader_src,
+                rewind_fragment_shader_src,
+                // Attributes
+                "vtxcoord", 2,
+                "texcoord", 2,
+                NULL,
+                // Uniforms
+                "projection",
+                "texture",
+                "time",
+                "alpha",
+                "texsize",
+                NULL))
+    , rewind_buffer(Glaserl::buffer())
+    , saturation_program(Glaserl::program(
+                textured_vertex_shader_src,
+                saturation_fragment_shader_src,
+                // Attributes
+                "vtxcoord", 2,
+                "texcoord", 2,
+                NULL,
+                // Uniforms
+                "projection",
+                "texture",
+                "alpha",
+                NULL))
+    , saturation_buffer(Glaserl::buffer())
     , active_program(NONE)
     , width(width)
     , height(height)
@@ -195,37 +350,65 @@ GLRendererPriv::flipVertically(bool flip)
         projection->ortho(0, width, height, 0, 0, 1);
     }
 
-    Glaserl::Util::load_matrix(textured_program, "projection", projection);
-    Glaserl::Util::load_matrix(blur_program, "projection", projection);
-    Glaserl::Util::load_matrix(path_program, "projection", projection);
+    for (auto p: {textured_program, blur_program, path_program, rewind_program, saturation_program}) {
+        Glaserl::Util::load_matrix(p, "projection", projection);
+    }
 }
 
 void
-GLRendererPriv::submitTextured(Glaserl::Texture &texture, float *data, size_t size)
+GLRendererPriv::submitTextured(Glaserl::Texture &texture, const FloatArray &data)
 {
     if (active_program != NONE) {
         flush();
     }
 
-    textured_buffer->append(data, size);
+    textured_buffer->append(data.data, data.size);
 
-    texture->enable();
-    Glaserl::Util::render_triangle_strip(textured_program, textured_buffer);
-    texture->disable();
+    with(texture, [this] (const Glaserl::Texture &texture) {
+        Glaserl::Util::render_triangle_strip(textured_program, textured_buffer);
+    });
 }
 
 void
-GLRendererPriv::submitBlur(Glaserl::Texture &texture, float *data, size_t size)
+GLRendererPriv::submitBlur(Glaserl::Texture &texture, const FloatArray &data)
 {
     if (active_program != NONE) {
         flush();
     }
 
-    blur_buffer->append(data, size);
+    blur_buffer->append(data.data, data.size);
 
-    texture->enable();
-    Glaserl::Util::render_triangle_strip(blur_program, blur_buffer);
-    texture->disable();
+    with(texture, [this] (const Glaserl::Texture &texture) {
+        Glaserl::Util::render_triangle_strip(blur_program, blur_buffer);
+    });
+}
+
+void
+GLRendererPriv::submitRewind(Glaserl::Texture &texture, const FloatArray &data)
+{
+    if (active_program != NONE) {
+        flush();
+    }
+
+    rewind_buffer->append(data.data, data.size);
+
+    with(texture, [this] (const Glaserl::Texture &texture) {
+        Glaserl::Util::render_triangle_strip(rewind_program, rewind_buffer);
+    });
+}
+
+void
+GLRendererPriv::submitSaturation(Glaserl::Texture &texture, const FloatArray &data)
+{
+    if (active_program != NONE) {
+        flush();
+    }
+
+    saturation_buffer->append(data.data, data.size);
+
+    with(texture, [this] (const Glaserl::Texture &texture) {
+        Glaserl::Util::render_triangle_strip(saturation_program, saturation_buffer);
+    });
 }
 
 void
@@ -364,64 +547,88 @@ GLRenderer::image(const NP::Texture &texture, int x, int y, int w, int h)
     subimage(texture, src, dst);
 }
 
+static fRect
+mapTexture(const NP::Texture &texture, const Rect &src)
+{
+    GLTextureData *data = static_cast<GLTextureData *>(texture.get());
+
+    float w = data->texture->width();
+    float h = data->texture->height();
+
+    float tx1 = float(src.tl.x) / w;
+    float ty1 = float(src.tl.y) / h;
+    data->texture->map_uv(tx1, ty1);
+
+    float tx2 = float(src.br.x) / w;
+    float ty2 = float(src.br.y) / h;
+    data->texture->map_uv(tx2, ty2);
+
+    return fRect(tx1, ty1, tx2, ty2);
+}
+
+static FloatArray
+vtxtex(const fRect &vtx, const fRect &tex)
+{
+    return FloatArray({
+        vtx.x1, vtx.y1, tex.x1, tex.y1,
+        vtx.x1, vtx.y2, tex.x1, tex.y2,
+        vtx.x2, vtx.y1, tex.x2, tex.y1,
+        vtx.x2, vtx.y2, tex.x2, tex.y2,
+    });
+}
+
 void
 GLRenderer::subimage(const NP::Texture &texture, const Rect &src, const Rect &dst)
 {
     GLTextureData *data = static_cast<GLTextureData *>(texture.get());
-    float w = data->texture->width();
-    float h = data->texture->height();
 
-    float tx1 = float(src.tl.x) / w, ty1 = float(src.tl.y) / h;
-    data->texture->map_uv(tx1, ty1);
-
-    float tx2 = float(src.br.x) / w, ty2 = float(src.br.y) / h;
-    data->texture->map_uv(tx2, ty2);
-
-    // Layout: vtx.x, vtx.y, tex.x, tex.y
-    float vtxdata[] = {
-        (float)dst.tl.x, (float)dst.tl.y, tx1, ty1,
-        (float)dst.tl.x, (float)dst.br.y, tx1, ty2,
-        (float)dst.br.x, (float)dst.tl.y, tx2, ty1,
-        (float)dst.br.x, (float)dst.br.y, tx2, ty2,
-    };
-
-    priv->submitTextured(data->texture, vtxdata, sizeof(vtxdata));
+    priv->submitTextured(data->texture, vtxtex(dst, mapTexture(texture, src)));
 }
 
 void
 GLRenderer::blur(const NP::Texture &texture, const Rect &src, const Rect &dst, float rx, float ry)
 {
     GLTextureData *data = static_cast<GLTextureData *>(texture.get());
-    float w = data->texture->width();
-    float h = data->texture->height();
-    data->texture->map_uv(w, h);
 
-    priv->blur_program->enable();
-    glUniform2f(priv->blur_program->uniform_location("pixelgrid"), rx / w, ry / h);
-    priv->blur_program->disable();
+    rx /= data->texture->width();
+    ry /= data->texture->height();
+    data->texture->map_uv(rx, ry);
 
-    w = data->texture->width();
-    h = data->texture->height();
+    with(priv->blur_program, [rx, ry] (const Glaserl::Program &program) {
+        glUniform2f(program->uniform_location("pixelgrid"), rx, ry);
+    });
 
-    float tx1 = float(src.tl.x) / w, ty1 = float(src.tl.y) / h;
-    data->texture->map_uv(tx1, ty1);
+    priv->submitBlur(data->texture, vtxtex(dst, mapTexture(texture, src)));
+}
 
-    float tx2 = float(src.br.x) / w, ty2 = float(src.br.y) / h;
-    data->texture->map_uv(tx2, ty2);
+void
+GLRenderer::rewind(const NP::Texture &texture, const Rect &src, const Rect &dst, float t, float a)
+{
+    GLTextureData *data = static_cast<GLTextureData *>(texture.get());
 
-    float x = dst.tl.x;
-    float y = dst.tl.y;
-    w = dst.br.x - dst.tl.x;
-    h = dst.br.y - dst.tl.y;
+    float tx = 1.f;
+    float ty = 1.f;
+    data->texture->map_uv(tx, ty);
 
-    // Layout: vtx.x, vtx.y, tex.x, tex.y
-    float vtxdata[] = {
-        (float)x, (float)y, tx1, ty1,
-        (float)x, (float)(y + h), tx1, ty2,
-        (float)(x + w), (float)y, tx2, ty1,
-        (float)(x + w), (float)(y + h), tx2, ty2,
-    };
-    priv->submitBlur(data->texture, vtxdata, sizeof(vtxdata));
+    with(priv->rewind_program, [t, a, tx, ty] (const Glaserl::Program &program) {
+        glUniform1f(program->uniform_location("time"), t);
+        glUniform1f(program->uniform_location("alpha"), a);
+        glUniform2f(program->uniform_location("texsize"), tx, ty);
+    });
+
+    priv->submitRewind(data->texture, vtxtex(dst, mapTexture(texture, src)));
+}
+
+void
+GLRenderer::saturation(const NP::Texture &texture, const Rect &src, const Rect &dst, float a)
+{
+    GLTextureData *data = static_cast<GLTextureData *>(texture.get());
+
+    with(priv->saturation_program, [a] (const Glaserl::Program &program) {
+        glUniform1f(program->uniform_location("alpha"), a);
+    });
+
+    priv->submitSaturation(data->texture, vtxtex(dst, mapTexture(texture, src)));
 }
 
 static void rgba_split(int rgba, float &r, float &g, float &b, float &a)

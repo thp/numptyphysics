@@ -73,6 +73,8 @@ public:
     virtual void image(const Texture &texture, int x, int y, int w, int h) = 0;
     virtual void subimage(const Texture &texture, const Rect &src, const Rect &dst) = 0;
     virtual void blur(const Texture &texture, const Rect &src, const Rect &dst, float rx, float ry) = 0;
+    virtual void rewind(const Texture &texture, const Rect &src, const Rect &dst, float t, float a) = 0;
+    virtual void saturation(const Texture &texture, const Rect &src, const Rect &dst, float a) = 0;
     virtual void rectangle(const Rect &rect, int rgba, bool fill) = 0;
     virtual void path(const Path &path, int rgba) = 0;
 

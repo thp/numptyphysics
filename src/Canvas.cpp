@@ -80,6 +80,18 @@ void Canvas::drawBlur(Image &image, const Rect &src, const Rect &dst, float rx, 
     RENDERER->blur(image.texture(), src, dst, rx, ry);
 }
 
+void Canvas::drawRewind(Image &image, const Rect &src, const Rect &dst, float time, float alpha)
+{
+    EVAL_LOCAL(RENDERER);
+    RENDERER->rewind(image.texture(), src, dst, time, alpha);
+}
+
+void Canvas::drawSaturation(Image &image, const Rect &src, const Rect &dst, float alpha)
+{
+    EVAL_LOCAL(RENDERER);
+    RENDERER->saturation(image.texture(), src, dst, alpha);
+}
+
 void Canvas::drawPath( const Path& path, int color, int a )
 {
     EVAL_LOCAL(RENDERER);

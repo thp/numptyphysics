@@ -36,6 +36,8 @@ public:
   void drawImage(Image &image, int x=0, int y=0);
   void drawAtlas(Image &image, const Rect &src, const Rect &dst);
   void drawBlur(Image &image, const Rect &src, const Rect &dst, float rx, float ry);
+  void drawRewind(Image &image, const Rect &src, const Rect &dst, float time, float alpha);
+  void drawSaturation(Image &image, const Rect &src, const Rect &dst, float alpha);
   void drawPath( const Path& path, int color, int a=255 );
   void drawRect( int x, int y, int w, int h, int c, bool fill=true, int a=255 );
   void drawRect( const Rect& r, int c, bool fill=true, int a=255 );
