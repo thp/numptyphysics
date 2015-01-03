@@ -20,6 +20,8 @@
 #include "Common.h"
 #include "Renderer.h"
 
+#include <string>
+
 class Path;
 class Image;
 

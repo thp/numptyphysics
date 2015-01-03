@@ -22,6 +22,7 @@
 #include "Canvas.h"
 #include "Script.h"
 #include "Interactions.h"
+#include "ForceField.h"
 
 #include <string>
 #include <fstream>
@@ -78,6 +79,7 @@ public:
   ScriptLog* getLog() { return &m_log; }
   const ScriptPlayer* replay() { return &m_player; }
 private:
+  bool addForceField(const char *x, const char *y, const char *width, const char *height, const char *force);
   void resetWorld();
   bool activate( Stroke *s );
   void activateAll();
@@ -105,6 +107,7 @@ private:
   int             m_step;
   std::map<int,Rect> m_color_rects;
   NP::Interactions    m_interactions;
+  std::vector<ForceField *> m_forceFields;
 
   friend class SceneSVGVisitor;
 };

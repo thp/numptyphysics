@@ -1,0 +1,13 @@
+<svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
+<rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
+<np:meta author="test" background="" title="" />
+<rect class="forcefield" np:force="0,-10" x="500" y="100" width="200" height="360" fill="blue" stroke="none" />
+<rect class="forcefield" np:force="10,0" x="300" y="370" width="200" height="90" fill="blue" stroke="none" />
+<path class="fixed " fill="none" stroke="#000077" stroke-width="3" d="M5 450L795 450" />
+<path class="goal sleeping " fill="none" stroke="#eec900" stroke-width="3" d="M604 73L613 52L612 61L615 71L631 72L627 74L623 81L621 81L625 91L620 89L619 90L620 89L622 91L624 97L614 84L612 84L607 89L606 92L604 92L602 95L601 94L599 87L601 81L595 79L590 73L599 70L606 70" />
+<path class="fixed " fill="none" stroke="#101010" stroke-width="3" d="M400 136" />
+<path class="token " fill="none" stroke="#b80000" stroke-width="3" d="M152 85L153 88L148 89L143 93L140 96L138 102L144 118L155 126L164 126L170 124L175 120L180 113L182 108L181 94L178 94L174 87L166 83L155 82L154 85" />
+<path class="fixed " fill="none" stroke="#000077" stroke-width="3" d="M688 449L688 308L681 246L680 222L680 61" />
+<path class="fixed " fill="none" stroke="#000077" stroke-width="3" d="M515 354L515 222L522 136L523 88L527 59L528 56L517 209L517 185L521 169L553 97L561 83L563 83L578 57L583 52" />
+<path class="fixed " fill="none" stroke="#000077" stroke-width="3" d="M679 172L678 128L666 99L651 74L643 54L636 42" />
+</svg>

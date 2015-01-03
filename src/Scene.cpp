@@ -28,6 +28,7 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <cstdlib>
 
 
 Scene::Scene( bool noWorld )
@@ -202,6 +203,11 @@ void Scene::step(bool isPaused)
     m_step++;
 
     if (introCompleted() && !isPaused) {
+        for (auto &ff: m_forceFields) {
+            ff->tick();
+            ff->update(m_strokes);
+        }
+
         if (m_accelerometer && m_dynamicGravity) {
             float32 gx, gy, gz;
             if (m_accelerometer->poll(gx, gy, gz)) {
@@ -286,12 +292,17 @@ void Scene::draw(Canvas &canvas, bool everything)
         }
         stroke->draw(canvas, a);
         i++;
+        //canvas.drawRect(stroke->screenBbox(), 0xff0000, true, 100);
     }
 
     clearWithDelete(m_deletedStrokes);
 
     for (auto &kv: m_color_rects) {
         canvas.drawRect(kv.second, kv.first, true, 128);
+    }
+
+    for (auto &ff: m_forceFields) {
+        ff->draw(canvas);
     }
 }
 
@@ -373,6 +384,7 @@ void Scene::clear()
     m_world->Step( ITERATION_TIMESTEPf, SOLVER_ITERATIONS );
   }
   m_log.clear();
+  clearWithDelete(m_forceFields);
 }
 
 void Scene::setGravity( const b2Vec2& g )
@@ -460,6 +472,21 @@ public:
                 scene->m_interactions.add(color->Value(), action->Value());
             } else {
                 LOG_WARNING("Invalid np:interaction");
+            }
+        } else if (strcmp(element.Name(), "rect") == 0) {
+            const tinyxml2::XMLAttribute *flags = element.FindAttribute("class");
+            if (flags && strcmp(flags->Value(), "forcefield") == 0) {
+                const tinyxml2::XMLAttribute *x = element.FindAttribute("x");
+                const tinyxml2::XMLAttribute *y = element.FindAttribute("y");
+                const tinyxml2::XMLAttribute *width = element.FindAttribute("width");
+                const tinyxml2::XMLAttribute *height = element.FindAttribute("height");
+                const tinyxml2::XMLAttribute *force = element.FindAttribute("np:force");
+                if (!x || !y || !width || !height || !force ||
+                        !scene->addForceField(x->Value(), y->Value(),
+                                         width->Value(), height->Value(),
+                                         force->Value())) {
+                    LOG_WARNING("Invalid forcefield");
+                }
             }
         } else if (strcmp(element.Name(), "path") == 0) {
             const tinyxml2::XMLAttribute *flags = element.FindAttribute("class");
@@ -594,6 +621,10 @@ bool Scene::save( const std::string& file, bool saveLog )
     o << thp::format("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"white\" stroke=\"none\" />", WORLD_WIDTH, WORLD_HEIGHT) << std::endl;
     o << thp::format("<np:meta author=\"%s\" background=\"%s\" title=\"%s\" />", m_author.c_str(), m_bg.c_str(), m_title.c_str()) << std::endl;
 
+    for (auto &ff: m_forceFields) {
+        o << ff->asString() << std::endl;
+    }
+
     o << m_interactions.serialize();
     for ( int i=0; i<m_strokes.size() && (!saveLog || i<m_protect); i++ ) {
 	o << m_strokes[i]->asString() << std::endl;
@@ -612,6 +643,25 @@ bool Scene::save( const std::string& file, bool saveLog )
   } else {
     return false;
   }
+}
+
+bool
+Scene::addForceField(const char *x, const char *y, const char *width, const char *height, const char *force)
+{
+    int ix = atoi(x);
+    int iy = atoi(y);
+    int iw = atoi(width);
+    int ih = atoi(height);
+
+    auto v = thp::split(force, ",");
+    if (v.size() != 2) {
+        return false;
+    }
+
+    b2Vec2 vforce(strtof(v[0].c_str(), nullptr), strtof(v[1].c_str(), nullptr));
+
+    m_forceFields.push_back(new ForceField(Rect(ix, iy, ix+iw, iy+ih), vforce));
+    return true;
 }
 
 

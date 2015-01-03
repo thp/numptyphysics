@@ -103,6 +103,8 @@ struct Rect {
   Rect(bool) { clear(); }
   Rect( const Vec2& atl, const Vec2& abr ) : tl(atl), br(abr) {} 
   Rect( int x1, int y1, int x2, int y2 ) : tl(x1,y1), br(x2,y2) {}
+  int w() const { return width() - 1; }
+  int h() const { return height() - 1; }
   int width() const { return br.x-tl.x+1;  }
   int height() const { return br.y-tl.y+1;  }
   Vec2 size() const { return br-tl; }
@@ -130,6 +132,9 @@ struct Rect {
   }
   void clipTo( const Rect& r ) { tl=Max(tl,r.tl); br=Min(br,r.br); }
   bool contains( const Vec2& p ) const {
+    return p.x >= tl.x && p.x <= br.x && p.y >= tl.y && p.y <= br.y;
+  }
+  bool contains( const b2Vec2 &p) const {
     return p.x >= tl.x && p.x <= br.x && p.y >= tl.y && p.y <= br.y;
   }
   bool contains( const Rect& p ) const {
