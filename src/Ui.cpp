@@ -683,11 +683,7 @@ bool Draggable::onPreEvent( Event& ev )
     if (m_dragMaybe && !m_dragging
 	&& ( std::abs(ev.x-m_dragOrg.x) >= CLICK_TOLERANCE
 	     || std::abs(ev.y-m_dragOrg.y) >= CLICK_TOLERANCE ) ) {
-      auto p_pos = parent()->position();
-      if (m_pos.br.y > p_pos.br.y) {
-          // Only allow dragging if bottom of draggable is below parent size
-          m_dragging = true;
-      }
+      m_dragging = true;
     }
     if (m_dragging) {
       m_delta = Vec2(ev.x,ev.y)-m_dragOrg;
@@ -702,15 +698,6 @@ bool Draggable::onPreEvent( Event& ev )
     if (m_dragging) {
       m_dragMaybe = false;
       m_dragging = false;
-
-      // Snap back into view if parent is bigger than drag area
-      auto p_pos = parent()->position();
-      if (m_pos.tl.y < p_pos.tl.y) {
-          LOG_WARNING("Snap back");
-          move(Vec2(0, p_pos.tl.y - m_pos.tl.y));
-          m_delta = Vec2(0, 0);
-      }
-
       return true;
     } else {
       //translate into a raw click
