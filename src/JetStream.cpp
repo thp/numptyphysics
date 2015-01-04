@@ -77,8 +77,8 @@ std::string
 JetStream::asString()
 {
     return thp::format("<rect class=\"jetstream\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" "
-                       "force=\"%.2f,%.2f\" />", rect.tl.x, rect.tl.y, rect.w(), rect.h(),
-                       force.x, force.y);
+                       "np:force=\"%.2f,%.2f\" fill=\"blue\" stroke=\"none\" />",
+                       rect.tl.x, rect.tl.y, rect.w(), rect.h(), force.x, force.y);
 }
 
 void
