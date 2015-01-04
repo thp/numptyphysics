@@ -904,6 +904,10 @@ Scene::playbackUntil(ScriptLog &log, int ticks)
         // Incomplete jet stream due to replay - remove it
         onSceneEvent(SceneEvent(SceneEvent::DELETE_LAST_JETSTREAM));
     }
+
+    // TODO: Sync paused state with game (either take current pause value
+    // and set that in the game, or take game's pause state and apply to
+    // current state (this way, one can pause the physics and rewind)
 }
 
 
