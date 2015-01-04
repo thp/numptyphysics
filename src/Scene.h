@@ -83,6 +83,9 @@ public:
   bool save( const std::string& file, bool saveLog=false );
 
   ScriptLog* getLog() { return &m_log; }
+  int getTicks() { return m_ticks; }
+
+  void playbackUntil(ScriptLog &log, int ticks);
 private:
   bool addJetStream(const char *x, const char *y, const char *width, const char *height, const char *force);
   void resetWorld();
@@ -110,6 +113,7 @@ private:
   bool            m_dynamicGravity;
   Accelerometer  *m_accelerometer;
   int             m_step;
+  int             m_ticks;
   std::map<int,Rect> m_color_rects;
   NP::Interactions    m_interactions;
   std::vector<JetStream *> m_jetStreams;

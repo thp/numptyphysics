@@ -410,7 +410,7 @@ Widget* createPlayOpts(GameControl* game )
 
 static const MenuItem editNormalOpts[] = {
   MenuItem("menu", StockIcon::CLOSE, Event::MENU),
-  MenuItem("reset", StockIcon::RESET, Event::RESET),
+  MenuItem("rewind", StockIcon::RESET, Event::RESET),
   MenuItem("skip", StockIcon::FORWARD, Event::NEXT),
   MenuItem("edit", StockIcon::SHARE, Event::EDIT),
   MenuItem("", StockIcon::NONE, Event::NOP)
@@ -418,7 +418,7 @@ static const MenuItem editNormalOpts[] = {
 
 static const MenuItem editDoneOpts[] = {
   MenuItem("menu", StockIcon::CLOSE, Event::MENU),
-  MenuItem("reset", StockIcon::RESET, Event::RESET),
+  MenuItem("rewind", StockIcon::RESET, Event::RESET),
   MenuItem("done", StockIcon::SHARE, Event::DONE),
   MenuItem("", StockIcon::NONE, Event::NOP)
 };

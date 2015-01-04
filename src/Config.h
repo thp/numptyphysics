@@ -59,7 +59,8 @@ constexpr const int TAB_HEIGHT = 40;
 constexpr const int DIALOG_TITLE_HEIGHT = 48;
 constexpr const int MENU_COLUMNS = 1;
 
-constexpr const int REWIND_TICKS = 40;
+constexpr const int REWIND_ANIMATION_TICKS = 40;
+constexpr const int REWIND_JUMP_LENGTH = 100;
 
 constexpr const float ROPE_SEGMENT_LENGTHf = 15.f;
 

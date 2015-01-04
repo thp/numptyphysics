@@ -289,8 +289,27 @@ public:
 
     if (m_reset_countdown > 0) {
         m_reset_countdown--;
-        if (m_reset_countdown == REWIND_TICKS / 2) {
-            gotoLevel(m_level);
+        if (m_reset_countdown == REWIND_ANIMATION_TICKS / 2) {
+            if (m_scene.isCompleted()) {
+                // From the finish screen, we always start the level fresh
+                gotoLevel(m_level);
+            } else if (!m_replaying) {
+                // Store all events up to now, so that we can playback those
+                // events after reloading the level up to a given point in
+                // the past (REWIND_JUMP_LENGTH ticks before now)
+                ScriptLog events = *(m_scene.getLog());
+                int ticks = m_scene.getTicks();
+                int target = std::max(0, ticks - REWIND_JUMP_LENGTH);
+
+                LOG_DEBUG("Rewinding: %d -> %d", ticks, target);
+
+                // Reload level and replay history until the target point
+                gotoLevel(m_level);
+                m_scene.playbackUntil(events, target);
+            } else {
+                // FIXME: Implement step-wise rewind for playback as well?
+                gotoLevel(m_level);
+            }
         }
     }
 
@@ -332,7 +351,7 @@ public:
 
           if (m_reset_countdown > 0) {
               effect = [this, window] (Image *img, const Rect &src, const Rect &dst) {
-                  float alpha = powf(1.f - fabsf(2.f * (float(m_reset_countdown) / float(REWIND_TICKS) - 0.5f)), 0.4f);
+                  float alpha = powf(1.f - fabsf(2.f * (float(m_reset_countdown) / float(REWIND_ANIMATION_TICKS) - 0.5f)), 0.4f);
                   window->drawRewind(*img, src, dst, OS->ticks(), alpha);
               };
           } else if (isPaused()) {
@@ -460,7 +479,7 @@ public:
       }
       break;
     case Event::RESET:
-      m_reset_countdown = REWIND_TICKS;
+      m_reset_countdown = REWIND_ANIMATION_TICKS;
       break;
     case Event::NEXT:
       if (m_level==0 && m_isCompleted) {

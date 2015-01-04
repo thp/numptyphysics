@@ -63,6 +63,7 @@ Scene::Scene( bool noWorld )
     m_dynamicGravity(false),
     m_accelerometer(Os::get()->getAccelerometer()),
     m_step(0)
+  , m_ticks(0)
   , m_color_rects()
   , m_interactions()
   , m_createStroke(nullptr)
@@ -358,6 +359,7 @@ void Scene::step()
         return;
     }
 
+    m_ticks++;
     m_recorder.tick(this);
     m_player.tick(this);
 
@@ -735,6 +737,7 @@ bool Scene::load(const std::string &level)
     resetWorld();
     m_dynamicGravity = false;
     m_step = 0;
+    m_ticks = 0;
 
     if (level.find("<svg") != std::string::npos) {
         tinyxml2::XMLDocument doc;
@@ -866,6 +869,41 @@ Scene::newJetStream(const Vec2 &pos)
     auto js = new JetStream(Rect(pos, pos + Vec2(10, 10)), force);
     m_jetStreams.push_back(js);
     return js;
+}
+
+void
+Scene::playbackUntil(ScriptLog &log, int ticks)
+{
+    ScriptPlayer player;
+    player.start(&log);
+
+    while (m_ticks < ticks) {
+        step();
+        if (introCompleted()) {
+            player.tick(this);
+        }
+    }
+
+    LOG_INFO("Played back %d events in %d frames", player.index(), m_step);
+
+    // Here, we have to do some cleanup, as the replay might have
+    // cut the events somewhere in the middle (later on, we might
+    // have sync barriers for scene events and avoid it this way)
+
+    if (m_createStroke) {
+        // Incomplete stroke due to replay - remove it
+        onSceneEvent(SceneEvent(SceneEvent::DELETE_LAST_STROKE));
+    }
+
+    if (m_moveStroke) {
+        // In-progress move due to replay - finish it
+        onSceneEvent(SceneEvent(SceneEvent::FINISH_MOVE_STROKE));
+    }
+
+    if (m_createJetStream) {
+        // Incomplete jet stream due to replay - remove it
+        onSceneEvent(SceneEvent(SceneEvent::DELETE_LAST_JETSTREAM));
+    }
 }
 
 

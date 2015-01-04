@@ -50,6 +50,9 @@ public:
     virtual void stop();
     virtual void tick(Scene *scene);
 
+    bool running() { return m_running; }
+    int index() { return m_index; }
+
 protected:
     ScriptLog *m_log;
     bool m_running;
