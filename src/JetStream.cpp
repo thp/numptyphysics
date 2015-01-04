@@ -1,9 +1,9 @@
-#include "ForceField.h"
+#include "JetStream.h"
 
 #include "thp_format.h"
 #include "petals_log.h"
 
-ForceField::ForceField(const Rect &rect, const b2Vec2 &force)
+JetStream::JetStream(const Rect &rect, const b2Vec2 &force)
     : rect(rect)
     , force(force)
     , particles()
@@ -15,7 +15,7 @@ ForceField::ForceField(const Rect &rect, const b2Vec2 &force)
 }
 
 void
-ForceField::draw(Canvas &canvas)
+JetStream::draw(Canvas &canvas)
 {
     //canvas.drawRect(rect, 0x000044, true, 50);
 
@@ -29,7 +29,7 @@ ForceField::draw(Canvas &canvas)
 }
 
 void
-ForceField::tick()
+JetStream::tick()
 {
     for (auto &particle: particles) {
         particle += force;
@@ -51,7 +51,7 @@ ForceField::tick()
 }
 
 void
-ForceField::update(std::vector<Stroke *> &strokes)
+JetStream::update(std::vector<Stroke *> &strokes)
 {
     for (auto &stroke: strokes) {
         if (rect.intersects(stroke->screenBbox())) {
@@ -64,9 +64,9 @@ ForceField::update(std::vector<Stroke *> &strokes)
 }
 
 std::string
-ForceField::asString()
+JetStream::asString()
 {
-    return thp::format("<rect class=\"forcefield\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" "
+    return thp::format("<rect class=\"jetstream\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" "
                        "force=\"%.2f,%.2f\" />", rect.tl.x, rect.tl.y, rect.w(), rect.h(),
                        force.x, force.y);
 }

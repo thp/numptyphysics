@@ -1,5 +1,5 @@
-#ifndef NUMPTYPHYSICS_FORCEFIELD_H
-#define NUMPTYPHYSICS_FORCEFIELD_H
+#ifndef NUMPTYPHYSICS_JETSTREAM_H
+#define NUMPTYPHYSICS_JETSTREAM_H
 
 #include "Canvas.h"
 #include "Common.h"
@@ -7,9 +7,9 @@
 
 #include <string>
 
-class ForceField {
+class JetStream {
 public:
-    ForceField(const Rect &rect, const b2Vec2 &force);
+    JetStream(const Rect &rect, const b2Vec2 &force);
 
     void draw(Canvas &canvas);
     void tick();
@@ -22,4 +22,4 @@ private:
     std::vector<b2Vec2> particles;
 };
 
-#endif /* NUMPTYPHYSICS_FORCEFIELD_H */
+#endif /* NUMPTYPHYSICS_JETSTREAM_H */

@@ -1,8 +1,8 @@
 <svg width="800" height="480" xmlns:np="http://numptyphysics.garage.maemo.org/">
 <rect x="0" y="0" width="800" height="480" fill="white" stroke="none" />
 <np:meta author="test" background="" title="" />
-<rect class="forcefield" np:force="0,-10" x="500" y="100" width="200" height="360" fill="blue" stroke="none" />
-<rect class="forcefield" np:force="10,0" x="300" y="370" width="200" height="90" fill="blue" stroke="none" />
+<rect class="jetstream" np:force="0,-10" x="500" y="100" width="200" height="360" fill="blue" stroke="none" />
+<rect class="jetstream" np:force="10,0" x="300" y="370" width="200" height="90" fill="blue" stroke="none" />
 <path class="fixed " fill="none" stroke="#000077" stroke-width="3" d="M5 450L795 450" />
 <path class="goal sleeping " fill="none" stroke="#eec900" stroke-width="3" d="M604 73L613 52L612 61L615 71L631 72L627 74L623 81L621 81L625 91L620 89L619 90L620 89L622 91L624 97L614 84L612 84L607 89L606 92L604 92L602 95L601 94L599 87L601 81L595 79L590 73L599 70L606 70" />
 <path class="fixed " fill="none" stroke="#101010" stroke-width="3" d="M400 136" />

@@ -203,9 +203,9 @@ void Scene::step(bool isPaused)
     m_step++;
 
     if (introCompleted() && !isPaused) {
-        for (auto &ff: m_forceFields) {
-            ff->tick();
-            ff->update(m_strokes);
+        for (auto &stream: m_jetStreams) {
+            stream->tick();
+            stream->update(m_strokes);
         }
 
         if (m_accelerometer && m_dynamicGravity) {
@@ -301,8 +301,8 @@ void Scene::draw(Canvas &canvas, bool everything)
         canvas.drawRect(kv.second, kv.first, true, 128);
     }
 
-    for (auto &ff: m_forceFields) {
-        ff->draw(canvas);
+    for (auto &stream: m_jetStreams) {
+        stream->draw(canvas);
     }
 }
 
@@ -384,7 +384,7 @@ void Scene::clear()
     m_world->Step( ITERATION_TIMESTEPf, SOLVER_ITERATIONS );
   }
   m_log.clear();
-  clearWithDelete(m_forceFields);
+  clearWithDelete(m_jetStreams);
 }
 
 void Scene::setGravity( const b2Vec2& g )
@@ -475,17 +475,17 @@ public:
             }
         } else if (strcmp(element.Name(), "rect") == 0) {
             const tinyxml2::XMLAttribute *flags = element.FindAttribute("class");
-            if (flags && strcmp(flags->Value(), "forcefield") == 0) {
+            if (flags && strcmp(flags->Value(), "jetstream") == 0) {
                 const tinyxml2::XMLAttribute *x = element.FindAttribute("x");
                 const tinyxml2::XMLAttribute *y = element.FindAttribute("y");
                 const tinyxml2::XMLAttribute *width = element.FindAttribute("width");
                 const tinyxml2::XMLAttribute *height = element.FindAttribute("height");
                 const tinyxml2::XMLAttribute *force = element.FindAttribute("np:force");
                 if (!x || !y || !width || !height || !force ||
-                        !scene->addForceField(x->Value(), y->Value(),
+                        !scene->addJetStream(x->Value(), y->Value(),
                                          width->Value(), height->Value(),
                                          force->Value())) {
-                    LOG_WARNING("Invalid forcefield");
+                    LOG_WARNING("Invalid jetstream");
                 }
             }
         } else if (strcmp(element.Name(), "path") == 0) {
@@ -621,8 +621,8 @@ bool Scene::save( const std::string& file, bool saveLog )
     o << thp::format("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"white\" stroke=\"none\" />", WORLD_WIDTH, WORLD_HEIGHT) << std::endl;
     o << thp::format("<np:meta author=\"%s\" background=\"%s\" title=\"%s\" />", m_author.c_str(), m_bg.c_str(), m_title.c_str()) << std::endl;
 
-    for (auto &ff: m_forceFields) {
-        o << ff->asString() << std::endl;
+    for (auto &stream: m_jetStreams) {
+        o << stream->asString() << std::endl;
     }
 
     o << m_interactions.serialize();
@@ -646,7 +646,7 @@ bool Scene::save( const std::string& file, bool saveLog )
 }
 
 bool
-Scene::addForceField(const char *x, const char *y, const char *width, const char *height, const char *force)
+Scene::addJetStream(const char *x, const char *y, const char *width, const char *height, const char *force)
 {
     int ix = atoi(x);
     int iy = atoi(y);
@@ -660,7 +660,7 @@ Scene::addForceField(const char *x, const char *y, const char *width, const char
 
     b2Vec2 vforce(strtof(v[0].c_str(), nullptr), strtof(v[1].c_str(), nullptr));
 
-    m_forceFields.push_back(new ForceField(Rect(ix, iy, ix+iw, iy+ih), vforce));
+    m_jetStreams.push_back(new JetStream(Rect(ix, iy, ix+iw, iy+ih), vforce));
     return true;
 }
 
