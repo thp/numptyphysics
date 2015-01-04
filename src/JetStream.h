@@ -16,7 +16,10 @@ public:
     void update(std::vector<Stroke *> &strokes);
     std::string asString();
 
+    void resize(const Vec2 &mouse);
+
 private:
+    Vec2 origin;
     Rect rect;
     b2Vec2 force;
     std::vector<b2Vec2> particles;

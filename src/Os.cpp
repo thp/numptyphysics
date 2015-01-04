@@ -67,6 +67,11 @@ static const BasicEventMap::ButtonPair game_erase_mousemap[] = {
   {}
 };
 
+static const BasicEventMap::ButtonPair game_jetstream_mousemap[] = {
+  { 1, Event::JETSTREAMBEGIN, Event::JETSTREAMMORE, Event::JETSTREAMEND },
+  {}
+};
+
 static const BasicEventMap::KeyPair app_keymap[] = {
   { NUMPTYKEY_q, Event::QUIT },
   {}
@@ -126,6 +131,7 @@ EventMap* Os::getEventMap( EventMapType type )
   static BasicEventMap gameMap(game_keymap,game_mousemap);
   static BasicEventMap gameMoveMap(game_keymap,game_move_mousemap);
   static BasicEventMap gameEraseMap(game_keymap,game_erase_mousemap);
+  static BasicEventMap gameJetstreamMap(game_keymap,game_jetstream_mousemap);
   static BasicEventMap editMap(NULL,edit_mousemap);
   static BasicEventMap uiButtonMap(NULL,ui_button_mousemap);
   static BasicEventMap uiDraggableMap(ui_draggable_keymap,ui_draggable_mousemap);
@@ -139,6 +145,8 @@ EventMap* Os::getEventMap( EventMapType type )
     return &gameMoveMap;
   case GAME_ERASE_MAP:
     return &gameEraseMap;
+  case GAME_JETSTREAM_MAP:
+    return &gameJetstreamMap;
   case APP_MAP:
     return &appMap;
   case EDIT_MAP:

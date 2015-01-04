@@ -494,15 +494,87 @@ Widget* createColourDialog(GameControl* game, int n, const int* cols)
 
 ////////////////////////////////////////////////////////////////
 
-static const MenuItem toolOpts[] = {
-  MenuItem("ground", StockIcon::TICK, Event(Event::SELECT,0)),
-  MenuItem("sleepy", StockIcon::TICK, Event(Event::SELECT,1)),
-  MenuItem("decor", StockIcon::TICK, Event(Event::SELECT,2)),
-  MenuItem("move", StockIcon::TICK, Event(Event::SELECT,3)),
-  MenuItem("erase", StockIcon::TICK, Event(Event::SELECT,4)),
-  MenuItem("rope", StockIcon::TICK, Event(Event::SELECT,5)),
-  MenuItem("interactive", StockIcon::TICK, Event(Event::SELECT,6)),
-  MenuItem("", StockIcon::NONE, Event::NOP)
+struct ToggleMenuItem {
+    ToggleMenuItem(const char *label,
+                   std::function<bool(GameControl *)> toggled,
+                   std::function<bool(GameControl *)> clicked)
+        : menuitem(MenuItem(label, StockIcon::TICK, Event(Event::SELECT)))
+        , toggled(toggled)
+        , clicked(clicked)
+    {
+    }
+
+    MenuItem menuitem;
+
+    // Status query - returns "true" if the check in the menu should be on
+    std::function<bool(GameControl *)> toggled;
+
+    // Click handler - returns "true" if the click event was handled
+    std::function<bool(GameControl *)> clicked;
+};
+
+static const ToggleMenuItem toolOpts[] = {
+  ToggleMenuItem("ground", [] (GameControl *game) {
+      return game->m_strokeFixed;
+  }, [] (GameControl *game) {
+      game->m_strokeFixed = !game->m_strokeFixed;
+      game->m_strokeSleep = false;
+      game->m_strokeDecor = false;
+      return true;
+  }),
+
+  ToggleMenuItem("sleepy", [] (GameControl *game) {
+      return game->m_strokeSleep;
+  }, [] (GameControl *game) {
+      game->m_strokeFixed = false;
+      game->m_strokeSleep = !game->m_strokeSleep;
+      game->m_strokeDecor = false;
+      return true;
+  }),
+
+  ToggleMenuItem("decor", [] (GameControl *game) {
+      return game->m_strokeDecor;
+  }, [] (GameControl *game) {
+      game->m_strokeFixed = false;
+      game->m_strokeSleep = false;
+      game->m_strokeDecor = !game->m_strokeDecor;
+      return true;
+  }),
+
+  ToggleMenuItem("move", [] (GameControl *game) {
+      return game->m_clickMode == CLICK_MODE_MOVE;
+  }, [] (GameControl *game) {
+      game->toggleClickMode(CLICK_MODE_MOVE);
+      return true;
+  }),
+
+  ToggleMenuItem("erase", [] (GameControl *game) {
+      return game->m_clickMode == CLICK_MODE_ERASE;
+  }, [] (GameControl *game) {
+      game->toggleClickMode(CLICK_MODE_ERASE);
+      return true;
+  }),
+
+  ToggleMenuItem("jetstream", [] (GameControl *game) {
+      return game->m_clickMode == CLICK_MODE_DRAW_JETSTREAM;
+  }, [] (GameControl *game) {
+      game->toggleClickMode(CLICK_MODE_DRAW_JETSTREAM);
+      return true;
+  }),
+
+  ToggleMenuItem("rope", [] (GameControl *game) {
+      return game->m_strokeRope;
+  }, [] (GameControl *game) {
+      game->m_strokeRope = !game->m_strokeRope;
+      return true;
+  }),
+
+  ToggleMenuItem("interactive", [] (GameControl *game) {
+      return game->m_interactiveDraw;
+  }, [] (GameControl *game) {
+      game->m_interactiveDraw = !game->m_interactiveDraw;
+      return true;
+  }),
 };
 
 
@@ -513,7 +585,11 @@ public:
 				  m_game(game)
   {
     m_buttonDim = Vec2(200, 40);
-    addItems( toolOpts );
+    std::vector<MenuItem> items;
+    for (auto &o: toolOpts) {
+        items.push_back(o.menuitem);
+    }
+    addItems(items);
     updateTicks();
   }
   Widget* makeButton( MenuItem* item, const Event& ev )
@@ -542,62 +618,33 @@ public:
   {
     for (int i=0; i<m_opts.size(); i++) {
       bool tick = false;
-      if (m_opts[i]->text() == "ground") {
-	tick = m_game->m_strokeFixed;
-      } else if (m_opts[i]->text() == "sleepy") { 
-	tick = m_game->m_strokeSleep;
-      } else if (m_opts[i]->text() == "decor") { 
-	tick = m_game->m_strokeDecor;
-      } else if (m_opts[i]->text() == "move") { 
-	tick = m_game->m_clickMode==1;
-      } else if (m_opts[i]->text() == "erase") { 
-	tick = m_game->m_clickMode==2;
-      } else if (m_opts[i]->text() == "rope") {
-        tick = m_game->m_strokeRope;
-      } else if (m_opts[i]->text() == "interactive") {
-        tick = m_game->m_interactiveDraw;
+
+      if (i < ARRAY_SIZE(toolOpts)) {
+          tick = toolOpts[i].toggled(m_game);
+      } else {
+          LOG_WARNING("Option not in toolOpts: %s", m_opts[i]->text().c_str());
       }
+
       m_opts[i]->set(tick ? StockIcon::TICK : StockIcon::BLANK);
     }
   }
+
   bool onEvent( Event& ev )
   {
       if (ev.code == Event::SELECT) {
-          switch(ev.x) {
-              case 0:
-                  m_game->m_strokeFixed = !m_game->m_strokeFixed;
-                  m_game->m_strokeSleep = false;
-                  m_game->m_strokeDecor = false;
-                  break;
-              case 1:
-                  m_game->m_strokeFixed = false;
-                  m_game->m_strokeSleep = !m_game->m_strokeSleep;
-                  m_game->m_strokeDecor = false;
-                  break;
-              case 2:
-                  m_game->m_strokeFixed = false;
-                  m_game->m_strokeSleep = false;
-                  m_game->m_strokeDecor = !m_game->m_strokeDecor;
-                  break;
-              case 3:
-                  m_game->clickMode((m_game->m_clickMode==1)?0:1);
-                  break;
-              case 4:
-                  m_game->clickMode((m_game->m_clickMode==2)?0:2);
-                  break;
-              case 5:
-                  m_game->m_strokeRope = !m_game->m_strokeRope;
-                  break;
-              case 6:
-                  m_game->m_interactiveDraw = !m_game->m_interactiveDraw;
-                  break;
-              default: return MenuDialog::onEvent(ev);
+          if (ev.x < ARRAY_SIZE(toolOpts)) {
+              if (toolOpts[ev.x].clicked(m_game)) {
+                  updateTicks();
+                  return true;
+              }
+          } else {
+              LOG_WARNING("Ignoring select event for invalid index %d", ev.x);
           }
-          updateTicks();
-          return true;
       }
-    return MenuDialog::onEvent(ev);
+
+      return MenuDialog::onEvent(ev);
   }
+
 private:
   GameControl *m_game;
   std::vector<StockIconButton*> m_opts;

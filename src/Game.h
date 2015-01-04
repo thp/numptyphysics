@@ -43,6 +43,13 @@ struct GameStats
   }
 };
 
+enum ClickMode {
+    CLICK_MODE_DRAW_STROKE,
+    CLICK_MODE_MOVE,
+    CLICK_MODE_ERASE,
+    CLICK_MODE_DRAW_JETSTREAM,
+};
+
 
 class GameControl
 {
@@ -50,7 +57,7 @@ public:
   GameControl() : m_quit(false),
 		 m_edit( false ),
 		 m_colour( 2 ),
-                 m_clickMode(0),
+                 m_clickMode(CLICK_MODE_DRAW_STROKE),
 		 m_strokeFixed( false ),
 		 m_strokeSleep( false ),
 		 m_strokeDecor( false ),
@@ -65,13 +72,14 @@ public:
   virtual bool save( const char *file=NULL ) =0;
   virtual bool load( const char* file ) { return false; };
   virtual void gotoLevel( int l, bool replay=false ) =0;
-  virtual void clickMode(int cm) =0;
+  virtual void clickMode(enum ClickMode cm) =0;
+  virtual void toggleClickMode(enum ClickMode cm) = 0;
   Levels& levels() { return *m_levels; }
   const GameStats& stats() { return m_stats; }
   bool  m_quit;
   bool  m_edit;
   int   m_colour;
-  int   m_clickMode;
+  enum ClickMode m_clickMode;
   bool  m_strokeFixed;
   bool  m_strokeSleep;
   bool  m_strokeDecor;

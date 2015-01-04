@@ -103,6 +103,11 @@ struct Rect {
   Rect(bool) { clear(); }
   Rect( const Vec2& atl, const Vec2& abr ) : tl(atl), br(abr) {} 
   Rect( int x1, int y1, int x2, int y2 ) : tl(x1,y1), br(x2,y2) {}
+  static Rect order(const Vec2 &a, const Vec2 &b)
+  {
+      return Rect(Min(a.x, b.x), Min(a.y, b.y),
+                  Max(a.x, b.x), Max(a.y, b.y));
+  }
   int w() const { return width() - 1; }
   int h() const { return height() - 1; }
   int width() const { return br.x-tl.x+1;  }

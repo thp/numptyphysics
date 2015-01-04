@@ -4,7 +4,8 @@
 #include "petals_log.h"
 
 JetStream::JetStream(const Rect &rect, const b2Vec2 &force)
-    : rect(rect)
+    : origin(rect.tl)
+    , rect(rect)
     , force(force)
     , particles()
 {
@@ -17,7 +18,7 @@ JetStream::JetStream(const Rect &rect, const b2Vec2 &force)
 void
 JetStream::draw(Canvas &canvas)
 {
-    //canvas.drawRect(rect, 0x000044, true, 50);
+    canvas.drawRect(rect, 0x000044, true, 20);
 
     for (auto &particle: particles) {
         Vec2 pos(particle.x, particle.y);
@@ -69,4 +70,16 @@ JetStream::asString()
     return thp::format("<rect class=\"jetstream\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" "
                        "force=\"%.2f,%.2f\" />", rect.tl.x, rect.tl.y, rect.w(), rect.h(),
                        force.x, force.y);
+}
+
+void
+JetStream::resize(const Vec2 &mouse)
+{
+    rect = Rect::order(origin, mouse);
+
+    particles.clear();
+    for (int i=0; i<sqrtf(rect.w() * rect.h())/10; i++) {
+        particles.push_back(b2Vec2(rect.tl.x, rect.tl.y) +
+                            b2Vec2(rand() % rect.width(), rand() % rect.height()));
+    }
 }

@@ -664,6 +664,15 @@ Scene::addJetStream(const char *x, const char *y, const char *width, const char 
     return true;
 }
 
+JetStream *
+Scene::newJetStream(const Vec2 &pos)
+{
+    auto force = b2Vec2(0.f, -10.f);
+    JetStream *result = new JetStream(Rect(pos, pos + Vec2(10, 10)), force);
+    m_jetStreams.push_back(result);
+    return result;
+}
+
 
 Image *Scene::g_bgImage = NULL;
 

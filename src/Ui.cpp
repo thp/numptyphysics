@@ -1020,6 +1020,15 @@ void Menu::addItems(const MenuItem* item)
   layout();
 }
 
+void
+Menu::addItems(const std::vector<MenuItem> &items)
+{
+    for (auto &item: items) {
+        m_items.push_back(new MenuItem(item.text, item.icon, item.event));
+    }
+    layout();
+}
+
 void Menu::addItem(const MenuItem& item)
 {
   m_items.push_back(new MenuItem(item.text, item.icon, item.event));

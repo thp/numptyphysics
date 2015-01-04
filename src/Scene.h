@@ -50,6 +50,8 @@ public:
   bool activateStroke( Stroke *s );
   std::list<Vec2> getJointCandidates(Stroke *s);
 
+  JetStream *newJetStream(const Vec2 &pos);
+
   int numStrokes() {
     return m_strokes.size();
   }

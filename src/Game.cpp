@@ -50,6 +50,20 @@ static constexpr const char *JOINT_IND_PATH =
     "326,58 325,55 323,54 321,51 320,49 319,48 316,46 314,44 "
     "312,43 314,43";
 
+static const char *
+clickModeName(enum ClickMode cm)
+{
+    switch (cm) {
+        case CLICK_MODE_DRAW_STROKE: return "draw stroke";
+        case CLICK_MODE_MOVE: return "move";
+        case CLICK_MODE_ERASE: return "erase";
+        case CLICK_MODE_DRAW_JETSTREAM: return "draw jetstream";
+    }
+
+    LOG_NOTREACHED;
+    return nullptr;
+}
+
 
 static float BUTTON_BORDER() { return SCREEN_WIDTH * 0.02f; }
 static float BUTTON_SIZE() { return SCREEN_WIDTH * 0.1f; }
@@ -59,6 +73,7 @@ class Game : public GameControl, public Container
   Scene   	    m_scene;
   Stroke  	   *m_createStroke;
   Stroke           *m_moveStroke;
+  JetStream        *m_createJetStream;
   Vec2              m_moveOffset;
   Widget           *m_pauseLabel;
   Widget           *m_editLabel;
@@ -73,9 +88,10 @@ class Game : public GameControl, public Container
   int               m_reset_countdown;
 public:
   Game( Levels* levels, int width, int height ) 
-  : m_createStroke(NULL),
-    m_moveStroke(NULL),
-    m_moveOffset(),
+  : m_createStroke(NULL)
+  , m_moveStroke(NULL)
+  , m_createJetStream(nullptr)
+  , m_moveOffset(),
     m_pauseLabel( NULL ),
     m_editLabel( NULL ),
     m_completedDialog( NULL ),
@@ -178,23 +194,39 @@ public:
     }
   }
 
-  void clickMode(int cm)
+  void toggleClickMode(enum ClickMode cm)
+  {
+      if (cm == m_clickMode) {
+          clickMode(CLICK_MODE_DRAW_STROKE);
+      } else {
+          clickMode(cm);
+      }
+  }
+
+  void clickMode(enum ClickMode cm)
   {
     if (cm != m_clickMode) {
-      LOG_DEBUG("clickMode = %d", cm);
+      LOG_DEBUG("clickMode = %s", clickModeName(cm));
       m_clickMode = cm;
       switch (cm) {
-          case 1:
+          case CLICK_MODE_DRAW_STROKE:
+              setEventMap(Os::get()->getEventMap(GAME_MAP));
+              m_clickModeLabel->text("");
+              break;
+          case CLICK_MODE_MOVE:
               setEventMap(Os::get()->getEventMap(GAME_MOVE_MAP));
               m_clickModeLabel->text("Move mode");
               break;
-          case 2:
+          case CLICK_MODE_ERASE:
               setEventMap(Os::get()->getEventMap(GAME_ERASE_MAP));
               m_clickModeLabel->text("Erase mode");
               break;
+          case CLICK_MODE_DRAW_JETSTREAM:
+              setEventMap(Os::get()->getEventMap(GAME_JETSTREAM_MAP));
+              m_clickModeLabel->text("Create jet stream");
+              break;
           default:
-              setEventMap(Os::get()->getEventMap(GAME_MAP));
-              m_clickModeLabel->text("");
+              LOG_NOTREACHED;
               break;
       }
     }
@@ -541,6 +573,15 @@ public:
       break;
     case Event::MOVEEND:
       m_moveStroke = NULL;
+      break;
+    case Event::JETSTREAMBEGIN:
+      m_createJetStream = m_scene.newJetStream(mousePoint(ev));
+      break;
+    case Event::JETSTREAMMORE:
+      m_createJetStream->resize(mousePoint(ev));
+      break;
+    case Event::JETSTREAMEND:
+      m_createJetStream = nullptr;
       break;
     case Event::DELETE:
       m_scene.deleteStroke( m_scene.strokeAtPoint( mousePoint(ev),

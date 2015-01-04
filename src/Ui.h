@@ -350,6 +350,7 @@ class Menu
 {
  public:
   void addItems(const MenuItem* item);
+  void addItems(const std::vector<MenuItem> &items);
   void addItem(const MenuItem& item);
   void addItem(const std::string& s, Event event=Event::NOP);
  protected:

@@ -50,6 +50,6 @@ log(enum Level level, const char *filename, const char *function,
 #define LOG_WARNING(...) PETALS_LOG(PetalsLog::LEVEL_WARNING, __VA_ARGS__)
 #define LOG_ERROR(...) PETALS_LOG(PetalsLog::LEVEL_ERROR, __VA_ARGS__)
 
-#define LOG_NOTREACHED PETALS_FATAL("Unreachable code")
+#define LOG_NOTREACHED LOG_FATAL("Unreachable code")
 
 #endif /* PETALSLOG_H */
