@@ -107,33 +107,28 @@ public:
 
   const char* name() {return "Game";}
 
-  void gotoLevel( int level, bool replay=false )
-  {
-    bool ok = false;
-    m_replaying = replay;
-
-    if ( replay ) {
+  void replayLevel() {
       // reset scene, delete user strokes, but retain log
-      m_scene.reset( NULL, true );
-      m_scene.start( true );
-      ok = true;
-    } else if ( level >= 0 && level < m_levels->numLevels() ) {
-        if (m_scene.load(m_levels->load(level))) {
-            m_scene.start( m_scene.getLog()->size() > 0 );
-            ok = true;
-        }
-    }
+      m_replaying = m_scene.replay();
+  }
 
-    if (ok) {
-      if ( m_edit ) {
-	m_scene.protect(0);
-      } else {
+  void gotoLevel(int level) {
+      if (level < 0 || level >= m_levels->numLevels()) {
+          LOG_WARNING("Level does not exist: %d", level);
+          return;
       }
-      m_level = level;
-      if (!m_replaying) {
-	m_stats.reset(OS->ticks());
+
+      if (m_scene.load(m_levels->load(level))) {
+          m_replaying = m_scene.start();
+
+          if (m_edit) {
+              // Unprotect all strokes
+              m_scene.protect(0);
+          }
+
+          m_level = level;
+          m_stats.reset(OS->ticks());
       }
-    }
   }
 
 
@@ -474,19 +469,19 @@ public:
 	       && m_os->exists(m_levels->demoName(m_level))) {
 	  m_level++;
 	}
-	gotoLevel( m_level );	
+	gotoLevel(m_level);
       } else {
-	gotoLevel( m_level+1 );
+	gotoLevel(m_level+1);
       }
       break;
     case Event::PREVIOUS:
-      gotoLevel( m_level-1 );
+      gotoLevel(m_level-1);
       break;
     case Event::REPLAY:
-      gotoLevel( ev.x, true );
+      replayLevel();
       break;
     case Event::PLAY:
-      gotoLevel( ev.x );
+      gotoLevel(ev.x);
       break;
     case Event::DRAWBEGIN:
       if (!m_replaying) {

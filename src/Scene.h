@@ -70,20 +70,19 @@ public:
   bool introCompleted();
   bool isCompleted();
   void draw(Canvas &canvas, bool everything=false);
-  void reset( Stroke* s=NULL,  bool purgeUnprotected=false );
   Stroke* strokeAtPoint( const Vec2 pt, float32 max );
   void clear();
+  bool replay();
 
   void setGravity( const b2Vec2& g );
   void setGravity( const std::string& s );
 
   bool load(const std::string &level);
-  void start( bool replay=false );
+  bool start();
   void protect( int n=-1 );
   bool save( const std::string& file, bool saveLog=false );
 
   ScriptLog* getLog() { return &m_log; }
-  const ScriptPlayer* replay() { return &m_player; }
 private:
   bool addJetStream(const char *x, const char *y, const char *width, const char *height, const char *force);
   void resetWorld();

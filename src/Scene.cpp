@@ -253,7 +253,7 @@ bool Scene::deleteStroke( Stroke *s ) {
   if ( s ) {
     int i = indexOf(m_strokes, s);
     if ( i >= m_protect ) {
-	reset(s);
+	s->reset(m_world);
 	m_strokes.erase(std::find(m_strokes.begin(), m_strokes.end(), s));
 	m_deletedStrokes.push_back(s);
 	return true;
@@ -394,7 +394,7 @@ void Scene::step()
         for (auto &stroke: m_strokes) {
             // TODO: also respawn goal if it's not shrinking yet
             if (stroke->hasAttribute(ATTRIB_TOKEN) && !BOUNDS_RECT.intersects(stroke->worldBbox())) {
-                reset(stroke);
+                stroke->reset(m_world);
                 activate(stroke);
             }
         }
@@ -529,22 +529,6 @@ std::map<int,Rect> Scene::calcColorRects()
     return result;
 }
 
-void Scene::reset( Stroke* s, bool purgeUnprotected )
-{
-  while ( purgeUnprotected && m_strokes.size() > m_protect ) {
-    m_strokes[m_strokes.size()-1]->reset(m_world);
-    m_strokes.pop_back();
-  }
-
-  // TODO: Purge unprotected jetstreams
-
-  for ( int i=0; i<m_strokes.size(); i++ ) {
-    if (s==NULL || s==m_strokes[i]) {
-	m_strokes[i]->reset(m_world);
-    }
-  }
-}
-
 Stroke* Scene::strokeAtPoint( const Vec2 pt, float32 max )
 {
   Stroke* best = NULL;
@@ -560,7 +544,9 @@ Stroke* Scene::strokeAtPoint( const Vec2 pt, float32 max )
 
 void Scene::clear()
 {
-  reset();
+  for (auto &s: m_strokes) {
+      s->reset(m_world);
+  }
 
   clearWithDelete(m_strokes);
   clearWithDelete(m_deletedStrokes);
@@ -570,6 +556,25 @@ void Scene::clear()
   }
   m_log.clear();
   clearWithDelete(m_jetStreams);
+}
+
+bool Scene::replay()
+{
+    // Remove all unprotected strokes
+    while (m_strokes.size() > m_protect) {
+        auto s = m_strokes.back();
+        s->reset(m_world);
+        delete s;
+        m_strokes.pop_back();
+    }
+
+    // TODO: Remove all unprotected jet streams
+
+    for (auto &s: m_strokes) {
+        s->reset(m_world);
+    }
+
+    return start();
 }
 
 void Scene::setGravity( const b2Vec2& g )
@@ -780,16 +785,19 @@ bool Scene::load(const std::string &level)
 }
 
 
-void Scene::start( bool replay )
+bool Scene::start()
 {
     activateAll();
-    if (replay) {
+
+    if (m_log.size() > 0) {
         m_recorder.stop();
         m_player.start(&m_log);
-    } else {
-        m_player.stop();
-        m_recorder.start(&m_log);
+        return true;
     }
+
+    m_player.stop();
+    m_recorder.start(&m_log);
+    return false;
 }
 
 void Scene::protect( int n )

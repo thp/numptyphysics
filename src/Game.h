@@ -71,7 +71,7 @@ public:
   virtual ~GameControl() {}
   virtual bool save( const char *file=NULL ) =0;
   virtual bool load( const char* file ) { return false; };
-  virtual void gotoLevel( int l, bool replay=false ) =0;
+  virtual void gotoLevel(int l) = 0;
   virtual void clickMode(enum ClickMode cm) =0;
   virtual void toggleClickMode(enum ClickMode cm) = 0;
   Levels& levels() { return *m_levels; }
