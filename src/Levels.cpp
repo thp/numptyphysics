@@ -21,12 +21,12 @@
 #include "Levels.h"
 #include "Config.h"
 #include "Os.h"
+#include "Regex.h"
 
 #include "petals_log.h"
 
 #include <iostream>
 #include <string>
-#include "slre.h"
 
 
 static const char MISC_COLLECTION[] = "C99_My Levels";
@@ -63,30 +63,13 @@ static std::string nameFromPath(const std::string& path)
   return name;
 }
 
-
-static std::vector<std::string>
-match_groups(const std::string &re, const std::string &string, int ncaps, int flags=0)
-{
-    std::vector<std::string> result;
-    slre_cap *caps = new slre_cap[ncaps];
-
-    if (slre_match(re.c_str(), string.c_str(), string.length(), caps, ncaps, flags) > 0) {
-        for (int i=0; i<ncaps; i++) {
-            result.push_back(std::string(caps[i].ptr, caps[i].len));
-        }
-    }
-
-    delete [] caps;
-    return result;
-}
-
 static int
 compare_names(const std::string &a, const std::string &b)
 {
     const auto RE = "([CDM])(\\d+)_(.*)";
     const auto GROUPS = 3;
-    auto ma = match_groups(RE, a, GROUPS);
-    auto mb = match_groups(RE, b, GROUPS);
+    auto ma = NP::Regex::match_groups(RE, a, GROUPS);
+    auto mb = NP::Regex::match_groups(RE, b, GROUPS);
 
     if (!ma.size() && !mb.size()) {
         // Simple string comparison

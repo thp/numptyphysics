@@ -31,6 +31,30 @@
 #include <cstdlib>
 
 
+static constexpr const char *JOINT_IND_PATH =
+    "282,39 280,38 282,38 285,39 300,39 301,60 303,66 302,64 "
+    "301,63 300,48 297,41 296,42 294,43 293,45 291,46 289,48 "
+    "287,49 286,52 284,53 283,58 281,62 280,66 282,78 284,82 "
+    "287,84 290,85 294,88 297,88 299,89 302,90 308,90 311,89 "
+    "314,89 320,85 321,83 323,83 324,81 327,78 328,75 327,63 "
+    "326,58 325,55 323,54 321,51 320,49 319,48 316,46 314,44 "
+    "312,43 314,43";
+
+struct JointInd {
+    JointInd()
+        : path(JOINT_IND_PATH)
+    {
+        path.scale(12.0f / (float32)path.bbox().width());
+        //path.simplify( 2.0f );
+        path.makeRelative();
+    }
+
+    Path path;
+};
+
+static JointInd jointInd;
+
+
 Scene::Scene( bool noWorld )
   : m_world( NULL ),
     m_bgImage( NULL ),
@@ -41,6 +65,11 @@ Scene::Scene( bool noWorld )
     m_step(0)
   , m_color_rects()
   , m_interactions()
+  , m_createStroke(nullptr)
+  , m_createJetStream(nullptr)
+  , m_moveStroke(nullptr)
+  , m_moveOffset()
+  , m_paused(false)
 {
     if ( g_bgImage==NULL ) {
         g_bgImage = new Image("paper.png");
@@ -59,6 +88,138 @@ Scene::~Scene()
   if ( m_world ) {
     delete m_world;
   }
+}
+
+bool
+Scene::onSceneEvent(const SceneEvent &ev)
+{
+    m_recorder.onSceneEvent(ev);
+
+    //LOG_INFO("Got scene event: %s", ev.repr().c_str());
+
+    switch (ev.op) {
+        case SceneEvent::PAUSE:
+            m_paused = true;
+            return true;
+        case SceneEvent::UNPAUSE:
+            m_paused = false;
+            return true;
+        case SceneEvent::INTERACT_AT:
+            return interact(ev.pos);
+
+        case SceneEvent::BEGIN_CREATE_STROKE_AT:
+            if (!m_createStroke) {
+                int colour = ev.userdata1;
+                int attrib = ev.userdata2;
+                m_createStroke = newStroke(Path() & ev.pos, colour, attrib);
+                return true;
+            }
+            break;
+        case SceneEvent::EXTEND_CREATE_STROKE_AT:
+            if (m_createStroke) {
+                extendStroke(m_createStroke, ev.pos);
+                return true;
+            }
+            break;
+        case SceneEvent::ACTIVATE_CREATE_STROKE:
+            if (m_createStroke) {
+                if (activateStroke(m_createStroke)) {
+                    m_createStroke = nullptr;
+                    return true;
+                } else {
+                    deleteStroke(m_createStroke);
+                    m_createStroke = nullptr;
+                    return false;
+                }
+            }
+            break;
+
+        case SceneEvent::ROPEIFY_CREATE_STROKE:
+            if (m_createStroke) {
+                for (auto &stroke: m_createStroke->ropeify(*this)) {
+                    activateStroke(stroke);
+                }
+                deleteStroke(m_createStroke);
+                m_createStroke = nullptr;
+                return true;
+            }
+            break;
+
+        case SceneEvent::BEGIN_MOVE_STROKE_AT:
+            if (!m_moveStroke) {
+                m_moveStroke = strokeAtPoint(ev.pos, SELECT_TOLERANCE);
+                if (m_moveStroke) {
+                    m_moveOffset = ev.pos - m_moveStroke->origin();
+                }
+                return true;
+            }
+            break;
+        case SceneEvent::CONTINUE_MOVE_STROKE_AT:
+            if (m_moveStroke) {
+                moveStroke(m_moveStroke, ev.pos - m_moveOffset);
+                return true;
+            }
+            break;
+        case SceneEvent::FINISH_MOVE_STROKE:
+            if (m_moveStroke) {
+                m_moveStroke = nullptr;
+                return true;
+            }
+            break;
+
+        case SceneEvent::DELETE_STROKE_AT:
+            return deleteStroke(strokeAtPoint(ev.pos, SELECT_TOLERANCE));
+            break;
+        case SceneEvent::DELETE_LAST_STROKE:
+            // FIXME: Make sure undo also works correctly for ropes (delete whole rope at once)
+            if (m_createStroke) {
+                deleteStroke(m_createStroke);
+                m_createStroke = nullptr;
+                return false;
+            } else if (!m_strokes.size()) {
+                return false;
+            }
+            return deleteStroke(m_strokes.back());
+
+        case SceneEvent::BEGIN_CREATE_JETSTREAM_AT:
+            if (!m_createJetStream) {
+                m_createJetStream = newJetStream(ev.pos);
+                return true;
+            }
+            break;
+        case SceneEvent::RESIZE_CREATE_JETSTREAM_AT:
+            if (m_createJetStream) {
+                m_createJetStream->resize(ev.pos);
+                return true;
+            }
+            break;
+        case SceneEvent::ACTIVATE_CREATE_JETSTREAM:
+            if (m_createJetStream) {
+                m_createJetStream->activate();
+                m_createJetStream = nullptr;
+                return true;
+            }
+            break;
+
+        case SceneEvent::DELETE_LAST_JETSTREAM:
+            if (m_createJetStream) {
+                m_createJetStream = nullptr;
+            }
+
+            if (m_jetStreams.size()) {
+                auto js = m_jetStreams.back();
+                m_jetStreams.pop_back();
+                delete js;
+                return true;
+            }
+            break;
+
+        default:
+            LOG_NOTREACHED;
+            return false;
+    }
+
+    return false;
 }
 
 void Scene::resetWorld()
@@ -85,7 +246,6 @@ Stroke* Scene::newStroke( const Path& p, int colour, int attribs ) {
   default: s->setColour( NP::Colour::values[colour] ); break;
   }
   m_strokes.push_back( s );
-  m_recorder.newStroke( p, colour, attribs );
   return s;
 }
 
@@ -96,7 +256,6 @@ bool Scene::deleteStroke( Stroke *s ) {
 	reset(s);
 	m_strokes.erase(std::find(m_strokes.begin(), m_strokes.end(), s));
 	m_deletedStrokes.push_back(s);
-	m_recorder.deleteStroke(i);
 	return true;
     }
   }
@@ -110,7 +269,6 @@ void Scene::extendStroke( Stroke* s, const Vec2& pt )
     int i = indexOf(m_strokes, s);
     if ( i >= m_protect ) {
       s->addPoint( pt );
-      m_recorder.extendStroke( i, pt );
     }
   }
 }
@@ -121,17 +279,13 @@ void Scene::moveStroke( Stroke* s, const Vec2& origin )
     int i = indexOf(m_strokes, s);
     if ( i >= m_protect ) {
       s->origin( origin );
-      m_recorder.moveStroke( i, origin );
     }
   }
 }
-	
 
 bool Scene::activateStroke( Stroke *s )
 {
-  bool result = activate(s);
-  m_recorder.activateStroke( indexOf(m_strokes, s) );
-  return result;
+  return activate(s);
 }
 
 std::list<Vec2> Scene::getJointCandidates(Stroke *s)
@@ -196,13 +350,18 @@ Scene::introCompleted()
     return m_step >= m_strokes.size();
 }
 
-void Scene::step(bool isPaused)
+void Scene::step()
 {
-    m_recorder.tick(isPaused);
-    isPaused |= m_player.tick();
     m_step++;
 
-    if (introCompleted() && !isPaused) {
+    if (!introCompleted()) {
+        return;
+    }
+
+    m_recorder.tick(this);
+    m_player.tick(this);
+
+    if (introCompleted() && !m_paused) {
         for (auto &stream: m_jetStreams) {
             stream->tick();
             stream->update(m_strokes);
@@ -259,7 +418,6 @@ void Scene::Add(const b2ContactPoint* point)
     if ( s1->hasAttribute(ATTRIB_TOKEN) 
 	   && s2->hasAttribute(ATTRIB_GOAL) ) {
 	s2->setAttribute(ATTRIB_DELETED);
-	m_recorder.goal(1);
     }
   }
 }
@@ -301,9 +459,33 @@ void Scene::draw(Canvas &canvas, bool everything)
         canvas.drawRect(kv.second, kv.first, true, 128);
     }
 
+    if (m_createStroke) {
+        b2Mat22 rot(0.01 * OS->ticks());
+
+        for (auto &candidate: getJointCandidates(m_createStroke)) {
+            Path joint = jointInd.path;
+            joint.translate(-joint.bbox().centroid());
+            joint.rotate(rot);
+            joint.translate(candidate + joint.bbox().centroid());
+            canvas.drawPath(joint, 0x606060);
+        }
+    }
+
     for (auto &stream: m_jetStreams) {
         stream->draw(canvas);
     }
+}
+
+bool
+Scene::canInteractAt(const Vec2 &pos)
+{
+    for (auto &kv: m_color_rects) {
+        if (kv.second.contains(pos)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool Scene::interact(const Vec2 &pos)
@@ -353,6 +535,9 @@ void Scene::reset( Stroke* s, bool purgeUnprotected )
     m_strokes[m_strokes.size()-1]->reset(m_world);
     m_strokes.pop_back();
   }
+
+  // TODO: Purge unprotected jetstreams
+
   for ( int i=0; i<m_strokes.size(); i++ ) {
     if (s==NULL || s==m_strokes[i]) {
 	m_strokes[i]->reset(m_world);
@@ -526,7 +711,7 @@ public:
             const tinyxml2::XMLAttribute *attr = element.FindAttribute("value");
 
             if (attr) {
-                scene->m_log.push_back(std::string(attr->Value()));
+                scene->m_log.push_back(ScriptLogEntry::deserialize(attr->Value()));
             } else {
                 LOG_WARNING("Invalid np:event");
             }
@@ -575,7 +760,7 @@ bool Scene::load(const std::string &level)
                     setGravity(line);
                     break;
                 case 'E':
-                    m_log.push_back(value);
+                    m_log.push_back(ScriptLogEntry::deserialize(value));
                     break;
                 default:
                     LOG_WARNING("Unparsed: '%s'", line.c_str());
@@ -597,14 +782,14 @@ bool Scene::load(const std::string &level)
 
 void Scene::start( bool replay )
 {
-  activateAll();
-  if ( replay ) {
-    m_recorder.stop();
-    m_player.start( &m_log, this );
-  } else {
-    m_player.stop();
-    m_recorder.start( &m_log );
-  }
+    activateAll();
+    if (replay) {
+        m_recorder.stop();
+        m_player.start(&m_log);
+    } else {
+        m_player.stop();
+        m_recorder.start(&m_log);
+    }
 }
 
 void Scene::protect( int n )
@@ -630,10 +815,10 @@ bool Scene::save( const std::string& file, bool saveLog )
 	o << m_strokes[i]->asString() << std::endl;
     }
 
-    if ( saveLog ) {      
-      for ( int i=0; i<m_log.size(); i++ ) {
-	o << m_log.asString( i ) <<std::endl;
-      }
+    if (saveLog) {
+        for (auto &entry: m_log) {
+            o << thp::format("<np:event value=\"%s\" />", ScriptLogEntry::serialize(entry).c_str()) << std::endl;
+        }
     }
 
     o << "</svg>" << std::endl;
@@ -660,7 +845,9 @@ Scene::addJetStream(const char *x, const char *y, const char *width, const char 
 
     b2Vec2 vforce(strtof(v[0].c_str(), nullptr), strtof(v[1].c_str(), nullptr));
 
-    m_jetStreams.push_back(new JetStream(Rect(ix, iy, ix+iw, iy+ih), vforce));
+    auto js = new JetStream(Rect(ix, iy, ix+iw, iy+ih), vforce);
+    m_jetStreams.push_back(js);
+    js->activate();
     return true;
 }
 
@@ -668,9 +855,9 @@ JetStream *
 Scene::newJetStream(const Vec2 &pos)
 {
     auto force = b2Vec2(0.f, -10.f);
-    JetStream *result = new JetStream(Rect(pos, pos + Vec2(10, 10)), force);
-    m_jetStreams.push_back(result);
-    return result;
+    auto js = new JetStream(Rect(pos, pos + Vec2(10, 10)), force);
+    m_jetStreams.push_back(js);
+    return js;
 }
 
 

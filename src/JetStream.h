@@ -16,9 +16,11 @@ public:
     void update(std::vector<Stroke *> &strokes);
     std::string asString();
 
+    void activate();
     void resize(const Vec2 &mouse);
 
 private:
+    bool active;
     Vec2 origin;
     Rect rect;
     b2Vec2 force;

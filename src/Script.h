@@ -16,94 +16,55 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-#include "Path.h"
+#include "SceneEvent.h"
 
 #include <iostream>
 #include <vector>
+#include <utility>
 
 class Scene;
 
-struct ScriptEntry {
-  enum Op {
-    OP_NEW,
-    OP_DELETE,
-    OP_EXTEND,
-    OP_MOVE,
-    OP_ACTIVATE,
-    OP_PAUSE,
-    OP_GOAL
-  };
+struct ScriptLogEntry {
+    ScriptLogEntry(int tick, const SceneEvent &ev) : tick(tick), ev(ev) {}
 
-  int  t;
-  Op   op;
-  int  stroke;
-  int  arg1;
-  int  arg2;
-  Vec2 pt;
+    static std::string serialize(const ScriptLogEntry &e);
+    static ScriptLogEntry deserialize(const std::string &s);
 
-  ScriptEntry( int _t, Op _op, int _stroke,
-	     int _arg1, int _arg2, const Vec2& _pt ) 
-  : t(_t), op(_op), stroke(_stroke),
-    arg1(_arg1), arg2(_arg2), pt(_pt)
-  {}
-  ScriptEntry() {};
-  ScriptEntry( const std::string& str );
-  std::string asString();
+    int tick;
+    SceneEvent ev;
 };
 
+class ScriptLog : public std::vector<ScriptLogEntry> {
+};
 
-class ScriptLog : public std::vector<ScriptEntry>
-{
+class ScriptHandler {
 public:
-  std::string asString( int i );
-  void append( int tick, ScriptEntry::Op op, int stroke=-1,
-	       int arg1=-1, int arg2=-1, const Vec2& pt=Vec2(-1,-1) );
-  void append( const std::string& str );
+    ScriptHandler()
+        : m_log(nullptr)
+        , m_running(false)
+        , m_ticks(0)
+        , m_index(0)
+    {}
+
+    virtual void start(ScriptLog *log);
+    virtual void stop();
+    virtual void tick(Scene *scene);
+
+protected:
+    ScriptLog *m_log;
+    bool m_running;
+    int m_ticks;
+    int m_index;
 };
 
-
-class ScriptRecorder
-{
+class ScriptRecorder : public ScriptHandler {
 public:
-  ScriptRecorder();
-  void start(ScriptLog* log);
-  void stop();
-  void tick(bool isPaused);
-  void newStroke( const Path& p, int colour, int attribs );
-  void deleteStroke( int index );
-  void extendStroke( int index, const Vec2& pt );
-  void moveStroke( int index, const Vec2& pt );
-  void activateStroke( int index );
-  void goal( int goalNum );
-
-  ScriptLog* getLog() { return m_log; }
-
-private:
-  bool          m_running;
-  bool          m_isPaused;
-  ScriptLog    *m_log;
-  int 		m_lastTick;
+    void onSceneEvent(const SceneEvent &ev);
 };
 
-
-class ScriptPlayer
-{
+class ScriptPlayer : public ScriptHandler {
 public:
-
-  void start( const ScriptLog* log, Scene* scene );
-  bool isRunning() const;
-  void stop();
-  bool tick(); 
-
-private:
-  bool           m_playing;
-  bool           m_isPaused;
-  const ScriptLog* m_log;
-  Scene         *m_scene;
-  int            m_index;
-  int  		 m_lastTick;
+    virtual void tick(Scene *scene);
 };
-
-
 
 #endif //SCRIPT_H

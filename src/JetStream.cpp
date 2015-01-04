@@ -4,7 +4,8 @@
 #include "petals_log.h"
 
 JetStream::JetStream(const Rect &rect, const b2Vec2 &force)
-    : origin(rect.tl)
+    : active(false)
+    , origin(rect.tl)
     , rect(rect)
     , force(force)
     , particles()
@@ -32,6 +33,10 @@ JetStream::draw(Canvas &canvas)
 void
 JetStream::tick()
 {
+    if (!active) {
+        return;
+    }
+
     for (auto &particle: particles) {
         particle += force;
         if (!rect.contains(particle)) {
@@ -54,6 +59,10 @@ JetStream::tick()
 void
 JetStream::update(std::vector<Stroke *> &strokes)
 {
+    if (!active) {
+        return;
+    }
+
     for (auto &stroke: strokes) {
         if (rect.intersects(stroke->screenBbox())) {
             auto body = stroke->body();
@@ -70,6 +79,12 @@ JetStream::asString()
     return thp::format("<rect class=\"jetstream\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" "
                        "force=\"%.2f,%.2f\" />", rect.tl.x, rect.tl.y, rect.w(), rect.h(),
                        force.x, force.y);
+}
+
+void
+JetStream::activate()
+{
+    active = true;
 }
 
 void

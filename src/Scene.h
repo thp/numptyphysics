@@ -23,6 +23,7 @@
 #include "Script.h"
 #include "Interactions.h"
 #include "JetStream.h"
+#include "SceneEvent.h"
 
 #include <string>
 #include <fstream>
@@ -43,6 +44,8 @@ public:
   Scene( bool noWorld=false );
   ~Scene();
 
+  bool onSceneEvent(const SceneEvent &ev);
+
   Stroke* newStroke( const Path& p, int colour, int attributes );
   bool deleteStroke( Stroke *s );
   void extendStroke( Stroke* s, const Vec2& pt );
@@ -60,9 +63,10 @@ public:
     return m_strokes;
   }
 
+  bool canInteractAt(const Vec2 &pos);
   bool interact(const Vec2 &pos);
 
-  void step( bool isPaused=false );
+  void step();
   bool introCompleted();
   bool isCompleted();
   void draw(Canvas &canvas, bool everything=false);
@@ -110,6 +114,13 @@ private:
   std::map<int,Rect> m_color_rects;
   NP::Interactions    m_interactions;
   std::vector<JetStream *> m_jetStreams;
+
+  // Create and move stuff
+  Stroke  	   *m_createStroke;
+  JetStream        *m_createJetStream;
+  Stroke           *m_moveStroke;
+  Vec2              m_moveOffset;
+  bool              m_paused;
 
   friend class SceneSVGVisitor;
 };

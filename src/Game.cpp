@@ -41,15 +41,6 @@
 using namespace std;
 
 
-static constexpr const char *JOINT_IND_PATH =
-    "282,39 280,38 282,38 285,39 300,39 301,60 303,66 302,64 "
-    "301,63 300,48 297,41 296,42 294,43 293,45 291,46 289,48 "
-    "287,49 286,52 284,53 283,58 281,62 280,66 282,78 284,82 "
-    "287,84 290,85 294,88 297,88 299,89 302,90 308,90 311,89 "
-    "314,89 320,85 321,83 323,83 324,81 327,78 328,75 327,63 "
-    "326,58 325,55 323,54 321,51 320,49 319,48 316,46 314,44 "
-    "312,43 314,43";
-
 static const char *
 clickModeName(enum ClickMode cm)
 {
@@ -71,10 +62,6 @@ static float BUTTON_SIZE() { return SCREEN_WIDTH * 0.1f; }
 class Game : public GameControl, public Container
 {
   Scene   	    m_scene;
-  Stroke  	   *m_createStroke;
-  Stroke           *m_moveStroke;
-  JetStream        *m_createJetStream;
-  Vec2              m_moveOffset;
   Widget           *m_pauseLabel;
   Widget           *m_editLabel;
   Widget           *m_completedDialog;
@@ -82,24 +69,18 @@ class Game : public GameControl, public Container
   Label            *m_clickModeLabel;
   Os               *m_os;
   bool              m_isCompleted;
-  Path              m_jointInd;
   Widget           *m_left_button;
   Widget           *m_right_button;
   int               m_reset_countdown;
 public:
   Game( Levels* levels, int width, int height ) 
-  : m_createStroke(NULL)
-  , m_moveStroke(NULL)
-  , m_createJetStream(nullptr)
-  , m_moveOffset(),
-    m_pauseLabel( NULL ),
+  : m_pauseLabel( NULL ),
     m_editLabel( NULL ),
     m_completedDialog( NULL ),
     m_options( NULL ),
     m_clickModeLabel(new Label("", nullptr, 0x000000)),
     m_os( Os::get() ),
-    m_isCompleted(false),
-    m_jointInd(JOINT_IND_PATH)
+    m_isCompleted(false)
   , m_left_button(new Button("MENU", Event(Event::OPTION, 1)))
   , m_right_button(new Button("TOOL", Event(Event::OPTION, 2)))
   , m_reset_countdown(0)
@@ -118,9 +99,6 @@ public:
     transparent(true); //don't clear
     m_greedyMouse = true; //get mouse clicks outside the window!
 
-    m_jointInd.scale( 12.0f / (float32)m_jointInd.bbox().width() );
-    //m_jointInd.simplify( 2.0f );
-    m_jointInd.makeRelative();
     m_levels = levels;
     gotoLevel(0);
     //add( new Button("O",Event::OPTION), Rect(800-32,0,32,32) );
@@ -190,7 +168,7 @@ public:
       LOG_INFO("Saving demo of level %d to %s", m_level, path.c_str());
       m_scene.save(path, true);
     } else {
-      LOG_INFO("Not daving demo of demo");
+      LOG_INFO("Not saving demo of demo");
     }
   }
 
@@ -256,10 +234,12 @@ public:
       }
       add( m_pauseLabel, Rect(SCREEN_WIDTH/2-128, 16, SCREEN_WIDTH/2+128, 64));
       m_paused = true;
+      m_scene.onSceneEvent(SceneEvent(SceneEvent::PAUSE));
     } else {
       remove( m_pauseLabel );
       m_pauseLabel = NULL;
       m_paused = false;
+      m_scene.onSceneEvent(SceneEvent(SceneEvent::UNPAUSE));
     }
   }
 
@@ -310,7 +290,7 @@ public:
 
   virtual void onTick( int tick ) 
   {
-    m_scene.step( isPaused() );
+    m_scene.step();
 
     if (m_reset_countdown > 0) {
         m_reset_countdown--;
@@ -360,7 +340,7 @@ public:
                   float alpha = powf(1.f - fabsf(2.f * (float(m_reset_countdown) / float(REWIND_TICKS) - 0.5f)), 0.4f);
                   window->drawRewind(*img, src, dst, OS->ticks(), alpha);
               };
-          } else if (m_paused) {
+          } else if (isPaused()) {
               effect = [window] (Image *img, const Rect &src, const Rect &dst) {
                   window->drawSaturation(*img, src, dst, 0.7f);
               };
@@ -391,18 +371,6 @@ public:
       // Draw the whole backbuffer to the screen
       screen.drawImage(*window->offscreen(), 0, 0);
 
-    if (m_createStroke) {
-        b2Mat22 rot(0.01 * OS->ticks());
-
-        for (auto &candidate: m_scene.getJointCandidates(m_createStroke)) {
-            Path joint = m_jointInd;
-            joint.translate(-joint.bbox().centroid());
-            joint.rotate(rot);
-            joint.translate(candidate + joint.bbox().centroid());
-            screen.drawPath(joint, 0x606060);
-        }
-    }
-
     Container::draw(screen,area);
   }
 
@@ -424,13 +392,15 @@ public:
       break;
     case Event::UNDO:
       if ( !m_replaying ) {
-	if ( m_createStroke ) {
-	  m_scene.deleteStroke( m_createStroke );
-	  m_createStroke = NULL;
-	} else if ( m_scene.strokes().size() && m_scene.deleteStroke( m_scene.strokes().at(m_scene.strokes().size()-1) ) ) {
-          // FIXME: Make sure undo also works correctly for ropes (delete whole rope at once)
-	  m_stats.undoCount++;
-	}
+          if (m_clickMode == CLICK_MODE_DRAW_JETSTREAM) {
+              if (m_scene.onSceneEvent(SceneEvent(SceneEvent::DELETE_LAST_JETSTREAM))) {
+                  m_stats.undoCount++;
+              }
+          } else {
+              if (m_scene.onSceneEvent(SceneEvent(SceneEvent::DELETE_LAST_STROKE))) {
+                  m_stats.undoCount++;
+              }
+          }
       }
       break;
     case Event::SAVE:
@@ -485,7 +455,7 @@ public:
       break;
     case Event::EDIT:
       edit( !m_edit );
-      if (m_edit && !m_paused) {
+      if (m_edit && !isPaused()) {
 	togglePause();
       }
       break;
@@ -519,73 +489,77 @@ public:
       gotoLevel( ev.x );
       break;
     case Event::DRAWBEGIN:
-      if ( !m_replaying && !m_createStroke ) {
-          if (!m_scene.interact(mousePoint(ev))) {
+      if (!m_replaying) {
+          if (m_scene.canInteractAt(mousePoint(ev))) {
+              m_scene.onSceneEvent(SceneEvent(SceneEvent::INTERACT_AT, mousePoint(ev)));
+          } else {
               int attrib = 0;
               if ( m_strokeFixed ) attrib |= ATTRIB_GROUND;
               if ( m_strokeSleep ) attrib |= ATTRIB_SLEEPING;
               if ( m_strokeDecor ) attrib |= ATTRIB_DECOR;
               if ( m_interactiveDraw ) attrib |= ATTRIB_INTERACTIVE;
-              m_createStroke = m_scene.newStroke(Path() & mousePoint(ev), m_colour, attrib);
+              m_scene.onSceneEvent(SceneEvent(SceneEvent::BEGIN_CREATE_STROKE_AT, mousePoint(ev), m_colour, attrib));
           }
       }
       break;
     case Event::DRAWMORE:
-      if ( m_createStroke ) {
-	m_scene.extendStroke( m_createStroke, mousePoint(ev) );
+      if (!m_replaying) {
+          m_scene.onSceneEvent(SceneEvent(SceneEvent::EXTEND_CREATE_STROKE_AT, mousePoint(ev)));
       }
       break;
     case Event::DRAWEND:
-      if ( m_createStroke ) {
-        if (m_strokeRope) {
-            m_stats.ropeCount++;
-            if (isPaused()) {
-                m_stats.pausedRopes++;
-            }
-            for (auto &stroke: m_createStroke->ropeify(m_scene)) {
-                m_scene.activateStroke(stroke);
-            }
-            m_scene.deleteStroke(m_createStroke);
-        } else if ( m_scene.activateStroke( m_createStroke ) ) {
-	  m_stats.strokeCount++;
-	  if ( isPaused() ) {
-	    m_stats.pausedStrokes++; 
-	  }
-	} else {
-	  m_scene.deleteStroke( m_createStroke );
-	}
-	m_createStroke = NULL;
-      }
-      break;
-    case Event::MOVEBEGIN:
-      if ( !m_replaying && !m_moveStroke ) {
-          Vec2 point(mousePoint(ev));
-          m_moveStroke = m_scene.strokeAtPoint(point, SELECT_TOLERANCE);
-          if (m_moveStroke) {
-              m_moveOffset = point - m_moveStroke->origin();
+      if (!m_replaying) {
+          if (m_strokeRope) {
+              if (m_scene.onSceneEvent(SceneEvent(SceneEvent::ROPEIFY_CREATE_STROKE))) {
+                  m_stats.ropeCount++;
+                  if (isPaused()) {
+                      m_stats.pausedRopes++;
+                  }
+              }
+          } else {
+              if (m_scene.onSceneEvent(SceneEvent(SceneEvent::ACTIVATE_CREATE_STROKE))) {
+                  m_stats.strokeCount++;
+                  if (isPaused()) {
+                      m_stats.pausedStrokes++;
+                  }
+              }
           }
       }
       break;
+    case Event::MOVEBEGIN:
+      if (!m_replaying) {
+          m_scene.onSceneEvent(SceneEvent(SceneEvent::BEGIN_MOVE_STROKE_AT, mousePoint(ev)));
+      }
+      break;
     case Event::MOVEMORE:
-      if ( m_moveStroke ) {
-	m_scene.moveStroke( m_moveStroke, mousePoint(ev) - m_moveOffset);
+      if (!m_replaying) {
+          m_scene.onSceneEvent(SceneEvent(SceneEvent::CONTINUE_MOVE_STROKE_AT, mousePoint(ev)));
       }
       break;
     case Event::MOVEEND:
-      m_moveStroke = NULL;
+      if (!m_replaying) {
+          m_scene.onSceneEvent(SceneEvent(SceneEvent::FINISH_MOVE_STROKE));
+      }
       break;
     case Event::JETSTREAMBEGIN:
-      m_createJetStream = m_scene.newJetStream(mousePoint(ev));
+      if (!m_replaying) {
+          m_scene.onSceneEvent(SceneEvent(SceneEvent::BEGIN_CREATE_JETSTREAM_AT, mousePoint(ev)));
+      }
       break;
     case Event::JETSTREAMMORE:
-      m_createJetStream->resize(mousePoint(ev));
+      if (!m_replaying) {
+          m_scene.onSceneEvent(SceneEvent(SceneEvent::RESIZE_CREATE_JETSTREAM_AT, mousePoint(ev)));
+      }
       break;
     case Event::JETSTREAMEND:
-      m_createJetStream = nullptr;
+      if (!m_replaying) {
+          m_scene.onSceneEvent(SceneEvent(SceneEvent::ACTIVATE_CREATE_JETSTREAM));
+      }
       break;
     case Event::DELETE:
-      m_scene.deleteStroke( m_scene.strokeAtPoint( mousePoint(ev),
-						   SELECT_TOLERANCE ) );
+      if (!m_replaying) {
+          m_scene.onSceneEvent(SceneEvent(SceneEvent::DELETE_STROKE_AT, mousePoint(ev)));
+      }
       break;
     default:
       used = Container::onEvent(ev);

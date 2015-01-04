@@ -13,200 +13,94 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  */
+
 #include "Script.h"
-#include "Path.h"
 #include "Scene.h"
-#include <sstream>
-#include <cstdio>
+#include "Regex.h"
 
-#include "thp_format.h"
 #include "petals_log.h"
+#include "thp_format.h"
 
-ScriptEntry::ScriptEntry( const std::string& str )
+
+std::string
+ScriptLogEntry::serialize(const ScriptLogEntry &e)
 {
-  char opc;
-  if ( sscanf(str.c_str(), "%d,%c,%d,%d,%d,%d,%d",
-	      &t, &opc, &stroke, &arg1, &arg2, &pt.x, &pt.y)==7 ) {
-    switch (opc) {
-    case 'n': op = OP_NEW; break;
-    case 'd': op = OP_DELETE; break;
-    case 'e': op = OP_EXTEND; break;
-    case 'm': op = OP_MOVE; break;
-    case 'a': op = OP_ACTIVATE; break;
-    case 'p': op = OP_PAUSE; break;
-    case 'g': op = OP_GOAL; break;
-    default: LOG_WARNING("Bad script op");
+    return thp::format("@%d:%s:%d,%d:%d:%d", e.tick, e.ev.meta()->name, e.ev.pos.x, e.ev.pos.y, e.ev.userdata1, e.ev.userdata2);
+}
+
+static int
+number(const std::string &s)
+{
+    // TODO: Error checking
+    return atoi(s.c_str());
+}
+
+ScriptLogEntry
+ScriptLogEntry::deserialize(const std::string &s)
+{
+    const auto RE = "@(\\d+):([A-Z_]+):(\\d+),(\\d+):(\\d+):(\\d+)";
+    const auto GROUPS = 6;
+
+    auto matchobj = NP::Regex::match_groups(RE, s, GROUPS);
+    if (matchobj.size() != 6) {
+        LOG_FATAL("Cannot deserialize ScriptLogEntry: '%s'", s.c_str());
     }
-  } else {
-    LOG_WARNING("Badly formed script entry");
-  }
+
+    int tick = number(matchobj[0]);
+    std::string operation = matchobj[1];
+    Vec2 pos(number(matchobj[2]), number(matchobj[3]));
+    int userdata1 = number(matchobj[4]);
+    int userdata2 = number(matchobj[5]);
+
+    return ScriptLogEntry(tick, SceneEvent(operation, pos, userdata1, userdata2));
 }
 
-
-std::string ScriptEntry::asString()
+void
+ScriptHandler::start(ScriptLog *log)
 {
-  static const char opcodes[] = "ndemapg";
-  std::stringstream s;
-  s << t << "," << opcodes[op] << ","
-    << stroke << "," << arg1 << "," << arg2 << ","
-    << pt.x << "," << pt.y; 
-  return thp::format("<np:event value=\"%s\" />", s.str().c_str());
+    m_log = log;
+    m_running = true;
+    m_ticks = 0;
+    m_index = 0;
 }
 
-std::string ScriptLog::asString( int i )
+void
+ScriptHandler::stop()
 {
-  if ( i < size() ) {
-    return at(i).asString();
-  }
-  return std::string();
+    m_log = nullptr;
+    m_running = false;
+    m_ticks = 0;
+    m_index = 0;
 }
 
-void ScriptLog::append( int tick, ScriptEntry::Op op, int stroke, 
-		      int arg1, int arg2, const Vec2& pt )
+void
+ScriptHandler::tick(Scene *scene)
 {
-  push_back( ScriptEntry( tick, op, stroke, arg1, arg2, pt ) );
-}
-
-void ScriptLog::append( const std::string& str ) 
-{
-  push_back( ScriptEntry(str) );
-}
-
-
-
-ScriptRecorder::ScriptRecorder()
-  : m_running(false)
-  , m_isPaused(false)
-  , m_log(NULL)
-{
-}
-
-void ScriptRecorder::start( ScriptLog* log ) 
-{
-  m_running = true;
-  m_isPaused = false;
-  m_log = log;
-  m_log->clear();
-  m_lastTick = 0;
-}
-
-void ScriptRecorder::stop()  
-{ 
-  if ( m_running ) {
-    m_running = false; 
-  }
-}
-
-void ScriptRecorder::tick(bool isPaused) 
-{
-  if ( m_running ) {
-    m_lastTick++;
-    if (isPaused != m_isPaused) {
-      m_isPaused = isPaused;
-      m_log->append( m_lastTick, ScriptEntry::OP_PAUSE, isPaused?1:0 );
+    if (m_running) {
+        m_ticks++;
     }
-  }
 }
 
-
-void ScriptRecorder::newStroke( const Path& p, int colour, int attribs )
+void
+ScriptRecorder::onSceneEvent(const SceneEvent &ev)
 {
-  if ( m_running )
-    m_log->append( m_lastTick, ScriptEntry::OP_NEW, 0, colour, attribs, p[0] );
-}
-
-
-void ScriptRecorder::deleteStroke( int index )
-{
-  if ( m_running )
-    m_log->append( m_lastTick, ScriptEntry::OP_DELETE, index );
-}
-
-void ScriptRecorder::extendStroke( int index, const Vec2& pt )
-{
-  if ( m_running )
-    m_log->append( m_lastTick, ScriptEntry::OP_EXTEND, index, 0, 0, pt );
-}
-
-void ScriptRecorder::moveStroke( int index, const Vec2& pt )
-{
-  if ( m_running )
-    m_log->append( m_lastTick, ScriptEntry::OP_MOVE, index, 0, 0, pt );
-}
-
-void ScriptRecorder::activateStroke( int index )
-{
-  if ( m_running )
-    m_log->append( m_lastTick, ScriptEntry::OP_ACTIVATE, index );
-}
-
-void ScriptRecorder::goal( int goalNum )
-{
-  if ( m_running )
-    m_log->append( m_lastTick, ScriptEntry::OP_GOAL, goalNum );
-}
-
-
-
-void ScriptPlayer::start( const ScriptLog* log, Scene* scene )
-{
-  m_playing = true;
-  m_isPaused = false;
-  m_log = log;
-  m_index = 0;
-  m_lastTick = 0;
-  m_scene = scene;
-  LOG_INFO("Start playback: %lu events", m_log->size());
-}
-
-
-void ScriptPlayer::stop()  
-{ 
-  m_playing = false; 
-  m_log = NULL;
-}
-
-bool ScriptPlayer::isRunning() const
-{
-  return m_log && m_log->size() > 0 && m_playing; 
-}
-
-bool ScriptPlayer::tick() 
-{
-  if ( m_playing ) {
-    m_lastTick++;
-
-    while ( m_index < m_log->size()
-	 && m_log->at(m_index).t <= m_lastTick ) {
-      const ScriptEntry& e = m_log->at(m_index);
-      switch (e.op) {
-      case ScriptEntry::OP_NEW:
-	m_scene->newStroke( Path(Path()&e.pt), e.arg1, e.arg2 );
-	break;
-      case ScriptEntry::OP_DELETE:
-	m_scene->deleteStroke( m_scene->strokes()[e.stroke] );
-	break;
-      case ScriptEntry::OP_EXTEND:
-	m_scene->extendStroke( m_scene->strokes()[e.stroke], e.pt );
-	break;
-      case ScriptEntry::OP_MOVE:
-	m_scene->moveStroke( m_scene->strokes()[e.stroke], e.pt );
-	break;
-      case ScriptEntry::OP_ACTIVATE:
-	m_scene->activateStroke( m_scene->strokes()[e.stroke] );
-	break;
-      case ScriptEntry::OP_PAUSE:
-	m_isPaused = (e.stroke != 0);
-	break;
-      case ScriptEntry::OP_GOAL:
-        // TODO
-        break;
-      }
-      m_index++;
+    if (m_running) {
+        if (m_log) {
+            m_log->push_back(ScriptLogEntry(m_ticks, ev));
+            m_index++;
+        } else {
+            LOG_WARNING("No log in ScriptRecorder onSceneEvent");
+        }
     }
-    return m_isPaused;
-  }
-  return false;
 }
 
+void
+ScriptPlayer::tick(Scene *scene)
+{
+    ScriptHandler::tick(scene);
 
+    while (m_running && m_index < m_log->size() && m_log->at(m_index).tick <= m_ticks) {
+        scene->onSceneEvent(m_log->at(m_index).ev);
+        m_index++;
+    }
+}
