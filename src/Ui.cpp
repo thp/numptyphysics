@@ -1222,9 +1222,9 @@ MenuDialog::MenuDialog( Widget* evtarget, const std::string &title, const MenuIt
   m_box = new VBox(BUTTON_SPACING);
   m_box->fitToParent(true);
   content()->add( m_box, 0, 0 );
-  moveTo(Vec2(SCREEN_WIDTH-24, 0));
+  moveTo(Vec2(WORLD_WIDTH-24, 0));
   sizeTo(Vec2(m_buttonDim.x*MENU_COLUMNS+24,200));
-  animateTo(Vec2(SCREEN_WIDTH-m_buttonDim.x*MENU_COLUMNS-24, 0));
+  animateTo(Vec2(WORLD_WIDTH-m_buttonDim.x*MENU_COLUMNS-24, 0));
   if (items) {
     addItems(items);
   }

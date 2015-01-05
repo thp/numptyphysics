@@ -529,8 +529,9 @@ GLRenderer::retrieve(NP::Framebuffer &rendertarget)
 Rect
 GLRenderer::clip(Rect rect)
 {
-    Glaserl::Util::set_scissor(rect.tl.x, SCREEN_HEIGHT - rect.tl.y - rect.height(),
-                               rect.width(), rect.height());
+    // TODO: Map rect.tl and rect.br using priv->pojection, then use set_scissor
+    Glaserl::Util::set_scissor(rect.tl.x, m_height - rect.tl.y - rect.h(),
+                               rect.w(), rect.h());
 
     std::swap(rect, priv->last_clip);
     return rect;

@@ -43,8 +43,8 @@ class App : private Container, public MainLoop
   thp::Timestep m_timestep;
 public:
   App(int argc, char** argv)
-    : m_width(SCREEN_WIDTH)
-    , m_height(SCREEN_HEIGHT)
+    : m_width(900)
+    , m_height(500)
     , m_quit(false)
     , m_window(NULL)
     , m_timestep(ITERATION_RATE)
@@ -73,9 +73,12 @@ private:
 
   void render()
   {
-      m_window->clip(FULLSCREEN_RECT);
+      // TODO: Use WORLD_WIDTH, WORLD_HEIGHT once clipping is fixed
+      //auto world = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+      auto world = OS->renderer()->rect();
+      m_window->clip(world);
       m_window->clear();
-      draw(*m_window, FULLSCREEN_RECT);
+      draw(*m_window, world);
       m_window->update();
   }
 

@@ -56,8 +56,8 @@ clickModeName(enum ClickMode cm)
 }
 
 
-static float BUTTON_BORDER() { return SCREEN_WIDTH * 0.02f; }
-static float BUTTON_SIZE() { return SCREEN_WIDTH * 0.1f; }
+static float BUTTON_BORDER() { return WORLD_WIDTH * 0.02f; }
+static float BUTTON_SIZE() { return WORLD_WIDTH * 0.1f; }
 
 class Game : public GameControl, public Container
 {
@@ -89,10 +89,10 @@ public:
     EVAL_LOCAL(BUTTON_SIZE);
 
     add(m_left_button, Rect(BUTTON_BORDER, BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE, BUTTON_BORDER + BUTTON_SIZE));
-    add(m_right_button, Rect(SCREEN_WIDTH - BUTTON_BORDER - BUTTON_SIZE, BUTTON_BORDER, SCREEN_WIDTH - BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE));
+    add(m_right_button, Rect(WORLD_WIDTH - BUTTON_BORDER - BUTTON_SIZE, BUTTON_BORDER, WORLD_WIDTH - BUTTON_BORDER, BUTTON_BORDER + BUTTON_SIZE));
 
     m_clickModeLabel->setAlignment(Label::ALIGN_RIGHT | Label::ALIGN_BOTTOM);
-    add(m_clickModeLabel, Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT).shrunk(BUTTON_BORDER));
+    add(m_clickModeLabel, Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT).shrunk(BUTTON_BORDER));
 
     setEventMap(Os::get()->getEventMap(GAME_MAP));
     sizeTo(Vec2(width,height));
@@ -227,7 +227,7 @@ public:
       if ( !m_pauseLabel ) {
           m_pauseLabel = new Button("Gameplay paused", Event::PAUSE);
       }
-      add( m_pauseLabel, Rect(SCREEN_WIDTH/2-128, 16, SCREEN_WIDTH/2+128, 64));
+      add( m_pauseLabel, Rect(WORLD_WIDTH/2-128, 16, WORLD_WIDTH/2+128, 64));
       m_paused = true;
       m_scene.onSceneEvent(SceneEvent(SceneEvent::PAUSE));
     } else {
@@ -251,7 +251,7 @@ public:
 	if ( !m_editLabel ) {
             m_editLabel = new Button("Edit mode", Event::DONE);
  	}
-	add(m_editLabel, Rect(SCREEN_WIDTH/2-128, SCREEN_HEIGHT-64, SCREEN_WIDTH/2+128, SCREEN_HEIGHT-16));
+	add(m_editLabel, Rect(WORLD_WIDTH/2-128, WORLD_HEIGHT-64, WORLD_WIDTH/2+128, WORLD_HEIGHT-16));
 	m_scene.protect(0);
       } else {
 	remove(m_editLabel);
@@ -345,6 +345,8 @@ public:
   {
       Window *window = dynamic_cast<Window *>(&screen);
 
+      auto rect = OS->renderer()->rect();
+
       if (window) {
           // If we draw an effect
           std::function<void(Image *, const Rect &src, const Rect &dst)> effect;
@@ -364,7 +366,7 @@ public:
 
           if (effect) {
               // If we want to draw an effect, render to a texture as input for the effect
-              RenderTarget target(SCREEN_WIDTH, SCREEN_HEIGHT);
+              RenderTarget target(rect.w(), rect.h());
               target.begin();
               m_scene.draw(target);
               target.end();
@@ -378,7 +380,7 @@ public:
 
           // Now we can draw the sceen into the offscreen buffer
           window->beginOffscreen();
-          effect(img.get(), FULLSCREEN_RECT, FULLSCREEN_RECT);
+          effect(img.get(), rect, rect);
           window->endOffscreen();
       }
 
@@ -434,7 +436,7 @@ public:
       } else if (ev.x == 2) {
 	//play menu
 	m_options = createPlayOpts(this);
-        m_right_button->animateTo(Vec2(SCREEN_WIDTH-BUTTON_BORDER-BUTTON_SIZE, -BUTTON_BORDER-BUTTON_SIZE));
+        m_right_button->animateTo(Vec2(WORLD_WIDTH-BUTTON_BORDER-BUTTON_SIZE, -BUTTON_BORDER-BUTTON_SIZE));
       }
       if (m_options) {
 	add( m_options );
@@ -442,7 +444,7 @@ public:
       break;
     case Event::POPUP_CLOSING:
       m_left_button->animateTo(Vec2(BUTTON_BORDER, BUTTON_BORDER));
-      m_right_button->animateTo(Vec2(SCREEN_WIDTH-BUTTON_BORDER-BUTTON_SIZE, BUTTON_BORDER));
+      m_right_button->animateTo(Vec2(WORLD_WIDTH-BUTTON_BORDER-BUTTON_SIZE, BUTTON_BORDER));
       used = false;
       break;
     case Event::SELECT:

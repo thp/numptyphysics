@@ -386,7 +386,7 @@ Stroke::hide()
 
         if (m_body) {
             // stash the body where no-one will find it
-            m_body->SetXForm( b2Vec2(0.0f,SCREEN_HEIGHT*2.0f), 0.0f );
+            m_body->SetXForm( b2Vec2(0.0f,WORLD_HEIGHT*2.0f), 0.0f );
             m_body->SetLinearVelocity( b2Vec2(0.0f,0.0f) );
             m_body->SetAngularVelocity( 0.0f );
         }

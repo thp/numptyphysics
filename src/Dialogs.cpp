@@ -77,7 +77,7 @@ public:
     vbox1->add(hbox, 200, 0);
     vbox1->add( new Spacer(),  100, 1 );
     content()->add(vbox1);
-    sizeTo(Vec2(SCREEN_WIDTH,SCREEN_HEIGHT));
+    sizeTo(Vec2(WORLD_WIDTH,WORLD_HEIGHT));
     moveTo(Vec2(0,0));
     animateTo(Vec2(0,0));
   }
@@ -103,7 +103,7 @@ public:
   {
     m_scroll = new ScrollArea();
     m_scroll->fitToParent(true);
-    m_scroll->virtualSize(Vec2(SCREEN_WIDTH,SCREEN_HEIGHT));
+    m_scroll->virtualSize(Vec2(WORLD_WIDTH,WORLD_HEIGHT));
 
     m_content->add(m_scroll,0,0);
     fitToParent(true);
@@ -119,7 +119,7 @@ public:
     m_collection = c;
     m_dispbase = 0;
     m_dispcount = m_levels->collectionSize(c);
-    m_scroll->virtualSize(Vec2(SCREEN_WIDTH,150+(SCREEN_HEIGHT/ICON_SCALE_FACTOR+40)*((m_dispcount+2)/3)));
+    m_scroll->virtualSize(Vec2(WORLD_WIDTH,150+(WORLD_HEIGHT/ICON_SCALE_FACTOR+40)*((m_dispcount+2)/3)));
 
     m_scroll->empty();
     Box *vbox = new VBox();
@@ -144,23 +144,23 @@ public:
     hbox->add( new Spacer(),  0, 1 );
     int accumw = 0;
     for (int i=0; i<m_dispcount; i++) {
-      accumw += SCREEN_WIDTH / ICON_SCALE_FACTOR + 10;
-      if (accumw >= SCREEN_WIDTH) {
-	vbox->add(hbox, SCREEN_HEIGHT/ICON_SCALE_FACTOR+30, 4);
+      accumw += WORLD_WIDTH / ICON_SCALE_FACTOR + 10;
+      if (accumw >= WORLD_WIDTH) {
+	vbox->add(hbox, WORLD_HEIGHT/ICON_SCALE_FACTOR+30, 4);
 	vbox->add( new Spacer(),  10, 0 );
 	hbox = new HBox();
 	hbox->add( new Spacer(),  0, 1 );
-	accumw = SCREEN_WIDTH / ICON_SCALE_FACTOR;
+	accumw = WORLD_WIDTH / ICON_SCALE_FACTOR;
       }
       m_thumbs[i] = new IconButton("--","",Event(Event::PLAY, //SELECT,
 						 m_levels->collectionLevel(c,i)));
       m_thumbs[i]->font(Font::blurbFont());
       m_thumbs[i]->setBg(NP::Colour::SELECTED_BG);
       m_thumbs[i]->border(false);
-      hbox->add( m_thumbs[i],  SCREEN_WIDTH / ICON_SCALE_FACTOR, 0 );
+      hbox->add( m_thumbs[i],  WORLD_WIDTH / ICON_SCALE_FACTOR, 0 );
       hbox->add( new Spacer(), 0, 1 );
     }
-    vbox->add(hbox, SCREEN_HEIGHT/ICON_SCALE_FACTOR+30, 4);
+    vbox->add(hbox, WORLD_HEIGHT/ICON_SCALE_FACTOR+30, 4);
     vbox->add( new Spacer(), 110, 10 );
     m_scroll->add(vbox,0,0);
 
@@ -168,7 +168,7 @@ public:
       Scene scene( true );
       int level = m_levels->collectionLevel(c,i);
       if (scene.load(m_levels->load(level))) {
-          RenderTarget temp(SCREEN_WIDTH, SCREEN_HEIGHT);
+          RenderTarget temp(WORLD_WIDTH, WORLD_HEIGHT);
 
           temp.begin();
           scene.draw(temp, true);
@@ -217,7 +217,7 @@ public:
     ScrollArea* scroll = new ScrollArea();
     scroll->fitToParent(true);
     RichText *text = new RichText(Config::readFile("help_text.html"));
-    scroll->virtualSize(Vec2(SCREEN_WIDTH,text->layout(SCREEN_WIDTH)));
+    scroll->virtualSize(Vec2(WORLD_WIDTH,text->layout(WORLD_WIDTH)));
     text->fitToParent(true);
     text->alpha(100);
     scroll->add(text,0,0);
@@ -264,7 +264,7 @@ public:
   {
     //Swipe::lock(false);
     content()->add(new FrontPage());
-    sizeTo(Vec2(SCREEN_WIDTH,SCREEN_HEIGHT));
+    sizeTo(Vec2(WORLD_WIDTH,WORLD_HEIGHT));
   }
   ~MainMenu() {
     //Swipe::lock(true);
@@ -393,9 +393,9 @@ public:
   {
     addItems(game->m_paused ? playPausedOpts : playNormalOpts);
     sizeTo(Vec2(140,480));
-    moveTo(Vec2(SCREEN_WIDTH,0));
-    animateTo(Vec2(SCREEN_WIDTH-140,0));
-    m_closeTarget = Vec2(SCREEN_WIDTH, 0);
+    moveTo(Vec2(WORLD_WIDTH,0));
+    animateTo(Vec2(WORLD_WIDTH-140,0));
+    m_closeTarget = Vec2(WORLD_WIDTH, 0);
   }
 };
 
@@ -475,7 +475,7 @@ public:
     }
     Vec2 size = m_buttonDim*5;
     sizeTo(size);
-    animateTo(Vec2(SCREEN_WIDTH - m_pos.width(),0));
+    animateTo(Vec2(WORLD_WIDTH - m_pos.width(),0));
   }
   Widget* makeButton( MenuItem* item, const Event& ev )
   {
@@ -711,7 +711,7 @@ public:
 
     vbox->add(new Spacer(),10,0);
     content()->add(vbox,0,0);
-    moveTo(Vec2(150, SCREEN_HEIGHT));
+    moveTo(Vec2(150, WORLD_HEIGHT));
     animateTo(Vec2(150, 120));
     sizeTo(Vec2(500,240));
   }

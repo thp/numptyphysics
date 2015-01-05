@@ -61,6 +61,12 @@ public:
 
     virtual void size(int *width, int *height) = 0;
 
+    Rect rect() {
+        int width, height;
+        size(&width, &height);
+        return Rect(0, 0, width, height);
+    }
+
     virtual Texture load(const char *filename, bool cache) = 0;
 
     virtual Framebuffer framebuffer(int width, int height) = 0;

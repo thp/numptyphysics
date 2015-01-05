@@ -20,12 +20,8 @@
 #include <fstream>
 
 
-Rect FULLSCREEN_RECT( 0, 0, WORLD_WIDTH-1, WORLD_HEIGHT-1 );
-
 const Rect BOUNDS_RECT( -WORLD_WIDTH/4, -WORLD_HEIGHT,
 			WORLD_WIDTH*5/4, WORLD_HEIGHT );
-int SCREEN_WIDTH = WORLD_WIDTH;
-int SCREEN_HEIGHT = WORLD_HEIGHT;
 
 std::string Config::findFile(const std::string &name)
 {

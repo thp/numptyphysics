@@ -64,10 +64,7 @@ constexpr const int REWIND_JUMP_LENGTH = 100;
 
 constexpr const float ROPE_SEGMENT_LENGTHf = 15.f;
 
-extern Rect FULLSCREEN_RECT;
 extern const Rect BOUNDS_RECT;
-extern int SCREEN_WIDTH;
-extern int SCREEN_HEIGHT;
 
 
 class Config {
