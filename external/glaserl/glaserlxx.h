@@ -88,41 +88,6 @@ buffer()
     return Buffer(new PBuffer());
 }
 
-class PMatrix {
-public:
-    PMatrix()
-        : d(glaserl_matrix_new())
-    {
-    }
-
-    ~PMatrix()
-    {
-        glaserl_matrix_destroy(d);
-    }
-
-    void identity() { glaserl_matrix_identity(d); }
-    void ortho(float left, float right, float bottom, float top,
-            float zNear, float zFar)
-    {
-        glaserl_matrix_ortho(d, left, right, bottom, top, zNear, zFar);
-    }
-    void rotate_2d(float angle)
-    {
-        glaserl_matrix_rotate_2d(d, angle);
-    }
-    float *data() { return glaserl_matrix_data(d); }
-
-    glaserl_matrix_t *d;
-};
-
-typedef std::shared_ptr<PMatrix> Matrix;
-
-static inline Matrix
-matrix()
-{
-    return Matrix(new PMatrix());
-}
-
 class PTexture {
 public:
     PTexture(unsigned char *rgba, int width, int height)
@@ -192,21 +157,15 @@ render_triangle_strip(Program &program, Buffer &buffer)
 }
 
 static inline void
-load_matrix(Program &program, const char *uniform, Matrix &matrix)
-{
-    glaserl_util_load_matrix(program->d, uniform, matrix->d);
-}
-
-static inline void
 default_blend()
 {
     glaserl_util_default_blend();
 }
 
 static inline void
-enable_scissor()
+enable_scissor(bool enable=true)
 {
-    glaserl_util_enable_scissor();
+    glaserl_util_enable_scissor(enable);
 }
 
 static inline void

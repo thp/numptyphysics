@@ -18,7 +18,8 @@
 
 #include "glaserl_program.h"
 #include "glaserl_buffer.h"
-#include "glaserl_matrix.h"
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,13 +29,10 @@ void
 glaserl_util_render_triangle_strip(glaserl_program_t *program, glaserl_buffer_t *buffer);
 
 void
-glaserl_util_load_matrix(glaserl_program_t *program, const char *uniform, glaserl_matrix_t *matrix);
-
-void
 glaserl_util_default_blend();
 
 void
-glaserl_util_enable_scissor();
+glaserl_util_enable_scissor(bool enable);
 
 void
 glaserl_util_set_scissor(int x, int y, int w, int h);

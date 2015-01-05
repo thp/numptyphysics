@@ -28,17 +28,6 @@ glaserl_util_render_triangle_strip(glaserl_program_t *program, glaserl_buffer_t 
 }
 
 void
-glaserl_util_load_matrix(glaserl_program_t *program, const char *uniform, glaserl_matrix_t *matrix)
-{
-    GLint location = glaserl_program_uniform_location(program, uniform);
-    glaserl_program_enable(program);
-
-    glUniformMatrix4fv(location, 1, GL_FALSE, glaserl_matrix_data(matrix));
-
-    glaserl_program_disable(program);
-}
-
-void
 glaserl_util_default_blend()
 {
     glEnable(GL_BLEND);
@@ -46,9 +35,13 @@ glaserl_util_default_blend()
 }
 
 void
-glaserl_util_enable_scissor()
+glaserl_util_enable_scissor(bool enable)
 {
-    glEnable(GL_SCISSOR_TEST);
+    if (enable) {
+        glEnable(GL_SCISSOR_TEST);
+    } else {
+        glDisable(GL_SCISSOR_TEST);
+    }
 }
 
 void
