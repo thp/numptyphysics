@@ -17,6 +17,10 @@
 
 #include "Config.h"
 
+#include "vector_math.h"
+
+#include "petals_log.h"
+
 #include <initializer_list>
 #include <cstring>
 #include <cstdlib>
@@ -91,7 +95,7 @@ with(const T &v, C callback)
 
 class GLRendererPriv {
 public:
-    GLRendererPriv(int width, int height);
+    GLRendererPriv(Vec2 world_size);
     ~GLRendererPriv();
 
     void submitTextured(Glaserl::Texture &texture, const FloatArray &data);
@@ -101,13 +105,13 @@ public:
     void submitPath(float *data, size_t size);
     void flush();
 
-    void flipVertically(bool flip);
+    void setupProjection(Rect world_rect, Vec2 framebuffer_size, bool offscreen);
 
 private:
     void drawTextured();
     void drawPath();
 
-    Glaserl::Matrix projection;
+    vmath::mat4<float> projection;
 
     Glaserl::Program textured_program;
     Glaserl::Buffer textured_buffer;
@@ -133,8 +137,12 @@ private:
     };
 
     enum ProgramType active_program;
-    int width;
-    int height;
+
+    Vec2 world_size;
+    Vec2 framebuffer_size;
+    Vec2 framebuffer_target_size;
+    bool rotate90;
+
     Rect last_clip;
 
     friend class GLRenderer;
@@ -262,8 +270,8 @@ const char *path_fragment_shader_src =
 "}\n"
 ;
 
-GLRendererPriv::GLRendererPriv(int width, int height)
-    : projection(Glaserl::matrix())
+GLRendererPriv::GLRendererPriv(Vec2 world_size)
+    : projection()
     , textured_program(Glaserl::program(
                 textured_vertex_shader_src,
                 textured_fragment_shader_src,
@@ -329,11 +337,13 @@ GLRendererPriv::GLRendererPriv(int width, int height)
                 NULL))
     , saturation_buffer(Glaserl::buffer())
     , active_program(NONE)
-    , width(width)
-    , height(height)
-    , last_clip(Rect(0, 0, width, height))
+    , world_size(world_size)
+    , framebuffer_size(world_size)
+    , framebuffer_target_size(framebuffer_size)
+    , rotate90(framebuffer_size.x < framebuffer_size.y)
+    , last_clip(Rect(Vec2(0, 0), world_size))
 {
-    flipVertically(false);
+    setupProjection(Rect(Vec2(0, 0), world_size), framebuffer_size, false);
 }
 
 GLRendererPriv::~GLRendererPriv()
@@ -341,18 +351,30 @@ GLRendererPriv::~GLRendererPriv()
 }
 
 void
-GLRendererPriv::flipVertically(bool flip)
+GLRendererPriv::setupProjection(Rect world_rect, Vec2 framebuffer_size, bool offscreen)
 {
-    // TODO: Zoom and center WORLD_WIDTH, WORLD_HEIGHT into available space
-    projection->identity();
-    if (flip) {
-        projection->ortho(0, width, 0, height, 0, 1);
-    } else {
-        projection->ortho(0, width, height, 0, 0, 1);
+    framebuffer_target_size = framebuffer_size;
+
+    projection = vmath::identity4<float>();
+
+    // Only rotate by 90 degrees if we render directly to the screen
+    if (framebuffer_target_size.x < framebuffer_target_size.y && !offscreen) {
+        projection *= vmath::rotation_matrix<float>(90.f, vmath::vec3<float>(0.f, 0.f, -1.f));
+        std::swap(framebuffer_size.x, framebuffer_size.y);
     }
 
+    // TODO: Zoom and center WORLD_WIDTH, WORLD_HEIGHT into available space
+    if (offscreen) {
+        projection *= vmath::ortho_matrix<float>(0, framebuffer_size.x, 0, framebuffer_size.y, 0, 1);
+    } else {
+        projection *= vmath::ortho_matrix<float>(0, framebuffer_size.x, framebuffer_size.y, 0, 0, 1);
+    }
+
+    auto m = vmath::transpose(projection);
     for (auto p: {textured_program, blur_program, path_program, rewind_program, saturation_program}) {
-        Glaserl::Util::load_matrix(p, "projection", projection);
+        with (p, [&m] (const Glaserl::Program &program) {
+            glUniformMatrix4fv(program->uniform_location("projection"), 1, GL_FALSE, m);
+        });
     }
 }
 
@@ -464,10 +486,9 @@ GLFramebufferData::~GLFramebufferData()
 {
 }
 
-GLRenderer::GLRenderer(int w, int h)
-    : m_width(w)
-    , m_height(h)
-    , priv(NULL)
+GLRenderer::GLRenderer(Vec2 world_size)
+    : _world_size(world_size)
+    , priv(nullptr)
 {
 }
 
@@ -477,25 +498,58 @@ GLRenderer::~GLRenderer()
 }
 
 void
-GLRenderer::init()
+GLRenderer::init(Vec2 framebuffer_size)
 {
-    priv = new GLRendererPriv(m_width, m_height);
+    priv = new GLRendererPriv(_world_size);
     glClearColor(1.f, 1.f, 1.f, 1.f);
     Glaserl::Util::default_blend();
-    Glaserl::Util::enable_scissor();
+    Glaserl::Util::enable_scissor(true);
+    priv->framebuffer_size = framebuffer_size;
+    priv->rotate90 = (priv->framebuffer_size.x < priv->framebuffer_size.y);
 }
 
-void
-GLRenderer::size(int *width, int *height)
+Vec2
+GLRenderer::framebuffer_size()
 {
-    *width = m_width;
-    *height = m_height;
+    if (priv->rotate90) {
+        return Vec2(priv->framebuffer_size.y, priv->framebuffer_size.x);
+    }
+
+    return priv->framebuffer_size;
+}
+
+Vec2
+GLRenderer::world_size()
+{
+    return priv->world_size;
 }
 
 void
 GLRenderer::mapXY(int &x, int &y)
 {
-    // TODO: Unproject x and y using priv->projection
+    auto fbsize = vmath::vec2<float>(priv->framebuffer_size.x, priv->framebuffer_size.y);
+
+    auto pos = (vmath::vec2<float>(x, y) / fbsize) * 2.f - vmath::vec2<float>(1.0f, 1.0f);
+    pos.y *= -1.f;
+
+    vmath::vec3<float> pos3(pos, 0.f);
+    pos3 = vmath::transform_point(vmath::inverse(priv->projection), pos3);
+
+    x = pos3.x;
+    y = pos3.y;
+}
+
+void
+GLRenderer::projectXY(int &x, int &y)
+{
+    auto fbsize = vmath::vec2<float>(priv->framebuffer_target_size.x, priv->framebuffer_target_size.y);
+
+    auto pos3 = vmath::transform_point(priv->projection, vmath::vec3<float>(x, y, 0.f));
+
+    auto pos = (vmath::vec2<float>(pos3.x, pos3.y) / 2.f + vmath::vec2<float>(0.5f, 0.5f)) * fbsize;
+
+    x = pos.x;
+    y = pos.y;
 }
 
 NP::Texture
@@ -505,17 +559,17 @@ GLRenderer::load(unsigned char *pixels, int w, int h)
 }
 
 NP::Framebuffer
-GLRenderer::framebuffer(int width, int height)
+GLRenderer::framebuffer(Vec2 size)
 {
-    return NP::Framebuffer(new GLFramebufferData(width, height));
+    return NP::Framebuffer(new GLFramebufferData(size.x, size.y));
 }
 
 void
-GLRenderer::begin(NP::Framebuffer &rendertarget)
+GLRenderer::begin(NP::Framebuffer &rendertarget, Rect world_rect)
 {
     GLFramebufferData *data = static_cast<GLFramebufferData *>(rendertarget.get());
     data->framebuffer->enable();
-    priv->flipVertically(true);
+    priv->setupProjection(world_rect, Vec2(data->w, data->h), true);
 }
 
 void
@@ -523,7 +577,7 @@ GLRenderer::end(NP::Framebuffer &rendertarget)
 {
     GLFramebufferData *data = static_cast<GLFramebufferData *>(rendertarget.get());
     data->framebuffer->disable();
-    priv->flipVertically(false);
+    priv->setupProjection(Rect(Vec2(0, 0), priv->world_size), priv->framebuffer_size, false);
 }
 
 NP::Texture
@@ -536,9 +590,26 @@ GLRenderer::retrieve(NP::Framebuffer &rendertarget)
 Rect
 GLRenderer::clip(Rect rect)
 {
-    // TODO: Map rect.tl and rect.br using priv->pojection, then use set_scissor
-    Glaserl::Util::set_scissor(rect.tl.x, m_height - rect.tl.y - rect.h(),
-                               rect.w(), rect.h());
+    int x1 = rect.tl.x;
+    int y1 = rect.tl.y;
+    int x2 = rect.br.x;
+    int y2 = rect.br.y;
+
+    projectXY(x1, y1);
+    projectXY(x2, y2);
+
+    if (x1 > x2) {
+        std::swap(x1, x2);
+    }
+
+    if (y1 > y2) {
+        std::swap(y1, y2);
+    }
+
+    int w = x2 - x1;
+    int h = y2 - y1;
+
+    Glaserl::Util::set_scissor(x1, y1, w, h);
 
     std::swap(rect, priv->last_clip);
     return rect;
@@ -754,7 +825,9 @@ GLRenderer::path(const Path &path, int rgba)
 void
 GLRenderer::clear()
 {
+    Glaserl::Util::enable_scissor(false);
     glClear(GL_COLOR_BUFFER_BIT);
+    Glaserl::Util::enable_scissor(true);
 }
 
 void

@@ -1182,18 +1182,18 @@ void Dialog::draw(Canvas &screen, const Rect &area)
 {
     Window *window = dynamic_cast<Window *>(&screen);
     if (window) {
-        RenderTarget tmp(m_pos.width() / 2, m_pos.height() / 2);
+        auto fb_size = m_pos.size() / 2;
+        auto world_rect = Rect(Vec2(0, 0), fb_size);
+        RenderTarget tmp(fb_size, world_rect);
         tmp.begin();
 
         Image *offscreen = window->offscreen();
-        Rect r2(0, 0, screen.width(), screen.height());
-        tmp.drawBlur(*offscreen, m_pos, r2, 0.0, 0.7);
+        tmp.drawBlur(*offscreen, m_pos, world_rect, 0.0, 0.7);
 
         tmp.end();
 
         Image image(tmp.contents());
-        Rect r(0, 0, tmp.width(), tmp.height());
-        screen.drawBlur(image, r, m_pos, 0.7, 0.0);
+        screen.drawBlur(image, world_rect, m_pos, 0.7, 0.0);
     } else {
         screen.drawRect(area, 0xff0000);
     }

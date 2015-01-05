@@ -110,11 +110,10 @@ public:
         }
     }
 
-    virtual void window(int w, int h)
+    virtual void window(Vec2 world_size)
     {
         if (!m_renderer) {
-            m_renderer = new SDL2Renderer(w, h);
-            m_renderer->init();
+            m_renderer = new SDL2Renderer(world_size);
         }
     }
 
@@ -128,6 +127,7 @@ public:
         SDL_Event e;
         if (SDL_PollEvent(&e)) {
             mapSDLEventToToolkitEvent(e, ev);
+            m_renderer->mapXY(ev.x, ev.y);
             return true;
         }
 

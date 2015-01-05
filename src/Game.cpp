@@ -345,7 +345,9 @@ public:
   {
       Window *window = dynamic_cast<Window *>(&screen);
 
-      auto rect = OS->renderer()->rect();
+      auto fb_size = OS->renderer()->framebuffer_size();
+      auto fb_rect = OS->renderer()->framebuffer_rect();
+      auto world_rect = OS->renderer()->world_rect();
 
       if (window) {
           // If we draw an effect
@@ -366,7 +368,7 @@ public:
 
           if (effect) {
               // If we want to draw an effect, render to a texture as input for the effect
-              RenderTarget target(rect.w(), rect.h());
+              RenderTarget target(fb_size, world_rect);
               target.begin();
               m_scene.draw(target);
               target.end();
@@ -380,7 +382,7 @@ public:
 
           // Now we can draw the sceen into the offscreen buffer
           window->beginOffscreen();
-          effect(img.get(), rect, rect);
+          effect(img.get(), fb_rect, fb_rect);
           window->endOffscreen();
       }
 

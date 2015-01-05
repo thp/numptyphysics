@@ -57,21 +57,16 @@ typedef std::shared_ptr<FramebufferData> Framebuffer;
 
 class Renderer {
 public:
-    virtual void init() = 0;
+    virtual Vec2 framebuffer_size() = 0;
+    virtual Vec2 world_size() = 0;
 
-    virtual void size(int *width, int *height) = 0;
-    virtual void mapXY(int &x, int &y) = 0;
-
-    Rect rect() {
-        int width, height;
-        size(&width, &height);
-        return Rect(0, 0, width, height);
-    }
+    Rect framebuffer_rect() { return Rect(Vec2(0, 0), framebuffer_size()); }
+    Rect world_rect() { return Rect(Vec2(0, 0), world_size()); }
 
     virtual Texture load(const char *filename, bool cache) = 0;
 
-    virtual Framebuffer framebuffer(int width, int height) = 0;
-    virtual void begin(Framebuffer &rendertarget) = 0;
+    virtual Framebuffer framebuffer(Vec2 size) = 0;
+    virtual void begin(Framebuffer &rendertarget, Rect world_rect) = 0;
     virtual void end(Framebuffer &rendertarget) = 0;
     virtual Texture retrieve(Framebuffer &rendertarget) = 0;
 

@@ -52,7 +52,7 @@ protected:
 class RenderTarget : public Canvas
 {
 public:
-    RenderTarget(int w, int h);
+    RenderTarget(Vec2 fb_size, Rect world_rect);
     ~RenderTarget();
 
     void begin();
@@ -62,6 +62,8 @@ public:
 
 private:
     NP::Framebuffer m_framebuffer;
+    Rect m_world_rect;
+    Rect m_save_clip;
 };
 
 class Window : public Canvas

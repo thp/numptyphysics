@@ -123,12 +123,11 @@ Window::Window(int w, int h, const char *title)
     , m_offscreen_image(nullptr)
     , m_title(title)
 {
-    OS->window(w, h);
+    OS->window(Vec2(w, h));
 
     EVAL_LOCAL(RENDERER);
-    RENDERER->size(&m_width, &m_height);
-
-    m_offscreen_target = new RenderTarget(w, h);
+    m_offscreen_target = new RenderTarget(RENDERER->framebuffer_size(),
+                                          RENDERER->world_rect());
     m_offscreen_image = new Image(m_offscreen_target->contents());
 }
 
@@ -163,9 +162,11 @@ Window::offscreen()
     return m_offscreen_image;
 }
 
-RenderTarget::RenderTarget(int w, int h)
-    : Canvas(w, h)
-    , m_framebuffer(RENDERER()->framebuffer(w, h))
+RenderTarget::RenderTarget(Vec2 fb_size, Rect world_rect)
+    : Canvas(world_rect.w(), world_rect.h())
+    , m_framebuffer(RENDERER()->framebuffer(fb_size))
+    , m_world_rect(world_rect)
+    , m_save_clip(world_rect)
 {
 }
 
@@ -177,7 +178,8 @@ void
 RenderTarget::begin()
 {
     EVAL_LOCAL(RENDERER);
-    RENDERER->begin(m_framebuffer);
+    RENDERER->begin(m_framebuffer, m_world_rect);
+    m_save_clip = RENDERER->clip(m_world_rect);
     clear();
 }
 
@@ -187,6 +189,7 @@ RenderTarget::end()
     EVAL_LOCAL(RENDERER);
     RENDERER->flush();
     RENDERER->end(m_framebuffer);
+    RENDERER->clip(m_save_clip);
 }
 
 NP::Texture

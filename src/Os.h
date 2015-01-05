@@ -42,7 +42,7 @@ class Os
   virtual long ticks() = 0;
   virtual void delay(int ms) = 0;
   virtual void init() = 0;
-  virtual void window(int w, int h) = 0;
+  virtual void window(Vec2 world_size) = 0;
   virtual NP::Renderer *renderer() = 0;
 
   void init(int argc, char **argv);

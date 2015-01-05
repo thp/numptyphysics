@@ -168,7 +168,8 @@ public:
       Scene scene( true );
       int level = m_levels->collectionLevel(c,i);
       if (scene.load(m_levels->load(level))) {
-          RenderTarget temp(WORLD_WIDTH, WORLD_HEIGHT);
+          auto size = Vec2(WORLD_WIDTH, WORLD_HEIGHT);
+          RenderTarget temp(size, Rect(Vec2(0, 0), size));
 
           temp.begin();
           scene.draw(temp, true);

@@ -40,18 +40,20 @@ class GLRendererPriv;
 
 class GLRenderer : public NP::Renderer {
 public:
-    GLRenderer(int w, int h);
+    GLRenderer(Vec2 world_size);
     ~GLRenderer();
 
-    virtual void init();
+    void init(Vec2 framebuffer_size);
+    void mapXY(int &x, int &y);
+    void projectXY(int &x, int &y);
 
-    virtual void size(int *width, int *height);
-    virtual void mapXY(int &x, int &y);
+    virtual Vec2 framebuffer_size();
+    virtual Vec2 world_size();
 
     virtual NP::Texture load(unsigned char *pixels, int w, int h);
 
-    virtual NP::Framebuffer framebuffer(int width, int height);
-    virtual void begin(NP::Framebuffer &rendertarget);
+    virtual NP::Framebuffer framebuffer(Vec2 size);
+    virtual void begin(NP::Framebuffer &rendertarget, Rect world_rect);
     virtual void end(NP::Framebuffer &rendertarget);
     virtual NP::Texture retrieve(NP::Framebuffer &rendertarget);
 
@@ -69,9 +71,7 @@ public:
     virtual void flush();
 
 private:
-    int m_width;
-    int m_height;
-
+    Vec2 _world_size;
     GLRendererPriv *priv;
 };
 

@@ -43,8 +43,8 @@ class App : private Container, public MainLoop
   thp::Timestep m_timestep;
 public:
   App(int argc, char** argv)
-    : m_width(900)
-    , m_height(500)
+    : m_width(WORLD_WIDTH)
+    , m_height(WORLD_HEIGHT)
     , m_quit(false)
     , m_window(NULL)
     , m_timestep(ITERATION_RATE)
@@ -73,9 +73,7 @@ private:
 
   void render()
   {
-      // TODO: Use WORLD_WIDTH, WORLD_HEIGHT once clipping is fixed
-      //auto world = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-      auto world = OS->renderer()->rect();
+      auto world = OS->renderer()->world_rect();
       m_window->clip(world);
       m_window->clear();
       draw(*m_window, world);
@@ -127,6 +125,7 @@ private:
 
           ToolkitEvent ev;
           while (OS->nextEvent(ev)) {
+          // TODO
               processEvent(ev);
           }
       });

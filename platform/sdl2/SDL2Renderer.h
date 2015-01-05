@@ -26,10 +26,8 @@
 
 class SDL2Renderer : public GLRenderer {
 public:
-    SDL2Renderer(int w, int h);
+    SDL2Renderer(Vec2 world_size);
     ~SDL2Renderer();
-
-    virtual void init();
 
     virtual NP::Texture load(const char *filename, bool cache);
 

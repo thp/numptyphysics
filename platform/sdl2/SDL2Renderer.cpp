@@ -42,18 +42,28 @@ SDLFontData::~SDLFontData()
 }
 
 
-SDL2Renderer::SDL2Renderer(int w, int h)
-    : GLRenderer(w, h)
+SDL2Renderer::SDL2Renderer(Vec2 world_size)
+    : GLRenderer(world_size)
     , m_window(nullptr)
     , m_pixelformat(nullptr)
     , m_gl_context()
     , m_texture_cache()
 {
+    //Vec2 framebuffer_size(900, 480);
+    //Vec2 framebuffer_size(480, 800);
+    Vec2 framebuffer_size(800, 480);
+
     m_window = SDL_CreateWindow("NumptyPhysics",
                                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+                                framebuffer_size.x, framebuffer_size.y,
+                                SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+
     m_pixelformat = SDL_AllocFormat(SDL_GetWindowPixelFormat(m_window));
     m_gl_context = SDL_GL_CreateContext(m_window);
+
+    GLRenderer::init(framebuffer_size);
+
+    TTF_Init();
 }
 
 SDL2Renderer::~SDL2Renderer()
@@ -61,13 +71,6 @@ SDL2Renderer::~SDL2Renderer()
     SDL_GL_DeleteContext(m_gl_context);
     SDL_FreeFormat(m_pixelformat);
     SDL_DestroyWindow(m_window);
-}
-
-void
-SDL2Renderer::init()
-{
-    GLRenderer::init();
-    TTF_Init();
 }
 
 NP::Texture
