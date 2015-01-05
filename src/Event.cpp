@@ -13,7 +13,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  */
+
 #include "Event.h"
+#include "Os.h"
 
 BasicEventMap::BasicEventMap( const KeyPair* keys, const ButtonPair* buttons )
   : m_keys(keys), m_buttons(buttons)
@@ -24,23 +26,28 @@ Event BasicEventMap::process(const ToolkitEvent& ev)
   const ButtonPair *inf = 0;
   const KeyPair *key = 0;
 
+  int x = ev.x;
+  int y = ev.y;
+
+  OS->renderer()->mapXY(x, y);
+
   switch (ev.type) {
       case ToolkitEvent::PRESS:
           inf = lookupButton(ev.key);
           if (inf) {
-              return Event(inf->down, ev.x, ev.y);
+              return Event(inf->down, x, y);
           }
           break;
       case ToolkitEvent::RELEASE:
           inf = lookupButton(ev.key);
           if (inf) {
-              return Event(inf->up, ev.x, ev.y);
+              return Event(inf->up, x, y);
           }
           break;
       case ToolkitEvent::MOVE:
           inf = lookupButton(ev.key);
           if (inf) {
-              return Event(inf->move, ev.x, ev.y);
+              return Event(inf->move, x, y);
           }
           break;
       case ToolkitEvent::KEYDOWN:

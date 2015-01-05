@@ -46,6 +46,7 @@ public:
     virtual void init();
 
     virtual void size(int *width, int *height);
+    virtual void mapXY(int &x, int &y);
 
     virtual NP::Texture load(unsigned char *pixels, int w, int h);
 

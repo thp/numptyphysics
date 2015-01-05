@@ -60,6 +60,7 @@ public:
     virtual void init() = 0;
 
     virtual void size(int *width, int *height) = 0;
+    virtual void mapXY(int &x, int &y) = 0;
 
     Rect rect() {
         int width, height;

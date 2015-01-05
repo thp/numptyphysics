@@ -343,6 +343,7 @@ GLRendererPriv::~GLRendererPriv()
 void
 GLRendererPriv::flipVertically(bool flip)
 {
+    // TODO: Zoom and center WORLD_WIDTH, WORLD_HEIGHT into available space
     projection->identity();
     if (flip) {
         projection->ortho(0, width, 0, height, 0, 1);
@@ -489,6 +490,12 @@ GLRenderer::size(int *width, int *height)
 {
     *width = m_width;
     *height = m_height;
+}
+
+void
+GLRenderer::mapXY(int &x, int &y)
+{
+    // TODO: Unproject x and y using priv->projection
 }
 
 NP::Texture
