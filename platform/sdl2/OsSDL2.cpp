@@ -80,6 +80,27 @@ static void mapSDLEventToToolkitEvent(SDL_Event &e, ToolkitEvent &ev)
             ev.finger = e.motion.which;
             ev.key = e.motion.state;
             break;
+        case SDL_FINGERDOWN:
+            ev.type = ToolkitEvent::PRESS;
+            ev.x = e.tfinger.x;
+            ev.y = e.tfinger.y;
+            ev.finger = 0;//e.tfinger.fingerId;
+            ev.key = 1;
+            break;
+        case SDL_FINGERUP:
+            ev.type = ToolkitEvent::RELEASE;
+            ev.x = e.tfinger.x;
+            ev.y = e.tfinger.y;
+            ev.finger = 0;//e.tfinger.fingerId;
+            ev.key = 1;
+            break;
+        case SDL_FINGERMOTION:
+            ev.type = ToolkitEvent::MOVE;
+            ev.x = e.tfinger.x;
+            ev.y = e.tfinger.y;
+            ev.finger = 0;//e.tfinger.fingerId;
+            ev.key = 1;
+            break;
         case SDL_KEYDOWN:
             ev.type = ToolkitEvent::KEYDOWN;
             ev.x = ev.y = ev.finger = 0;
