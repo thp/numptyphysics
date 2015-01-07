@@ -61,6 +61,8 @@ SDL2Renderer::SDL2Renderer(Vec2 world_size)
     m_pixelformat = SDL_AllocFormat(SDL_GetWindowPixelFormat(m_window));
     m_gl_context = SDL_GL_CreateContext(m_window);
 
+    // Query real window size (for fullscreen windows)
+    SDL_GetWindowSize(m_window, &framebuffer_size.x, &framebuffer_size.y);
     GLRenderer::init(framebuffer_size);
 
     TTF_Init();
