@@ -370,6 +370,18 @@ GLRendererPriv::setupProjection(Rect world_rect, Vec2 framebuffer_size, bool off
         projection *= vmath::ortho_matrix<float>(0, framebuffer_size.x, framebuffer_size.y, 0, 0, 1);
     }
 
+    if (!offscreen) {
+        float w = framebuffer_size.x, W = world_rect.w(), wscale = w / W;
+        float h = framebuffer_size.y, H = world_rect.h(), hscale = h / H;
+
+        float scale = std::min(wscale, hscale);
+        float xoffset = (w - W * scale) / 2.f;
+        float yoffset = (h - H * scale) / 2.f;
+
+        projection *= vmath::translation_matrix<float>(xoffset, yoffset, 0.f);
+        projection *= vmath::scaling_matrix<float>(scale, scale, 1.f);
+    }
+
     auto m = vmath::transpose(projection);
     for (auto p: {textured_program, blur_program, path_program, rewind_program, saturation_program}) {
         with (p, [&m] (const Glaserl::Program &program) {
@@ -501,7 +513,7 @@ void
 GLRenderer::init(Vec2 framebuffer_size)
 {
     priv = new GLRendererPriv(_world_size);
-    glClearColor(1.f, 1.f, 1.f, 1.f);
+    glClearColor(0.f, 0.f, 0.f, 1.f);
     Glaserl::Util::default_blend();
     Glaserl::Util::enable_scissor(true);
     priv->framebuffer_size = framebuffer_size;

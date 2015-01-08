@@ -89,10 +89,21 @@ buffer()
 }
 
 class PTexture {
-public:
-    PTexture(unsigned char *rgba, int width, int height)
-        : d(glaserl_texture_new(rgba, width, height))
+private:
+    PTexture(glaserl_texture_t *texture)
+        : d(texture)
     {
+    }
+
+public:
+    static PTexture *rgba(unsigned char *rgba, int width, int height)
+    {
+        return new PTexture(glaserl_texture_new(rgba, width, height));
+    }
+
+    static PTexture *rgb(unsigned char *rgb, int width, int height)
+    {
+        return new PTexture(glaserl_texture_new_rgb(rgb, width, height));
     }
 
     ~PTexture()
@@ -114,14 +125,21 @@ typedef std::shared_ptr<PTexture> Texture;
 static inline Texture
 texture(unsigned char *rgba, int width, int height)
 {
-    return Texture(new PTexture(rgba, width, height));
+    return Texture(PTexture::rgba(rgba, width, height));
+}
+
+static inline Texture
+texture_rgb(unsigned char *rgb, int width, int height)
+{
+    return Texture(PTexture::rgb(rgb, width, height));
 }
 
 class PFramebuffer {
 public:
-    PFramebuffer(int width, int height)
+    PFramebuffer(int width, int height, bool rgba=false)
         : d(glaserl_framebuffer_new(width, height))
-        , texture(Glaserl::texture(NULL, width, height))
+        , texture(rgba ? Glaserl::texture(nullptr, width, height)
+                       : Glaserl::texture_rgb(nullptr, width, height))
     {
         glaserl_framebuffer_attach(d, texture->d);
     }

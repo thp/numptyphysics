@@ -345,8 +345,8 @@ public:
   {
       Window *window = dynamic_cast<Window *>(&screen);
 
-      auto fb_size = OS->renderer()->framebuffer_size();
       auto fb_rect = OS->renderer()->framebuffer_rect();
+      auto world_size = OS->renderer()->world_size();
       auto world_rect = OS->renderer()->world_rect();
 
       if (window) {
@@ -368,7 +368,7 @@ public:
 
           if (effect) {
               // If we want to draw an effect, render to a texture as input for the effect
-              RenderTarget target(fb_size, world_rect);
+              RenderTarget target(world_size, world_rect);
               target.begin();
               m_scene.draw(target);
               target.end();
@@ -387,9 +387,8 @@ public:
       }
 
       // Draw the whole backbuffer to the screen
-      screen.drawImage(*window->offscreen(), 0, 0);
-
-    Container::draw(screen,area);
+      screen.drawImage(*window->offscreen());
+      Container::draw(screen, area);
   }
 
   virtual bool onEvent( Event& ev )

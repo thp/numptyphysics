@@ -24,6 +24,7 @@ extern "C" {
 
 enum glaserl_texture_format_t {
     GLASERL_TEXTURE_RGBA,
+    GLASERL_TEXTURE_RGB,
 };
 
 struct glaserl_texture_t {
@@ -42,6 +43,9 @@ typedef struct glaserl_texture_t glaserl_texture_t;
 
 glaserl_texture_t *
 glaserl_texture_new(unsigned char *rgba, int width, int height);
+
+glaserl_texture_t *
+glaserl_texture_new_rgb(unsigned char *rgb, int width, int height);
 
 void
 glaserl_texture_enable(glaserl_texture_t *texture);

@@ -126,7 +126,7 @@ Window::Window(int w, int h, const char *title)
     OS->window(Vec2(w, h));
 
     EVAL_LOCAL(RENDERER);
-    m_offscreen_target = new RenderTarget(RENDERER->framebuffer_size(),
+    m_offscreen_target = new RenderTarget(RENDERER->world_size(),
                                           RENDERER->world_rect());
     m_offscreen_image = new Image(m_offscreen_target->contents());
 }
