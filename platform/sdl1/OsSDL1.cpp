@@ -1,6 +1,6 @@
 /*
  * This file is part of NumptyPhysics <http://thp.io/2015/numptyphysics/>
- * Coyright (c) 2015 Thomas Perl <m@thp.io>
+ * Coyright (c) 2014, 2015 Thomas Perl <m@thp.io>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -13,11 +13,37 @@
  * General Public License for more details.
  */
 
-#ifndef NUMPTYPHYSICS_APP_H
-#define NUMPTYPHYSICS_APP_H
 
-class MainLoop;
+#include "App.h"
+#include "Os.h"
 
-extern MainLoop *npmain(int argc, char** argv);
+#include "OsSDLSTB.h"
 
-#endif /* NUMPTYPHYSICS_APP_H */
+
+class OsSDL1 : public OsSDLSTB {
+public:
+    OsSDL1()
+        : OsSDLSTB()
+    {
+    }
+
+    virtual bool openBrowser(const char *url)
+    {
+        return false;
+    }
+
+    virtual std::string userDataDir()
+    {
+        return ".numptyphysics-data-sdl1";
+    }
+};
+
+int main(int argc, char** argv)
+{
+    std::shared_ptr<Os> os(new OsSDL1());
+
+    std::shared_ptr<MainLoop> mainloop(npmain(argc, argv));
+    while (mainloop->step());
+
+    return 0;
+}

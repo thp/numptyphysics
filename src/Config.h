@@ -67,6 +67,15 @@ constexpr const float ROPE_SEGMENT_LENGTHf = 15.f;
 extern const Rect BOUNDS_RECT;
 
 
+class Blob {
+public:
+    Blob(char *data, size_t len) : data(data), len(len) {}
+    ~Blob() { free(data); }
+
+    char *data;
+    size_t len;
+};
+
 class Config {
 public:
     static std::string defaultLevelPath();
@@ -79,6 +88,7 @@ public:
 
     static std::string findFile(const std::string &name);
     static std::string readFile(const std::string &name);
+    static Blob *readBlob(const std::string &name);
 };
 
 #endif //CONFIG_H

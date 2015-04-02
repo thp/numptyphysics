@@ -1,0 +1,18 @@
+# Platform build definition for Emscripten
+# Will be processed by makefile
+
+add_platform(gl)
+add_platform(sdlstb)
+
+add_external(stb_loader)
+
+CFLAGS += -DUSE_OPENGL_ES
+CXXFLAGS += -DUSE_OPENGL_ES
+
+CFLAGS += -O2
+CXXFLAGS += -O2
+LIBS += -O2
+
+LIBS += --embed-file data
+
+TARGET := $(APP).html

@@ -3,11 +3,15 @@ APP := numptyphysics
 SOURCES := $(wildcard src/*.cpp)
 CXXFLAGS += -std=c++11 -Isrc -Wall -Wno-sign-compare
 
-all: $(APP)
+all: app
 
 include mk/top.mk
 
-$(APP): $(OBJECTS) $(LOCAL_LIBS)
+TARGET ?= $(APP)
+
+app: $(TARGET)
+
+$(TARGET): $(OBJECTS) $(LOCAL_LIBS)
 	$(SILENTMSG) "\tLD\t$@"
 	$(SILENTCMD) $(CXX) -o $@ $^ $(LIBS)
 

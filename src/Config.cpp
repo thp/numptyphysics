@@ -33,6 +33,24 @@ std::string Config::findFile(const std::string &name)
     return name;
 }
 
+Blob *
+Config::readBlob(const std::string &name)
+{
+    std::string filename = findFile(name);
+    std::ifstream is(filename.c_str(), std::ios::in);
+
+    is.seekg(0, is.end);
+    size_t length = is.tellg();
+    is.seekg(0, is.beg);
+
+    char *buffer = new char [length];
+
+    is.read (buffer, length);
+    is.close();
+
+    return new Blob(buffer, length);
+}
+
 std::string
 Config::readFile(const std::string &name)
 {

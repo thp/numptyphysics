@@ -1,0 +1,4 @@
+# Platform build definition for SDL1 with STB_Loader
+# Will be processed by makefile
+
+add_external(stb_loader)

@@ -1,0 +1,10 @@
+# Platform build definition for SDL1
+# Will be processed by makefile
+
+add_platform(gl)
+add_platform(sdlstb)
+
+add_external(stb_loader)
+
+add_pkgconfig(sdl)
+add_pkgconfig(gl)
