@@ -1,5 +1,7 @@
 TARGETS= Gen/float/libbox2d.a Gen/fixed/libbox2d.a
 
+RANLIB ?= ranlib
+
 ifdef DEVKITPRO
 TARGETS += Gen/nds-float/lib/libbox2d.a Gen/nds-fixed/lib/libbox2d.a
 endif
