@@ -7,4 +7,5 @@ add_platform(sdlstb)
 add_external(stb_loader)
 
 add_pkgconfig(sdl)
-add_pkgconfig(gl)
+
+include platform/gl/gl.mk
