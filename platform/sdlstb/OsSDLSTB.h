@@ -83,6 +83,11 @@ static void mapSDLEventToToolkitEvent(SDL_Event &e, ToolkitEvent &ev)
             ev.x = ev.y = ev.finger = 0;
             ev.key = mapSDLKeyToNumptyKey(e.key.keysym.sym);
             break;
+        case SDL_VIDEORESIZE:
+            ev.type = ToolkitEvent::RESIZE;
+            ev.x = e.resize.w;
+            ev.y = e.resize.h;
+            break;
         case SDL_QUIT:
             ev.type = ToolkitEvent::QUIT;
             break;
@@ -111,7 +116,7 @@ public:
     virtual void window(Vec2 world_size)
     {
         if (!m_renderer) {
-            m_renderer = new SDLSTBRenderer(world_size);
+            m_renderer = new SDLSTBRenderer(world_size, world_size);
         }
     }
 
@@ -126,6 +131,11 @@ public:
         if (SDL_PollEvent(&e)) {
             mapSDLEventToToolkitEvent(e, ev);
             m_renderer->mapXY(ev.x, ev.y);
+            if (ev.type == ToolkitEvent::RESIZE) {
+                Vec2 world_size = m_renderer->world_size();
+                delete m_renderer;
+                m_renderer = new SDLSTBRenderer(world_size, Vec2(ev.x, ev.y));
+            }
             return true;
         }
 

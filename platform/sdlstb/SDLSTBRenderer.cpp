@@ -40,14 +40,12 @@ EmscriptenFontData::~EmscriptenFontData()
 }
 
 
-SDLSTBRenderer::SDLSTBRenderer(Vec2 world_size)
+SDLSTBRenderer::SDLSTBRenderer(Vec2 world_size, Vec2 framebuffer_size)
     : GLRenderer(world_size)
     , m_surface(nullptr)
     , m_texture_cache()
 {
-    Vec2 framebuffer_size(800, 480);
-
-    m_surface = SDL_SetVideoMode(framebuffer_size.x, framebuffer_size.y, 0, SDL_OPENGL);
+    m_surface = SDL_SetVideoMode(framebuffer_size.x, framebuffer_size.y, 0, SDL_OPENGL | SDL_RESIZABLE);
 
     // Query real window size (for fullscreen windows)
     framebuffer_size.x = m_surface->w;

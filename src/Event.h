@@ -30,6 +30,8 @@ public:
         /* keyboard */
         KEYDOWN,
         KEYUP,
+        /* window */
+        RESIZE,
         /* meta */
         QUIT,
     };

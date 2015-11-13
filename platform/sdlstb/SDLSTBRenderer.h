@@ -26,7 +26,7 @@
 
 class SDLSTBRenderer : public GLRenderer {
 public:
-    SDLSTBRenderer(Vec2 world_size);
+    SDLSTBRenderer(Vec2 world_size, Vec2 framebuffer_size);
     ~SDLSTBRenderer();
 
     virtual NP::Texture load(const char *filename, bool cache);

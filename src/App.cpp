@@ -98,6 +98,11 @@ private:
                   default:
                       break;
               }
+
+          case ToolkitEvent::RESIZE:
+              delete m_window;
+              m_window = new Window(m_width, m_height, "Numpty Physics");
+              break;
           default:
               /* do nothing */
               break;
