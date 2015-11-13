@@ -105,8 +105,6 @@ private:
   ScriptLog       m_log;
   ScriptRecorder  m_recorder;
   ScriptPlayer    m_player;
-  Image          *m_bgImage;
-  static Image   *g_bgImage;
   int             m_protect;
   b2Vec2          m_gravity;
   b2Vec2          m_currentGravity;

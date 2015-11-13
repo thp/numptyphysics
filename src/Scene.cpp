@@ -57,7 +57,6 @@ static JointInd jointInd;
 
 Scene::Scene( bool noWorld )
   : m_world( NULL ),
-    m_bgImage( NULL ),
     m_protect( 0 ),
     m_gravity(0.0f, 0.0f),
     m_dynamicGravity(false),
@@ -72,11 +71,6 @@ Scene::Scene( bool noWorld )
   , m_moveOffset()
   , m_paused(false)
 {
-    if ( g_bgImage==NULL ) {
-        g_bgImage = new Image("paper.png");
-    }
-    m_bgImage = g_bgImage;
-
   if ( !noWorld ) {
     resetWorld();
   }
@@ -437,9 +431,8 @@ bool Scene::isCompleted()
 
 void Scene::draw(Canvas &canvas, bool everything)
 {
-    if (m_bgImage) {
-        canvas.drawImage(*m_bgImage);
-    }
+    Image paper("paper.png", true);
+    canvas.drawImage(paper);
 
     int i = 0;
     const int fade_duration = 50;
@@ -909,7 +902,3 @@ Scene::playbackUntil(ScriptLog &log, int ticks)
     // and set that in the game, or take game's pause state and apply to
     // current state (this way, one can pause the physics and rewind)
 }
-
-
-Image *Scene::g_bgImage = NULL;
-
