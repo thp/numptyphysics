@@ -28,6 +28,7 @@
 #include "Dialogs.h"
 #include "Ui.h"
 #include "Colour.h"
+#include "I18n.h"
 
 #include "petals_log.h"
 
@@ -78,11 +79,11 @@ public:
     m_editLabel( NULL ),
     m_completedDialog( NULL ),
     m_options( NULL ),
-    m_clickModeLabel(new Label("", nullptr, 0x000000)),
+    m_clickModeLabel(new Label(Tr::copy(""), nullptr, 0x000000)),
     m_os( Os::get() ),
     m_isCompleted(false)
-  , m_left_button(new Button("MENU", Event(Event::OPTION, 1)))
-  , m_right_button(new Button("TOOL", Event(Event::OPTION, 2)))
+  , m_left_button(new Button(Tr("MENU"), Event(Event::OPTION, 1)))
+  , m_right_button(new Button(Tr("TOOL"), Event(Event::OPTION, 2)))
   , m_reset_countdown(0)
   {
     EVAL_LOCAL(BUTTON_BORDER);
@@ -184,19 +185,19 @@ public:
       switch (cm) {
           case CLICK_MODE_DRAW_STROKE:
               setEventMap(Os::get()->getEventMap(GAME_MAP));
-              m_clickModeLabel->text("");
+              m_clickModeLabel->text(Tr::copy(""));
               break;
           case CLICK_MODE_MOVE:
               setEventMap(Os::get()->getEventMap(GAME_MOVE_MAP));
-              m_clickModeLabel->text("Move mode");
+              m_clickModeLabel->text(Tr("Move mode"));
               break;
           case CLICK_MODE_ERASE:
               setEventMap(Os::get()->getEventMap(GAME_ERASE_MAP));
-              m_clickModeLabel->text("Erase mode");
+              m_clickModeLabel->text(Tr("Erase mode"));
               break;
           case CLICK_MODE_DRAW_JETSTREAM:
               setEventMap(Os::get()->getEventMap(GAME_JETSTREAM_MAP));
-              m_clickModeLabel->text("Create jet stream");
+              m_clickModeLabel->text(Tr("Create jet stream"));
               break;
           default:
               LOG_NOTREACHED;
@@ -218,14 +219,14 @@ public:
   void showMessage( const std::string& msg )
   {
     LOG_INFO("showMessage \"%s\"", msg.c_str());
-    add( new MessageBox(msg) );
+    add( new MessageBox(Tr::copy(msg)) );
   }
 
   void togglePause()
   {
     if ( !m_paused ) {
       if ( !m_pauseLabel ) {
-          m_pauseLabel = new Button("Gameplay paused", Event::PAUSE);
+          m_pauseLabel = new Button(Tr("Gameplay paused"), Event::PAUSE);
       }
       add( m_pauseLabel, Rect(WORLD_WIDTH/2-128, 16, WORLD_WIDTH/2+128, 64));
       m_paused = true;
@@ -249,7 +250,7 @@ public:
       m_edit = doEdit;
       if ( m_edit ) {	
 	if ( !m_editLabel ) {
-            m_editLabel = new Button("Edit mode", Event::DONE);
+            m_editLabel = new Button(Tr("Edit mode"), Event::DONE);
  	}
 	add(m_editLabel, Rect(WORLD_WIDTH/2-128, WORLD_HEIGHT-64, WORLD_WIDTH/2+128, WORLD_HEIGHT-16));
 	m_scene.protect(0);

@@ -47,3 +47,17 @@ thp::format(const std::string &fmt, ...)
 
     return result;
 }
+
+std::string
+thp::format(const thp::stringable &fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    char *tmp;
+    vasprintf(&tmp, fmt.c_str(), ap);
+    std::string result = tmp;
+    free(tmp);
+
+    return result;
+}

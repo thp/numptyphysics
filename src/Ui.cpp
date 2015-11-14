@@ -170,26 +170,23 @@ WidgetParent* Widget::topLevel()
 
 Label::Label()
     : Widget()
-    , m_text()
+    , m_tr(nullptr)
     , m_font(nullptr)
     , m_alignment(Label::ALIGN_CENTER)
 {
 }
 
-
-Label::Label(const std::string& s, const Font* f, int color)
-  : m_text(s)
+Label::Label(const Tr& s, const Font* f, int color)
+  : m_tr(s)
   , m_font(f?f:Font::blurbFont())
   , m_alignment(Label::ALIGN_CENTER)
 {
     setFg(color);
 }
 
-void Label::text( const std::string& s )
+void Label::text( const Tr& s )
 {
-    if (m_text != s) {
-        m_text = s;
-    }
+    m_tr = s;
 }
 
 void Label::draw( Canvas& screen, const Rect& area )
@@ -200,18 +197,20 @@ void Label::draw( Canvas& screen, const Rect& area )
 
     Widget::draw(screen,area);
 
+    std::string text = m_tr.c_str();
+
     bool align_h_center = ((m_alignment & (ALIGN_LEFT | ALIGN_RIGHT)) == 0);
     bool align_v_center = ((m_alignment & (ALIGN_TOP | ALIGN_BOTTOM)) == 0);
 
     if (align_h_center && align_v_center) {
-        m_font->drawCenter( &screen, m_pos.centroid(), m_text, m_fg);
+        m_font->drawCenter( &screen, m_pos.centroid(), text, m_fg);
         return;
     }
 
     auto func = &Font::drawCenter;
 
     Vec2 pos = m_pos.centroid();
-    Vec2 metrics = m_font->metrics(m_text);
+    Vec2 metrics = m_font->metrics(text);
 
     if ((m_alignment & ALIGN_TOP) != 0) {
         pos.y = m_pos.tl.y;
@@ -242,13 +241,13 @@ void Label::draw( Canvas& screen, const Rect& area )
         }
     }
 
-    (m_font->*func)(&screen, pos, m_text, m_fg);
+    (m_font->*func)(&screen, pos, text, m_fg);
 }
 
 ////////////////////////////////////////////////////////////////
 
 
-Button::Button(const std::string& s, Event selEvent)
+Button::Button(const Tr& s, Event selEvent)
   : Label(s),
     m_selEvent(selEvent)
 {
@@ -333,7 +332,7 @@ void Icon::draw(Canvas &screen, const Rect &area)
 ////////////////////////////////////////////////////////////////
 
 
-StockIconButton::StockIconButton(const std::string &label, enum StockIcon::Kind icon, const Event &ev)
+StockIconButton::StockIconButton(const Tr &label, enum StockIcon::Kind icon, const Event &ev)
     : Button(label, ev)
     , m_icon(icon)
     , m_vertical(true)
@@ -349,11 +348,13 @@ StockIconButton::draw(Canvas &screen, const Rect &area)
 {
     Widget::draw(screen, area);
 
+    std::string text = m_tr.c_str();
+
     int spacing = 10;
-    Vec2 textsize = m_font->metrics(m_text);
+    Vec2 textsize = m_font->metrics(text);
     Vec2 offset;
 
-    if (m_text.empty()) {
+    if (text.empty()) {
         StockIcon::draw(screen, area, m_icon, m_pos.centroid());
         return;
     }
@@ -364,13 +365,13 @@ StockIconButton::draw(Canvas &screen, const Rect &area)
             StockIcon::draw(screen, area, m_icon, m_pos.centroid() + offset);
 
             offset = Vec2(0, (StockIcon::size()) / 4);
-            m_font->drawCenter(&screen, m_pos.centroid() + offset, m_text, m_fg);
+            m_font->drawCenter(&screen, m_pos.centroid() + offset, text, m_fg);
         } else {
             offset = Vec2(0, -(textsize.y + spacing) / 2);
             StockIcon::draw(screen, area, m_icon, m_pos.centroid() + offset);
 
             offset = Vec2(0, (StockIcon::size() + spacing) / 2);
-            m_font->drawCenter(&screen, m_pos.centroid() + offset, m_text, m_fg);
+            m_font->drawCenter(&screen, m_pos.centroid() + offset, text, m_fg);
         }
     } else {
         Vec2 contentSize(StockIcon::size() + textsize.x,
@@ -380,7 +381,7 @@ StockIconButton::draw(Canvas &screen, const Rect &area)
         StockIcon::draw(screen, area, m_icon, m_pos.centroid() + offset);
 
         offset = Vec2(m_pos.height() - m_pos.width() / 2 + spacing, -textsize.y / 2);
-        m_font->drawLeft(&screen, m_pos.centroid() + offset, m_text, m_fg);
+        m_font->drawLeft(&screen, m_pos.centroid() + offset, text, m_fg);
     }
 }
 
@@ -388,7 +389,7 @@ StockIconButton::draw(Canvas &screen, const Rect &area)
 ////////////////////////////////////////////////////////////////
 
 
-IconButton::IconButton(const std::string& s, const std::string& icon, const Event& ev)
+IconButton::IconButton(const Tr& s, const std::string& icon, const Event& ev)
   : Button(s,ev)
   , m_vertical(true)
   , m_icon(icon.size() ? new Image(icon) : nullptr)
@@ -429,7 +430,8 @@ void IconButton::draw( Canvas& screen, const Rect& area )
     if (m_focussed) {
       screen.drawRect(m_pos,screen.makeColour(NP::Colour::SELECTED_BG),true);
     }
-    Vec2 textsize = m_font->metrics(m_text);    
+    std::string text = m_tr.c_str();
+    Vec2 textsize = m_font->metrics(text);    
     if (m_vertical) {
       int x = m_pos.centroid().x - m_icon->width()/2; 
       int y = m_pos.centroid().y - m_icon->height()/2 - textsize.y/2; 
@@ -437,14 +439,14 @@ void IconButton::draw( Canvas& screen, const Rect& area )
       screen.drawImage(*m_icon,x,y);
       x = m_pos.centroid().x;
       y += m_icon->height() + m_pos.height()/10;
-      m_font->drawCenter( &screen, Vec2(x,y), m_text, m_fg);
+      m_font->drawCenter( &screen, Vec2(x,y), text, m_fg);
     } else {
       int x = m_pos.tl.x + 10;
       int y = m_pos.centroid().y - m_icon->height()/2;
       screen.drawImage(*m_icon,x,y);
       x += m_icon->width() + 10;
       y = m_pos.centroid().y - textsize.y/2;
-      m_font->drawLeft( &screen, Vec2(x,y), m_text, m_fg);
+      m_font->drawLeft( &screen, Vec2(x,y), text, m_fg);
     }
   } else {
     Button::draw(screen,area);
@@ -455,17 +457,12 @@ void IconButton::draw( Canvas& screen, const Rect& area )
 ////////////////////////////////////////////////////////////////
 
 
-RichText::RichText(const std::string& s, const Font* f)
+RichText::RichText(const Tr& s, const Font* f)
   : Label(s,f),
     m_layoutRequired(true)
 {}
 
-RichText::RichText(unsigned char *s, size_t len, const Font* f)
-  : Label(std::string((const char*)s, len),f),
-    m_layoutRequired(true)
-{}
-
-void RichText::text( const std::string& s )
+void RichText::text( const Tr& s )
 {
   Label::text(s);
   m_layoutRequired = true;
@@ -478,13 +475,14 @@ void RichText::draw( Canvas& screen, const Rect& area )
     layout(m_pos.width()-20);
     m_layoutRequired = false;
   }
+  std::string text = m_tr.c_str();
   for (int l=0; l<m_snippets.size(); l++) {
     if (m_snippets[l].textlen > 0) {
       Vec2 pos = m_pos.tl + m_snippets[l].pos;
       Vec2 posnext = l==m_snippets.size()-1 ? pos:m_pos.tl+m_snippets[l+1].pos;
       if (pos.y < area.br.y && posnext.y >= area.tl.y ) {
-	std::string sniptext = m_text.substr(m_snippets[l].textoff,
-					     m_snippets[l].textlen);
+	std::string sniptext = text.substr(m_snippets[l].textoff,
+					   m_snippets[l].textlen);
 	switch (m_snippets[l].align) {
 	case 1:
 	  pos.x += (m_pos.width()-20-m_snippets[l].font->metrics(sniptext).x)/2;
@@ -544,14 +542,16 @@ int RichText::layout(int w)
   m_snippets.clear();
   m_snippets.push_back(snippet);
 
+  std::string text = m_tr.c_str();
+
   while (p != std::string::npos) {
     bool newline = false;
-    size_t e = m_text.find_first_of(" \t\n\r<>", p); 
+    size_t e = text.find_first_of(" \t\n\r<>", p); 
 
     if (e==std::string::npos) {
-      wordmetrics = snippet.font->metrics(m_text.substr(p,e));
+      wordmetrics = snippet.font->metrics(text.substr(p,e));
     } else {
-      wordmetrics = snippet.font->metrics(m_text.substr(p,e-p));
+      wordmetrics = snippet.font->metrics(text.substr(p,e-p));
     }
     if (x!=margin) {
       // space
@@ -566,9 +566,9 @@ int RichText::layout(int w)
       newline = true;
     }
 
-    if (e!=std::string::npos && m_text[e]=='<') {
-      size_t f = m_text.find('>',e);
-      Tag tag(m_text,e,f);
+    if (e!=std::string::npos && text[e]=='<') {
+      size_t f = text.find('>',e);
+      Tag tag(text,e,f);
       if (tag.tag() == "H1") {
 	newline = true;
 	if (tag.closed()) {
@@ -624,14 +624,14 @@ int RichText::layout(int w)
 
     p=e;
     if (p==std::string::npos) {
-      m_snippets[l].textlen = m_text.length() - m_snippets[l].textoff;
+      m_snippets[l].textlen = text.length() - m_snippets[l].textoff;
       m_snippets[l].pos = Vec2(0,y);
       y += m_snippets[l].font->height();
     } else {
-      while (m_text[p] == ' '
-	     || m_text[p] == '\n'
-	     || m_text[p] == '\r'
-	     || m_text[p] == '\t') {
+      while (text[p] == ' '
+	     || text[p] == '\n'
+	     || text[p] == '\r'
+	     || text[p] == '\t') {
 	//eat whitespace
 	if (p==m_snippets[l].textoff) {
 	  m_snippets[l].textoff++;
@@ -1014,7 +1014,7 @@ void Box::remove( Widget* w )
 void Menu::addItems(const MenuItem* item)
 {
   while (item && item->event.code != Event::NOP) {
-    m_items.push_back(new MenuItem(item->text, item->icon, item->event));
+    m_items.push_back(new MenuItem(*item));
     item++;
   }
   layout();
@@ -1024,18 +1024,18 @@ void
 Menu::addItems(const std::vector<MenuItem> &items)
 {
     for (auto &item: items) {
-        m_items.push_back(new MenuItem(item.text, item.icon, item.event));
+        m_items.push_back(new MenuItem(item));
     }
     layout();
 }
 
 void Menu::addItem(const MenuItem& item)
 {
-  m_items.push_back(new MenuItem(item.text, item.icon, item.event));
+  m_items.push_back(new MenuItem(item));
   layout();
 }
 
-void Menu::addItem(const std::string& s, Event event)
+void Menu::addItem(const Tr& s, Event event)
 {
   addItem(MenuItem(s, StockIcon::NONE, event));
 }
@@ -1082,7 +1082,7 @@ void TabBook::draw( Canvas& screen, const Rect& area )
   screen.drawRect(border,screen.makeColour(NP::Colour::TL_BORDER),false);
 }
 
-void TabBook::addTab( const std::string &s, Widget* w )
+void TabBook::addTab( const Tr &s, Widget* w )
 {
   Widget* tab = new Button(s,Event(Event::SELECT,m_count,-1));
   add( tab, Rect(m_count*TAB_WIDTH,0,
@@ -1115,7 +1115,7 @@ void TabBook::selectTab( int t )
 ////////////////////////////////////////////////////////////////
 
 
-Dialog::Dialog( const std::string &title, Event left, Event right )
+Dialog::Dialog( const Tr &title, Event left, Event right )
 {
   setEventMap(UI_DIALOG_MAP);
   setFg(0x000000);
@@ -1127,15 +1127,15 @@ Dialog::Dialog( const std::string &title, Event left, Event right )
   m_left = m_right = NULL;
   m_closeRequested = false;
   VBox *all = new VBox();
-  if (title.length() > 0) {
+  if (title) {
     HBox *bar = new HBox();
     if (left.code!=Event::NOP) {
-      m_left = new Button("<>",left);
+      m_left = new Button(Tr::copy("<>"),left);
       bar->add(m_left, 100, 0);
     }
     bar->add(m_title, 64, 1);
     if (right.code!=Event::NOP) {
-      m_right = new StockIconButton("", StockIcon::CLOSE, right);
+      m_right = new StockIconButton(Tr::copy(""), StockIcon::CLOSE, right);
       bar->add(m_right, 100, 0);
     }
     all->add(bar, DIALOG_TITLE_HEIGHT, 0);
@@ -1143,7 +1143,6 @@ Dialog::Dialog( const std::string &title, Event left, Event right )
   all->add(m_content, 40, 1);
   add(all,0,0);
 }
-
 
 void Dialog::onTick( int tick )
 {
@@ -1213,7 +1212,7 @@ bool Dialog::close()
 ////////////////////////////////////////////////////////////////
 
 
-MenuDialog::MenuDialog( Widget* evtarget, const std::string &title, const MenuItem* items )
+MenuDialog::MenuDialog( Widget* evtarget, const Tr &title, const MenuItem* items )
   : Dialog(title),
     m_target(evtarget),
     m_columns(MENU_COLUMNS),
@@ -1246,7 +1245,7 @@ bool MenuDialog::onEvent( Event& ev )
 
 Widget* MenuDialog::makeButton( MenuItem* item, const Event& ev )
 {
-  return new Button(item->text,ev);
+  return new Button(item->tr,ev);
 }
 
 void MenuDialog::layout()
@@ -1282,7 +1281,8 @@ void MenuDialog::layout()
 ////////////////////////////////////////////////////////////////
 
 
-MessageBox::MessageBox( const std::string& text )
+MessageBox::MessageBox( const Tr& text )
+    : Dialog(Tr::copy(""))
 {
   Box * vbox = new VBox();
   RichText *rt = new RichText(text);

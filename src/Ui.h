@@ -19,6 +19,7 @@
 
 #include "Common.h"
 #include "Event.h"
+#include "I18n.h"
 
 #include <string>
 #include <functional>
@@ -122,10 +123,10 @@ class Label : public Widget
 {
  public:
   Label();
-  Label(const std::string& s, const Font* f=NULL, int color=0xffffff);
+  Label(const Tr& s, const Font* f=NULL, int color=0xffffff);
   const char* name() {return "Label";}
-  virtual void text( const std::string& s );
-  const std::string& text() const { return m_text; }
+  virtual void text( const Tr& s );
+  //const std::string& text() const { return m_text; }
   virtual void draw( Canvas& screen, const Rect& area );
   void font( const Font* f ) { m_font = f; }
 
@@ -142,8 +143,10 @@ class Label : public Widget
   int alignment() { return m_alignment; }
   void setAlignment(int alignment) { m_alignment = alignment; }
 
+  const Tr &tr() const { return m_tr; }
+
  protected:
-  std::string m_text;
+  Tr m_tr;
   const Font *m_font;
   int m_alignment;
 };
@@ -152,7 +155,7 @@ class Label : public Widget
 class Button : public Label
 {
  public:
-  Button(const std::string& s, Event event=Event::NOP);
+  Button(const Tr& s, Event event=Event::NOP);
   const char* name() {return "Button";}
   void event(Event ev) {m_selEvent = ev;}
   void draw( Canvas& screen, const Rect& area );
@@ -182,7 +185,7 @@ protected:
 class IconButton : public Button
 {
  public:
-  IconButton(const std::string& s, const std::string& icon, const Event& ev);
+  IconButton(const Tr& s, const std::string& icon, const Event& ev);
   ~IconButton();
   const char* name() {return "IconButton";}
   void image(Image *image, bool takeOwnership=true);
@@ -198,7 +201,7 @@ class IconButton : public Button
 
 class StockIconButton : public Button {
  public:
-  StockIconButton(const std::string &label, enum StockIcon::Kind icon, const Event &ev);
+  StockIconButton(const Tr &label, enum StockIcon::Kind icon, const Event &ev);
   ~StockIconButton();
   void align(int dir) { m_vertical = (dir == 0); }
   void set(enum StockIcon::Kind icon) { m_icon = icon; }
@@ -214,9 +217,8 @@ class StockIconButton : public Button {
 class RichText : public Label
 {
  public:
-  RichText(const std::string& s, const Font* f=NULL);
-  RichText(unsigned char *s, size_t len, const Font* f=NULL);
-  virtual void text( const std::string& s );
+  RichText(const Tr& s, const Font* f=NULL);
+  virtual void text( const Tr& s );
   virtual void draw( Canvas& screen, const Rect& area );
   int layout(int w);
  protected:
@@ -339,9 +341,12 @@ class ScrollArea : public Panel
 class MenuItem
 {
 public:
-  MenuItem(const std::string& s, enum StockIcon::Kind icon=StockIcon::NONE, Event ev=Event::NOP)
-  : text(s), icon(icon), event(ev) {}
-  std::string text;
+  MenuItem(const Tr& s, enum StockIcon::Kind icon=StockIcon::NONE, Event ev=Event::NOP)
+  : tr(s), icon(icon), event(ev) {}
+
+  MenuItem(const MenuItem &o) : tr(o.tr), icon(o.icon), event(o.event) {}
+
+  Tr tr;
   enum StockIcon::Kind icon;
   Event event;
 };
@@ -352,7 +357,7 @@ class Menu
   void addItems(const MenuItem* item);
   void addItems(const std::vector<MenuItem> &items);
   void addItem(const MenuItem& item);
-  void addItem(const std::string& s, Event event=Event::NOP);
+  void addItem(const Tr& s, Event event=Event::NOP);
  protected:
   virtual void layout() =0;
   std::vector<MenuItem*> m_items;
@@ -368,7 +373,7 @@ class TabBook : public Panel
   virtual bool onEvent( Event& ev );
   virtual void draw( Canvas& screen, const Rect& area );
 
-  virtual void addTab( const std::string &s, Widget* w );
+  virtual void addTab( const Tr &s, Widget* w );
   void selectTab( int t );
  private:
   int m_count, m_selected;
@@ -380,7 +385,7 @@ class TabBook : public Panel
 class Dialog : public Panel
 {
  public:
-  Dialog( const std::string &title="", Event left=Event::NOP, Event right=Event::NOP );
+  Dialog( const Tr &title, Event left=Event::NOP, Event right=Event::NOP );
   const char* name() {return "Dialog";}
   void onTick( int tick );
   bool processEvent(ToolkitEvent &ev);
@@ -400,7 +405,7 @@ class Dialog : public Panel
 class MenuDialog : public Dialog, public virtual Menu
 {
  public:
-  MenuDialog( Widget* evtarget, const std::string &title, const MenuItem* items=NULL );
+  MenuDialog( Widget* evtarget, const Tr &title, const MenuItem* items=NULL );
   const char* name() {return "MenuDialog";}
   virtual bool onEvent( Event& ev );
  protected:
@@ -415,7 +420,7 @@ class MenuDialog : public Dialog, public virtual Menu
 class MessageBox : public Dialog
 {
  public:
-  MessageBox( const std::string& text );
+  MessageBox( const Tr& text );
 };
 
 class Layer : public Dialog

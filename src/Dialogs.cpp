@@ -22,8 +22,10 @@
 #include "Game.h"
 #include "Scene.h"
 #include "Colour.h"
+#include "I18n.h"
 
 #include "petals_log.h"
+#include "thp_format.h"
 
 #include <vector>
 #include <algorithm>
@@ -51,12 +53,13 @@ class LevelLauncher : public Dialog
 {
 public:
   LevelLauncher(int l, Image *image)
+      : Dialog(Tr(nullptr))
   {
     Box *vbox1 = new VBox();
     vbox1->add( new Spacer(),  100, 1 );
     Box *hbox = new HBox();
     hbox->add( new Spacer(),  10, 2 );
-    IconButton *icon = new IconButton("level", "", Event::NOP);
+    IconButton *icon = new IconButton(Tr("level"), "", Event::NOP);
     if (image) {
         icon->image(image, false);
     }
@@ -64,11 +67,11 @@ public:
     hbox->add( new Spacer(),  10, 1 );
     Box *vbox = new VBox();
     vbox->add( new Spacer(),  10, 1 );
-    vbox->add( new IconButton("Review","",
+    vbox->add( new IconButton(Tr("Review"),"",
 			      Event(Event::REPLAY,l)),
 			      BUTTON_HEIGHT, 1 );
     vbox->add( new Spacer(),  10, 0 );
-    vbox->add( new IconButton("Play","",
+    vbox->add( new IconButton(Tr("Play"),"",
 			      Event(Event::PLAY,l)),
 			      BUTTON_HEIGHT, 1 );
     vbox->add( new Spacer(),  10, 1 );
@@ -125,15 +128,15 @@ public:
     Box *vbox = new VBox();
     vbox->add( new Spacer(),  10, 0 );
     Box *hbox = new HBox();
-    Widget *w = new Button("<<",Event::PREVIOUS);
+    Widget *w = new Button(Tr::copy("<<"),Event::PREVIOUS);
     w->border(false);
     hbox->add( w, BUTTON_WIDTH, 0 );
     hbox->add( new Spacer(), 10, 0 );
-    Label *title = new Label(m_levels->collectionName(c));
+    Label *title = new Label(Tr::copy(m_levels->collectionName(c)));
     title->font(Font::headingFont());
     title->alpha(100);
     hbox->add( title, BUTTON_WIDTH, 4 );
-    w= new Button(">>",Event::NEXT);
+    w= new Button(Tr::copy(">>"),Event::NEXT);
     w->border(false);    
     hbox->add( new Spacer(), 10, 0 );
     hbox->add( w, BUTTON_WIDTH, 0 );
@@ -152,7 +155,7 @@ public:
 	hbox->add( new Spacer(),  0, 1 );
 	accumw = WORLD_WIDTH / ICON_SCALE_FACTOR;
       }
-      m_thumbs[i] = new IconButton("--","",Event(Event::PLAY, //SELECT,
+      m_thumbs[i] = new IconButton(Tr::copy("--"),"",Event(Event::PLAY, //SELECT,
 						 m_levels->collectionLevel(c,i)));
       m_thumbs[i]->font(Font::blurbFont());
       m_thumbs[i]->setBg(NP::Colour::SELECTED_BG);
@@ -175,7 +178,7 @@ public:
           scene.draw(temp, true);
           temp.end();
 
-          m_thumbs[i]->text( m_levels->levelName(level) );
+          m_thumbs[i]->text( Tr::copy(m_levels->levelName(level)) );
           Image *image = new Image(temp.contents());
           image->scale(1. / ICON_SCALE_FACTOR);
           m_thumbs[i]->image(image);
@@ -217,13 +220,14 @@ public:
     Box *vbox = new VBox();
     ScrollArea* scroll = new ScrollArea();
     scroll->fitToParent(true);
-    RichText *text = new RichText(Config::readFile("help_text.html"));
+    // TODO: Make help_text.html translatable
+    RichText *text = new RichText(Tr::copy(Config::readFile("help_text.html")));
     scroll->virtualSize(Vec2(WORLD_WIDTH,text->layout(WORLD_WIDTH)));
     text->fitToParent(true);
     text->alpha(100);
     scroll->add(text,0,0);
     vbox->add( scroll, 0, 1 );
-    vbox->add( new Button(PROJECT_HOMEPAGE,Event::SELECT), 36, 0 );
+    vbox->add( new Button(Tr::copy(PROJECT_HOMEPAGE),Event::SELECT), 36, 0 );
     m_content->add(vbox,0,0);
   }
   bool onEvent(Event& ev)
@@ -242,11 +246,11 @@ struct FrontPage : public MenuPage
 {
   FrontPage() : MenuPage(true)
   {
-    m_content->add( new StockIconButton("CHOOSE", StockIcon::CHOOSE, Event(Event::MENU,1)),
+    m_content->add( new StockIconButton(Tr("CHOOSE"), StockIcon::CHOOSE, Event(Event::MENU,1)),
 		    Rect(125,100,275,300) );
-    m_content->add( new StockIconButton("PLAY", StockIcon::PLAY, Event(Event::MENU,2)),
+    m_content->add( new StockIconButton(Tr("PLAY"), StockIcon::PLAY, Event(Event::MENU,2)),
 		    Rect(325,100,475,300) );
-    m_content->add( new StockIconButton("HELP", StockIcon::HELP, Event(Event::MENU,3)),
+    m_content->add( new StockIconButton(Tr("HELP"), StockIcon::HELP, Event(Event::MENU,3)),
 		    Rect(525,100,675,300) );
     fitToParent(true);
   }
@@ -259,7 +263,7 @@ class MainMenu : public Dialog
   int          m_chosenLevel;
 public:
   MainMenu(GameControl* game)
-    : Dialog("NUMPTY PHYSICS",Event::NOP,Event::QUIT),
+    : Dialog(Tr("NUMPTY PHYSICS"),Event::NOP,Event::QUIT),
       m_game(game),
       m_chosenLevel(game->m_level)
   {
@@ -279,7 +283,7 @@ public:
 	content()->empty();	
 	content()->add(new LevelSelector(m_game, m_chosenLevel));
         if (rightControl()) {
-            rightControl()->text("");
+            rightControl()->text(Tr::copy(""));
             rightControl()->event(Event::CANCEL);
         }
 	break;
@@ -290,7 +294,7 @@ public:
 	content()->empty();
 	content()->add(new HelpPage());
         if (rightControl()) {
-            rightControl()->text("");
+            rightControl()->text(Tr::copy(""));
             rightControl()->event(Event::CANCEL);
         }
 	break;
@@ -302,7 +306,7 @@ public:
       content()->empty();
       content()->add(new LevelLauncher(m_chosenLevel, NULL));
       if (rightControl()) {
-          rightControl()->text("");
+          rightControl()->text(Tr::copy(""));
           rightControl()->event(Event(Event::MENU,1));
       }
       return true;
@@ -335,19 +339,19 @@ Widget* createMainMenu(GameControl* game)
 
 
 static const MenuItem playNormalOpts[] = {
-  MenuItem("pen", StockIcon::PEN, Event(Event::SELECT,1,-1)),
-  MenuItem("tools", StockIcon::CHOOSE, Event(Event::SELECT,2,-1)),
-  MenuItem("pause", StockIcon::PAUSE, Event::PAUSE),
-  MenuItem("undo", StockIcon::UNDO, Event::UNDO),
-  MenuItem("", StockIcon::NONE, Event::NOP)
+  MenuItem(Tr("pen"), StockIcon::PEN, Event(Event::SELECT,1,-1)),
+  MenuItem(Tr("tools"), StockIcon::CHOOSE, Event(Event::SELECT,2,-1)),
+  MenuItem(Tr("pause"), StockIcon::PAUSE, Event::PAUSE),
+  MenuItem(Tr("undo"), StockIcon::UNDO, Event::UNDO),
+  MenuItem(Tr::copy(""), StockIcon::NONE, Event::NOP)
 };
 
 static const MenuItem playPausedOpts[] = {
-  MenuItem("pen", StockIcon::PEN, Event(Event::SELECT,1,-1)),
-  MenuItem("tools", StockIcon::CHOOSE, Event(Event::SELECT,2,-1)),
-  MenuItem("resume", StockIcon::PLAY, Event::PAUSE),
-  MenuItem("undo", StockIcon::UNDO, Event::UNDO),
-  MenuItem("", StockIcon::NONE, Event::NOP)
+  MenuItem(Tr("pen"), StockIcon::PEN, Event(Event::SELECT,1,-1)),
+  MenuItem(Tr("tools"), StockIcon::CHOOSE, Event(Event::SELECT,2,-1)),
+  MenuItem(Tr("resume"), StockIcon::PLAY, Event::PAUSE),
+  MenuItem(Tr("undo"), StockIcon::UNDO, Event::UNDO),
+  MenuItem(Tr::copy(""), StockIcon::NONE, Event::NOP)
 };
 
 
@@ -356,7 +360,7 @@ class OptsPopup : public MenuDialog
 protected:
   Vec2 m_closeTarget;
 public:
-  OptsPopup() : MenuDialog(this, "", NULL) 
+  OptsPopup() : MenuDialog(this, Tr::copy(""), NULL)
   {
     m_buttonDim = Vec2(90,90);
     m_closeTarget = Vec2(-10, 0);
@@ -364,7 +368,7 @@ public:
 
   virtual Widget* makeButton( MenuItem* item, const Event& ev )
   {
-    return new StockIconButton(item->text, item->icon, ev);
+    return new StockIconButton(item->tr, item->icon, ev);
   }
 
   virtual bool onEvent( Event& ev ) {
@@ -410,18 +414,18 @@ Widget* createPlayOpts(GameControl* game )
 
 
 static const MenuItem editNormalOpts[] = {
-  MenuItem("menu", StockIcon::CLOSE, Event::MENU),
-  MenuItem("rewind", StockIcon::RESET, Event::RESET),
-  MenuItem("skip", StockIcon::FORWARD, Event::NEXT),
-  MenuItem("edit", StockIcon::SHARE, Event::EDIT),
-  MenuItem("", StockIcon::NONE, Event::NOP)
+  MenuItem(Tr("menu"), StockIcon::CLOSE, Event::MENU),
+  MenuItem(Tr("rewind"), StockIcon::RESET, Event::RESET),
+  MenuItem(Tr("skip"), StockIcon::FORWARD, Event::NEXT),
+  MenuItem(Tr("edit"), StockIcon::SHARE, Event::EDIT),
+  MenuItem(Tr::copy(""), StockIcon::NONE, Event::NOP)
 };
 
 static const MenuItem editDoneOpts[] = {
-  MenuItem("menu", StockIcon::CLOSE, Event::MENU),
-  MenuItem("rewind", StockIcon::RESET, Event::RESET),
-  MenuItem("done", StockIcon::SHARE, Event::DONE),
-  MenuItem("", StockIcon::NONE, Event::NOP)
+  MenuItem(Tr("menu"), StockIcon::CLOSE, Event::MENU),
+  MenuItem(Tr("rewind"), StockIcon::RESET, Event::RESET),
+  MenuItem(Tr("done"), StockIcon::SHARE, Event::DONE),
+  MenuItem(Tr::copy(""), StockIcon::NONE, Event::NOP)
 };
 
 
@@ -450,7 +454,7 @@ Widget* createEditOpts(GameControl* game )
 class ColourButton : public Button
 {
 public:
-  ColourButton(const std::string& s, int c, const Event& ev)
+  ColourButton(const Tr& s, int c, const Event& ev)
     : Button(s,ev)
   {
     m_bg = c;
@@ -462,16 +466,16 @@ class ColourDialog : public MenuDialog
 {
 public:
   ColourDialog( int num, const int* cols ) 
-    : MenuDialog(this,"pen"),
+    : MenuDialog(this, Tr("pen")),
       m_colours(cols)					     
   {
     m_columns = 4;
     m_buttonDim = Vec2(BUTTON_HEIGHT, BUTTON_HEIGHT);
     for (int i=0; i<num; i++) {
       switch(i) {
-          case 0: addItem( MenuItem("O", StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
-          case 1: addItem( MenuItem("X", StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
-          default: addItem( MenuItem("/", StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
+          case 0: addItem( MenuItem(Tr::copy("O"), StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
+          case 1: addItem( MenuItem(Tr::copy("X"), StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
+          default: addItem( MenuItem(Tr::copy("/"), StockIcon::NONE, Event(Event::SELECT,1,i)) ); break;
       }
     }
     Vec2 size = m_buttonDim*5;
@@ -480,7 +484,7 @@ public:
   }
   Widget* makeButton( MenuItem* item, const Event& ev )
   {
-    Button *w = new ColourButton(item->text,m_colours[item->event.y],ev);
+    Button *w = new ColourButton(item->tr,m_colours[item->event.y],ev);
     w->font(Font::titleFont());
     return w;
   }
@@ -496,10 +500,10 @@ Widget* createColourDialog(GameControl* game, int n, const int* cols)
 ////////////////////////////////////////////////////////////////
 
 struct ToggleMenuItem {
-    ToggleMenuItem(const char *label,
+    ToggleMenuItem(const Tr &tr,
                    std::function<bool(GameControl *)> toggled,
                    std::function<bool(GameControl *)> clicked)
-        : menuitem(MenuItem(label, StockIcon::TICK, Event(Event::SELECT)))
+        : menuitem(MenuItem(tr, StockIcon::TICK, Event(Event::SELECT)))
         , toggled(toggled)
         , clicked(clicked)
     {
@@ -515,7 +519,7 @@ struct ToggleMenuItem {
 };
 
 static const ToggleMenuItem toolOpts[] = {
-  ToggleMenuItem("ground", [] (GameControl *game) {
+  ToggleMenuItem(Tr("ground"), [] (GameControl *game) {
       return game->m_strokeFixed;
   }, [] (GameControl *game) {
       game->m_strokeFixed = !game->m_strokeFixed;
@@ -524,7 +528,7 @@ static const ToggleMenuItem toolOpts[] = {
       return true;
   }),
 
-  ToggleMenuItem("sleepy", [] (GameControl *game) {
+  ToggleMenuItem(Tr("sleepy"), [] (GameControl *game) {
       return game->m_strokeSleep;
   }, [] (GameControl *game) {
       game->m_strokeFixed = false;
@@ -533,7 +537,7 @@ static const ToggleMenuItem toolOpts[] = {
       return true;
   }),
 
-  ToggleMenuItem("decor", [] (GameControl *game) {
+  ToggleMenuItem(Tr("decor"), [] (GameControl *game) {
       return game->m_strokeDecor;
   }, [] (GameControl *game) {
       game->m_strokeFixed = false;
@@ -542,35 +546,35 @@ static const ToggleMenuItem toolOpts[] = {
       return true;
   }),
 
-  ToggleMenuItem("move", [] (GameControl *game) {
+  ToggleMenuItem(Tr("move"), [] (GameControl *game) {
       return game->m_clickMode == CLICK_MODE_MOVE;
   }, [] (GameControl *game) {
       game->toggleClickMode(CLICK_MODE_MOVE);
       return true;
   }),
 
-  ToggleMenuItem("erase", [] (GameControl *game) {
+  ToggleMenuItem(Tr("erase"), [] (GameControl *game) {
       return game->m_clickMode == CLICK_MODE_ERASE;
   }, [] (GameControl *game) {
       game->toggleClickMode(CLICK_MODE_ERASE);
       return true;
   }),
 
-  ToggleMenuItem("jetstream", [] (GameControl *game) {
+  ToggleMenuItem(Tr("jetstream"), [] (GameControl *game) {
       return game->m_clickMode == CLICK_MODE_DRAW_JETSTREAM;
   }, [] (GameControl *game) {
       game->toggleClickMode(CLICK_MODE_DRAW_JETSTREAM);
       return true;
   }),
 
-  ToggleMenuItem("rope", [] (GameControl *game) {
+  ToggleMenuItem(Tr("rope"), [] (GameControl *game) {
       return game->m_strokeRope;
   }, [] (GameControl *game) {
       game->m_strokeRope = !game->m_strokeRope;
       return true;
   }),
 
-  ToggleMenuItem("interactive", [] (GameControl *game) {
+  ToggleMenuItem(Tr("interactive"), [] (GameControl *game) {
       return game->m_interactiveDraw;
   }, [] (GameControl *game) {
       game->m_interactiveDraw = !game->m_interactiveDraw;
@@ -582,7 +586,7 @@ static const ToggleMenuItem toolOpts[] = {
 class ToolDialog : public MenuDialog
 {
 public:
-  ToolDialog(GameControl* game) : MenuDialog(this, "tools",NULL),
+  ToolDialog(GameControl* game) : MenuDialog(this, Tr("tools"),NULL),
 				  m_game(game)
   {
     m_buttonDim = Vec2(200, 40);
@@ -595,7 +599,7 @@ public:
   }
   Widget* makeButton( MenuItem* item, const Event& ev )
   {
-    StockIconButton *w = new StockIconButton(item->text, item->icon, ev);
+    StockIconButton *w = new StockIconButton(item->tr, item->icon, ev);
     w->align(1);
     m_opts.push_back(w);
     return w;
@@ -623,7 +627,7 @@ public:
       if (i < ARRAY_SIZE(toolOpts)) {
           tick = toolOpts[i].toggled(m_game);
       } else {
-          LOG_WARNING("Option not in toolOpts: %s", m_opts[i]->text().c_str());
+          LOG_WARNING("Option not in toolOpts: %s", m_opts[i]->tr().c_str());
       }
 
       m_opts[i]->set(tick ? StockIcon::TICK : StockIcon::BLANK);
@@ -668,10 +672,10 @@ class NextLevelDialog : public Dialog
   GameControl* m_game;
 public:
   NextLevelDialog(GameControl* game)
-    : Dialog("BRAVO!!!",Event::NOP,Event::MENU),
+    : Dialog(Tr("BRAVO!!!"),Event::NOP,Event::MENU),
       m_game(game)
   {
-    rightControl()->text("");
+    rightControl()->text(Tr::copy(""));
     char buf[32];
     const GameStats& stats = m_game->stats();
     int time = (stats.endTime - stats.startTime)/1000;
@@ -681,32 +685,39 @@ public:
 
     Box *vbox = new VBox();
     vbox->add(new Spacer(),10,1);
-    if (h > 0) {
-      sprintf(buf,"time: %dh %dm %ds",m,h,s);
-    } else if (m > 0) {
-      int m = time/60/1000;
-      sprintf(buf,"time: %dm %ds",m,s);
-    } else {
-      sprintf(buf,"time: %ds",s);
-    }
-    vbox->add(new Label(buf, nullptr, 0x000000),20,0);
-    sprintf(buf,"%d stroke%s",stats.strokeCount,stats.strokeCount==1?"":"s");
-    vbox->add(new Label(buf, nullptr, 0x000000),20,0);
+
+    auto tr_time = Tr::defer([=] () {
+        if (h > 0) {
+            return thp::format(Tr("time: %dh %dm %ds"), m, h, s);
+        } else if (m > 0) {
+            int m = time/60/1000;
+            return thp::format(Tr("time: %dm %ds"), m, s);
+        } else {
+            return thp::format(Tr("time: %ds"), s);
+        }
+    });
+    vbox->add(new Label(tr_time, nullptr, 0x000000),20,0);
+
+    vbox->add(new Label(TR_DEFERRED(thp::format(Tr("%d stroke(s)"), stats.strokeCount)), nullptr, 0x000000),20,0);
+
     if (stats.pausedStrokes) {
-      sprintf(buf,"     (%d while paused)",stats.pausedStrokes);
-      vbox->add(new Label(buf, nullptr, 0x000000),20,0);
+      auto tr = Tr::defer([=] () {
+          std::string msg = thp::format(Tr("%d while paused"), stats.pausedStrokes);
+          return thp::format("     (%s)", msg.c_str());
+      });
+      vbox->add(new Label(tr, nullptr, 0x000000),20,0);
     }
-    sprintf(buf,"%d undo%s",stats.undoCount,stats.undoCount==1?"":"s");
-    vbox->add(new Label(buf, nullptr, 0x000000),20,0);
+
+    vbox->add(new Label(TR_DEFERRED(thp::format(Tr("%d undo(s)"), stats.undoCount)), nullptr, 0x000000),20,0);
     vbox->add(new Spacer(),10,1);
  
     Box *hbox2 = new HBox();
     hbox2->add(new Spacer(),20,0);
-    hbox2->add(new Button("review",Event(Event::REPLAY,game->m_level)),BUTTON_WIDTH,0);
+    hbox2->add(new Button(Tr("review"),Event(Event::REPLAY,game->m_level)),BUTTON_WIDTH,0);
     hbox2->add(new Spacer(),1,1);
-    hbox2->add(new Button("again",Event::RESET),BUTTON_WIDTH,0);
+    hbox2->add(new Button(Tr("again"),Event::RESET),BUTTON_WIDTH,0);
     hbox2->add(new Spacer(),1,1);
-    hbox2->add(new Button("next",Event::NEXT),BUTTON_WIDTH,0);
+    hbox2->add(new Button(Tr("next"),Event::NEXT),BUTTON_WIDTH,0);
     hbox2->add(new Spacer(),20,0);
     vbox->add(hbox2,BUTTON_HEIGHT,0);
 
@@ -732,21 +743,21 @@ class EditDoneDialog : public Dialog
   GameControl* m_game;
 public:
   EditDoneDialog(GameControl* game)
-    : Dialog("Exit Editor",Event::NOP,Event::CLOSE),
+    : Dialog(Tr("Exit Editor"),Event::NOP,Event::CLOSE),
       m_game(game)
   {
     Box *vbox = new VBox();
     vbox->add(new Spacer(),10,1);
-    vbox->add(new Label("Save level?"),20,0);
+    vbox->add(new Label(Tr("Save level?")),20,0);
     vbox->add(new Spacer(),10,1);
  
     Box *hbox2 = new HBox();
     hbox2->add(new Spacer(),20,0);
-    hbox2->add(new Button("cancel",Event::CLOSE),BUTTON_WIDTH,0);
+    hbox2->add(new Button(Tr("cancel"),Event::CLOSE),BUTTON_WIDTH,0);
     hbox2->add(new Spacer(),1,1);
-    hbox2->add(new Button("exit",Event::EDIT),BUTTON_WIDTH,0);
+    hbox2->add(new Button(Tr("exit"),Event::EDIT),BUTTON_WIDTH,0);
     hbox2->add(new Spacer(),1,1);
-    hbox2->add(new Button("save",Event::SAVE),BUTTON_WIDTH,0);
+    hbox2->add(new Button(Tr("save"),Event::SAVE),BUTTON_WIDTH,0);
     hbox2->add(new Spacer(),20,0);
     vbox->add(hbox2,BUTTON_HEIGHT,0);
 

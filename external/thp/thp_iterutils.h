@@ -13,10 +13,6 @@
  * General Public License for more details.
  */
 
-#if 0
-exec clang++ -std=c++11 -DTHP_ITERUTILS_TEST -o thp_iterutils_test -x c++ $0
-#endif
-
 #ifndef THP_ITERUTILS_H
 #define THP_ITERUTILS_H
 
@@ -77,38 +73,10 @@ Unpacker<T> unpack(std::initializer_list<T *> l, std::vector<T> *rest=nullptr) {
     return Unpacker<T>(l, rest);
 }
 
-std::string
-_trim(const std::string &stdstr)
-{
-    const char *str = stdstr.c_str();
-    const char *end = str + strlen(str) - 1;
-    while (*str && isspace(*str)) {
-        str++;
-    }
-    while (end > str && isspace(*end)) {
-        end--;
-    }
-    return std::string(str, end + 1);
-}
+std::string _trim(const std::string &stdstr);
+std::vector<std::string> split(const std::string &text, const std::string &sep);
 
-std::function<std::string(const std::string &)> trim = _trim;
-
-std::vector<std::string> split(const std::string &text, const std::string &sep) {
-    std::vector<std::string> result;
-
-    char *tmp = strdup(text.c_str());
-
-    char *saveptr = NULL;
-    char *c = strtok_r(tmp, sep.c_str(), &saveptr);
-    while (c != NULL) {
-        result.push_back(c);
-        c = strtok_r(NULL, sep.c_str(), &saveptr);
-    }
-
-    free(tmp);
-
-    return result;
-}
+static std::function<std::string(const std::string &)> trim = _trim;
 
 template <class T, class C>
 C map(std::function<T(const T &)> function, const C &sequence)
@@ -121,35 +89,5 @@ C map(std::function<T(const T &)> function, const C &sequence)
 }
 
 }; // namespace thp
-
-
-#if defined(THP_ITERUTILS_TEST)
-int main(int argc, char *argv[])
-{
-    int a, b;
-    thp::unpack({&a, &b}) = {3, 4};
-    std::cerr << "Got: a = " << a << ", b = " << b << std::endl;
-
-    std::string c, d;
-    thp::unpack({&c, &d}) = thp::split("stroke:#ff00ff", ":");
-    std::cerr << "Got: c = " << c << ", d = " << d << std::endl;
-
-    try {
-        std::string e, f;
-        thp::unpack({&e, &f}) = {"A", "B", "C"};
-    } catch (thp::UnpackException e) {
-        std::cerr << "Cannot unpack, expected " << e.targets << ", got " << e.values << std::endl;
-    }
-
-    std::string g, h;
-    std::vector<std::string> rest;
-    thp::unpack({&g, &h}, &rest) = thp::split("a;b;c;d;e;f", ";");
-    std::cerr << "g = " << g << ", h = " << h << ", rest size = " << rest.size() << std::endl;
-
-    std::string k, v;
-    thp::unpack({&k, &v}) = thp::map(thp::trim, thp::split(" stroke: #ff00ff ", ":"));
-    std::cerr << "Got: '" << k << "', '" << v << "'" << std::endl;
-}
-#endif /* defined(THP_ITERUTILS_TEST) */
 
 #endif /* THP_ITERUTILS_H */

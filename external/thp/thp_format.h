@@ -20,9 +20,15 @@
 
 namespace thp {
 
+class stringable {
+public:
+    virtual const char *c_str() const = 0;
+};
+
 /* allocating sprintf */
 std::string format(const char *fmt, ...);
 std::string format(const std::string &fmt, ...);
+std::string format(const stringable &fmt, ...);
 
 }; /* namespace thp */
 

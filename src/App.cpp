@@ -53,6 +53,9 @@ public:
       OS->init();
       setEventMap(APP_MAP);
 
+      // FIXME: Figure out system language and load corresponding translation
+      Tr::load("i18n/de");
+
       m_window = new Window(m_width,m_height,"Numpty Physics");
       sizeTo(Vec2(m_width,m_height));
 
