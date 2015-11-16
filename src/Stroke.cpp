@@ -27,13 +27,13 @@ static struct {
     const char *name;
     Attribute attribute;
 } ATTRIBUTE_NAMES[] = {
-    "token", ATTRIB_TOKEN,
-    "goal", ATTRIB_GOAL,
-    "fixed", ATTRIB_GROUND,
-    "sleeping", ATTRIB_SLEEPING,
-    "decor", ATTRIB_DECOR,
-    "rope", ATTRIB_ROPE,
-    "interactive", ATTRIB_INTERACTIVE,
+    { "token", ATTRIB_TOKEN, },
+    { "goal", ATTRIB_GOAL, },
+    { "fixed", ATTRIB_GROUND, },
+    { "sleeping", ATTRIB_SLEEPING, },
+    { "decor", ATTRIB_DECOR, },
+    { "rope", ATTRIB_ROPE, },
+    { "interactive", ATTRIB_INTERACTIVE, },
 };
 
 Stroke::Stroke(const Path &path)

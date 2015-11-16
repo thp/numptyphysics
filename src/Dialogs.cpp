@@ -89,7 +89,6 @@ public:
 class LevelSelector : public MenuPage
 {
   static const int THUMB_COUNT = 32;
-  GameControl* m_game;
   Levels* m_levels;
   int m_collection;
   int m_dispbase;
@@ -98,8 +97,7 @@ class LevelSelector : public MenuPage
   ScrollArea* m_scroll;
 public:
   LevelSelector(GameControl* game, int initialLevel)
-    : m_game(game),
-      m_levels(game->m_levels),
+    : m_levels(game->m_levels),
       m_collection(0),
       m_dispbase(0),
       m_dispcount(0)
@@ -676,7 +674,6 @@ public:
       m_game(game)
   {
     rightControl()->text(Tr::copy(""));
-    char buf[32];
     const GameStats& stats = m_game->stats();
     int time = (stats.endTime - stats.startTime)/1000;
     int h = time/60/60;
@@ -740,11 +737,9 @@ Widget *createNextLevelDialog( GameControl* game )
 
 class EditDoneDialog : public Dialog
 {
-  GameControl* m_game;
 public:
   EditDoneDialog(GameControl* game)
-    : Dialog(Tr("Exit Editor"),Event::NOP,Event::CLOSE),
-      m_game(game)
+    : Dialog(Tr("Exit Editor"),Event::NOP,Event::CLOSE)
   {
     Box *vbox = new VBox();
     vbox->add(new Spacer(),10,1);

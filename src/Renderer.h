@@ -57,6 +57,8 @@ typedef std::shared_ptr<FramebufferData> Framebuffer;
 
 class Renderer {
 public:
+    virtual ~Renderer() {}
+
     virtual Vec2 framebuffer_size() = 0;
     virtual Vec2 world_size() = 0;
 
