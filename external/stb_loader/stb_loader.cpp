@@ -7,6 +7,8 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
+#include "utf8decoder.h"
+
 #include <algorithm>
 
 
@@ -52,15 +54,23 @@ StbLoader::render_font(void *buffer, size_t len, StbLoader_Color color, int size
     descent *= scale;
     lineGap *= scale;
 
+    uint32_t codepoint = 0;
+    uint32_t state = 0;
+    const unsigned char *p = (const unsigned char *)text;
+
     // First pass: Get size of bitmap to render
-    for (int i=0; text[i]; i++) {
+    for (; *p; ++p) {
+        if (utf8_decode(&state, &codepoint, *p) != UTF8_ACCEPT) {
+            continue;
+        }
+
         int cw, ch;
         int xo, yo;
         stbtt_FreeBitmap(stbtt_GetCodepointBitmap(f, scale, scale,
-                    text[i], &cw, &ch, &xo, &yo), nullptr);
+                    codepoint, &cw, &ch, &xo, &yo), nullptr);
 
         int advance, bearing;
-        stbtt_GetCodepointHMetrics(f, text[i], &advance, &bearing);
+        stbtt_GetCodepointHMetrics(f, codepoint, &advance, &bearing);
         advance *= scale;
         bearing *= scale;
 
@@ -72,15 +82,21 @@ StbLoader::render_font(void *buffer, size_t len, StbLoader_Color color, int size
 
     int x = 0;
 
+    codepoint = 0; state = 0; p = (const unsigned char *)text;
+
     // Second pass: Render RGBA bitmap
-    for (int i=0; text[i]; i++) {
+    for (; *p; ++p) {
+        if (utf8_decode(&state, &codepoint, *p) != UTF8_ACCEPT) {
+            continue;
+        }
+
         int cw, ch;
         int xo, yo;
         unsigned char *cb = stbtt_GetCodepointBitmap(f, scale, scale,
-                text[i], &cw, &ch, &xo, &yo);
+                codepoint, &cw, &ch, &xo, &yo);
 
         int advance, bearing;
-        stbtt_GetCodepointHMetrics(f, text[i], &advance, &bearing);
+        stbtt_GetCodepointHMetrics(f, codepoint, &advance, &bearing);
         advance *= scale;
         bearing *= scale;
 

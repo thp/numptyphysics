@@ -117,7 +117,7 @@ SDL2Renderer::metrics(const NP::Font &font, const char *text, int *width, int *h
 {
     SDLFontData *data = static_cast<SDLFontData *>(font.get());
 
-    TTF_SizeText(data->m_font, text, width, height);
+    TTF_SizeUTF8(data->m_font, text, width, height);
 }
 
 NP::Texture
@@ -140,7 +140,7 @@ SDL2Renderer::text(const NP::Font &font, const char *text, int rgb)
 
     fg.value = SDL_MapRGB(m_pixelformat, r, g, b);
 
-    SDL_Surface *surface = TTF_RenderText_Blended(data->m_font, text, fg.color);
+    SDL_Surface *surface = TTF_RenderUTF8_Blended(data->m_font, text, fg.color);
     NP::Texture result = GLRenderer::load((unsigned char *)surface->pixels,
                                           surface->w, surface->h);
     SDL_FreeSurface(surface);
