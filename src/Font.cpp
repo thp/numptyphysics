@@ -17,6 +17,8 @@
 #include "Canvas.h"
 #include "Config.h"
 
+#define FONT_FILE "SourceSansPro-Light.ttf"
+
 
 Font::Font( const std::string& file, int ptsize )
 {
@@ -80,7 +82,7 @@ const Font* Font::titleFont()
 {
   static Font* f = 0;
   if (!f) {
-      f = new Font("femkeklaver.ttf",48);
+      f = new Font(FONT_FILE,48);
   }
   return f;
 }
@@ -89,7 +91,7 @@ const Font* Font::headingFont()
 {
   static Font* f = 0;
   if (!f) {
-      f = new Font("femkeklaver.ttf",32);
+      f = new Font(FONT_FILE,32);
   }
   return f;
 }
@@ -98,7 +100,7 @@ const Font* Font::blurbFont()
 {
   static Font* f = 0;
   if (!f) {
-      f = new Font("femkeklaver.ttf",24);
+      f = new Font(FONT_FILE,24);
   }
   return f;
 }
