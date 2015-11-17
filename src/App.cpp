@@ -54,7 +54,12 @@ public:
       setEventMap(APP_MAP);
 
       // FIXME: Figure out system language and load corresponding translation
-      Tr::load("i18n/de");
+      for (int i=0; i<argc; i++) {
+          if (i < argc-1 && strcmp(argv[i], "--lang") == 0) {
+              LOG_DEBUG("Trying to load translation for '%s'", argv[i+1]);
+              Tr::load(thp::format("i18n/%s", argv[i+1]));
+          }
+      }
 
       m_window = new Window(m_width,m_height,"Numpty Physics");
       sizeTo(Vec2(m_width,m_height));
