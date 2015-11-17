@@ -22,6 +22,7 @@
 #include "Colour.h"
 
 #include "petals_log.h"
+#include "thp_iterutils.h"
 
 #include <iostream>
 #include <algorithm>
@@ -481,8 +482,8 @@ void RichText::draw( Canvas& screen, const Rect& area )
       Vec2 pos = m_pos.tl + m_snippets[l].pos;
       Vec2 posnext = l==m_snippets.size()-1 ? pos:m_pos.tl+m_snippets[l+1].pos;
       if (pos.y < area.br.y && posnext.y >= area.tl.y ) {
-	std::string sniptext = text.substr(m_snippets[l].textoff,
-					   m_snippets[l].textlen);
+	std::string sniptext = thp::trim(text.substr(m_snippets[l].textoff,
+					   m_snippets[l].textlen));
 	switch (m_snippets[l].align) {
 	case 1:
 	  pos.x += (m_pos.width()-20-m_snippets[l].font->metrics(sniptext).x)/2;
