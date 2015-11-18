@@ -30,6 +30,7 @@
 #include "petals_log.h"
 
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <unistd.h>
 
