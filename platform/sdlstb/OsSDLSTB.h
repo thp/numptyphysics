@@ -61,21 +61,33 @@ static void mapSDLEventToToolkitEvent(SDL_Event &e, ToolkitEvent &ev)
             ev.type = ToolkitEvent::PRESS;
             ev.x = e.button.x;
             ev.y = e.button.y;
+#if defined(EMSCRIPTEN)
+            ev.finger = 0;
+#else
             ev.finger = e.button.which;
+#endif /* defined(EMSCRIPTEN) */
             ev.key = e.button.button;
             break;
         case SDL_MOUSEBUTTONUP:
             ev.type = ToolkitEvent::RELEASE;
             ev.x = e.button.x;
             ev.y = e.button.y;
+#if defined(EMSCRIPTEN)
+            ev.finger = 0;
+#else
             ev.finger = e.button.which;
+#endif /* defined(EMSCRIPTEN) */
             ev.key = e.button.button;
             break;
         case SDL_MOUSEMOTION:
             ev.type = ToolkitEvent::MOVE;
             ev.x = e.motion.x;
             ev.y = e.motion.y;
+#if defined(EMSCRIPTEN)
+            ev.finger = 0;
+#else
             ev.finger = e.motion.which;
+#endif /* defined(EMSCRIPTEN) */
             ev.key = e.motion.state;
             break;
         case SDL_KEYDOWN:
