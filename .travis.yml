@@ -1,0 +1,11 @@
+language: c
+sudo: required
+dist: trusty
+install:
+    - sudo add-apt-repository universe
+    - sudo apt-get update
+    - sudo apt-get install -y libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+    - sudo apt-get install -y libsdl1.2-dev libglib2.0-dev libgl1-mesa-dev
+script:
+    - make PLATFORM=sdl1 && git clean -fdx
+    - make PLATFORM=sdl2 && git clean -fdx
