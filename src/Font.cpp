@@ -82,7 +82,7 @@ const Font* Font::titleFont()
 {
   static Font* f = 0;
   if (!f) {
-      f = new Font(FONT_FILE,48);
+      f = new Font(FONT_FILE,32);
   }
   return f;
 }
@@ -91,7 +91,7 @@ const Font* Font::headingFont()
 {
   static Font* f = 0;
   if (!f) {
-      f = new Font(FONT_FILE,32);
+      f = new Font(FONT_FILE,23);
   }
   return f;
 }
@@ -100,7 +100,7 @@ const Font* Font::blurbFont()
 {
   static Font* f = 0;
   if (!f) {
-      f = new Font(FONT_FILE,24);
+      f = new Font(FONT_FILE,16);
   }
   return f;
 }
