@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 
 static const char MISC_COLLECTION[] = "C99_My Levels";
@@ -99,16 +100,30 @@ compare_names(const std::string &a, const std::string &b)
     return ma[2].compare(mb[2]);
 }
 
-int
-LevelDesc::compare(const LevelDesc *a, const LevelDesc *b)
+bool
+operator<(LevelDesc a, LevelDesc b)
 {
-    return compare_names(a->file, b->file);
+    return compare_names(a.file, b.file) < 0;
 }
 
-int
-Collection::compare(const Collection *a, const Collection *b)
+void
+LevelDesc::swap(LevelDesc &a, LevelDesc &b)
 {
-    return compare_names(a->name, b->name);
+    std::swap(a.file, b.file);
+}
+
+bool
+operator<(Collection a, Collection b)
+{
+    return compare_names(a.name, b.name) < 0;
+}
+
+void
+Collection::swap(Collection &a, Collection &b)
+{
+    std::swap(a.file, b.file);
+    std::swap(a.name, b.name);
+    std::swap(a.levels, b.levels);
 }
 
 Levels::Levels(std::vector<std::string> dirs)
@@ -242,9 +257,9 @@ std::string Levels::levelName( int i, bool pretty )
 void
 Levels::sort()
 {
-    m_collections.sort();
+    std::sort(m_collections.begin(), m_collections.end());
     for (auto &collection: m_collections) {
-        collection.levels.sort();
+        std::sort(collection.levels.begin(), collection.levels.end());
     }
 }
 
