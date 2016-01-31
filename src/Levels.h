@@ -20,19 +20,6 @@
 #include <cstdio>
 #include <sstream>
 #include <vector>
-#include <stdlib.h>
-
-template <typename T>
-class SortableVector : public std::vector<T> {
-public:
-    SortableVector() : std::vector<T>() {}
-
-    void sort()
-    {
-        qsort(std::vector<T>::data(), std::vector<T>::size(), sizeof(T),
-              (int (*)(const void *, const void *))T::compare);
-    }
-};
 
 struct LevelDesc {
     LevelDesc()
@@ -45,7 +32,7 @@ struct LevelDesc {
     {
     }
 
-    static int compare(const LevelDesc *a, const LevelDesc *b);
+    void swap(LevelDesc &a, LevelDesc &b);
 
     std::string file;
 };
@@ -65,11 +52,11 @@ struct Collection {
     {
     }
 
-    static int compare(const Collection *a, const Collection *b);
+    void swap(Collection &a, Collection &b);
 
     std::string file;
     std::string name;
-    SortableVector<LevelDesc> levels;
+    std::vector<LevelDesc> levels;
 };
 
 class Levels
@@ -107,7 +94,7 @@ class Levels
   bool scanCollection(const std::string& file);
 
   int m_numLevels;
-  SortableVector<Collection> m_collections;
+  std::vector<Collection> m_collections;
 };
 
 #endif //LEVELS_H
