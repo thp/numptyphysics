@@ -101,7 +101,7 @@ compare_names(const std::string &a, const std::string &b)
 }
 
 bool
-operator<(LevelDesc a, LevelDesc b)
+operator<(const LevelDesc &a, const LevelDesc &b)
 {
     return compare_names(a.file, b.file) < 0;
 }
@@ -113,7 +113,7 @@ LevelDesc::swap(LevelDesc &a, LevelDesc &b)
 }
 
 bool
-operator<(Collection a, Collection b)
+operator<(const Collection &a, const Collection &b)
 {
     return compare_names(a.name, b.name) < 0;
 }
