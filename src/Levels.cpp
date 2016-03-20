@@ -17,6 +17,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <dirent.h>
+#include <string.h>
 
 #include "Levels.h"
 #include "Config.h"

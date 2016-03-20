@@ -17,6 +17,8 @@
 #include "Script.h"
 #include "Scene.h"
 
+#include <string.h>
+
 #include "petals_log.h"
 #include "thp_format.h"
 
