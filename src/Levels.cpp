@@ -21,7 +21,6 @@
 #include "Levels.h"
 #include "Config.h"
 #include "Os.h"
-#include "Regex.h"
 
 #include "petals_log.h"
 
@@ -64,40 +63,93 @@ static std::string nameFromPath(const std::string& path)
   return name;
 }
 
+static bool
+parse_level_order(const char *s, char &levelchar, int &number, const char *&rest)
+{
+    enum {
+        PINIT,
+        PCHAR,
+        PNUMBER,
+        PUNDERSCORE,
+        PACCEPT,
+    } state = PINIT;
+
+    levelchar = '\0';
+    number = 0;
+    rest = s;
+
+    size_t len = strlen(s);
+    for (int i=0; i<len && state != PACCEPT; i++) {
+        switch (state) {
+            case PINIT:
+                if (s[i] == 'C' || s[i] == 'D' || s[i] == 'M') {
+                    levelchar = s[i];
+                    state = PCHAR;
+                }
+                break;
+            case PCHAR:
+                if (isdigit(s[i])) {
+                    number = s[i] - '0';
+                    state = PNUMBER;
+                } else {
+                    state = PINIT;
+                    i--;
+
+                    levelchar = '\0';
+                }
+                break;
+            case PNUMBER:
+                if (isdigit(s[i])) {
+                    number = (number * 10) + s[i] - '0';
+                } else if (s[i] == '_') {
+                    state = PUNDERSCORE;
+                } else {
+                    state = PINIT;
+                    i--;
+
+                    levelchar = '\0';
+                    number = 0;
+                }
+                break;
+            case PUNDERSCORE:
+                rest = s + i;
+                state = PACCEPT;
+                break;
+            default:
+            case PACCEPT:
+                break;
+        }
+    }
+
+    return (state == PACCEPT);
+}
+
+
 static int
 compare_names(const std::string &a, const std::string &b)
 {
-    const auto RE = "([CDM])(\\d+)_(.*)";
-    const auto GROUPS = 3;
-    auto ma = NP::Regex::match_groups(RE, a, GROUPS);
-    auto mb = NP::Regex::match_groups(RE, b, GROUPS);
+    char ca, cb;
+    int oa, ob;
+    const char *ra, *rb;
 
-    if (!ma.size() && !mb.size()) {
-        // Simple string comparison
-        return a.compare(b);
-    } else if (!ma.size()) {
-        return -1;
-    } else if (!mb.size()) {
-        return 1;
+    if (parse_level_order(a.c_str(), ca, oa, ra) && parse_level_order(b.c_str(), cb, ob, rb)) {
+        // Compare class character ([C]ollection, [D]emo, [M]enu)
+        if (ca != cb) {
+            return ca - cb;
+        }
+
+        // Compare order number (00, 01, ...)
+        if (oa != ob) {
+            return oa - ob;
+        }
+
+        // Compare rest-of-string (C01_foo)
+        //                             ^^^
+        return strcmp(ra, rb);
     }
 
-    // Compare class character ([C]ollection, [D]emo, [M]enu)
-    char ca = ma[0][0];
-    char cb = mb[0][0];
-    if (ca != cb) {
-        return ca - cb;
-    }
-
-    // Compare order number (00, 01, ...)
-    int oa = atoi(ma[1].c_str());
-    int ob = atoi(mb[1].c_str());
-    if (oa != ob) {
-        return oa - ob;
-    }
-
-    // Compare rest-of-string (C01_foo)
-    //                             ^^^
-    return ma[2].compare(mb[2]);
+    // Fallback: Simple string comparison
+    return a.compare(b);
 }
 
 bool

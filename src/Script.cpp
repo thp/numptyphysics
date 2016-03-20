@@ -16,7 +16,6 @@
 
 #include "Script.h"
 #include "Scene.h"
-#include "Regex.h"
 
 #include "petals_log.h"
 #include "thp_format.h"
@@ -35,13 +34,40 @@ number(const std::string &s)
     return atoi(s.c_str());
 }
 
+static std::vector<std::string>
+split_by(const char *splits, const std::string &s)
+{
+    std::vector<std::string> result;
+
+    int len = strlen(splits);
+    size_t pos = 0;
+    for (int i=0; i<len; i++) {
+        size_t start = s.find(splits[i], pos);
+        if (start == std::string::npos) {
+            break;
+        }
+        start++;
+        size_t end = len;
+        if (i < len-1) {
+            end = s.find(splits[i+1], start);
+            if (end == std::string::npos) {
+                break;
+            }
+        }
+        result.push_back(s.substr(start, end-start));
+        pos = end;
+    }
+
+    return result;
+}
+
 ScriptLogEntry
 ScriptLogEntry::deserialize(const std::string &s)
 {
-    const auto RE = "@(\\d+):([A-Z_]+):(\\d+),(\\d+):(\\d+):(\\d+)";
-    const auto GROUPS = 6;
+    // @0:BEGIN_CREATE_STROKE_AT:605,243:2:0
+    // ^ ^                      ^   ^   ^ ^
+    auto matchobj = split_by("@::,::", s);
 
-    auto matchobj = NP::Regex::match_groups(RE, s, GROUPS);
     if (matchobj.size() != 6) {
         LOG_FATAL("Cannot deserialize ScriptLogEntry: '%s'", s.c_str());
     }
