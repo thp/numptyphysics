@@ -1,0 +1,9 @@
+Eglo Platform plugin for Pocket C.H.I.P
+=======================================
+
+To build, you need to checkout the Eglo library:
+
+  git clone https://github.com/thp/eglo ../eglo
+  make -C ../eglo
+  make PLATFORM=eglo
+  ./numptyphysics

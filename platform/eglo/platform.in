@@ -1,0 +1,11 @@
+# Platform build definition for EGLO
+# Will be processed by makefile
+
+add_platform(gl)
+add_external(stb_loader)
+
+CFLAGS += -DUSE_OPENGL_ES
+CXXFLAGS += -DUSE_OPENGL_ES
+
+LIBS += -L../eglo -leglo -lGLESv2 -Wl,-rpath,. -Wl,-rpath,../eglo
+CXXFLAGS += -I../eglo
