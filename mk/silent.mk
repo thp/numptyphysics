@@ -2,6 +2,6 @@ ifeq ($(V),1)
     SILENTMSG := @true
     SILENTCMD :=
 else
-    SILENTMSG := @echo
+    SILENTMSG := @printf
     SILENTCMD := @
 endif
