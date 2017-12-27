@@ -153,6 +153,13 @@ private:
 MainLoop *
 npmain(int argc, char **argv)
 {
+    if (argc == 2) {
+        const std::string arg0 = argv[1];
+        if (arg0 == "-v" || arg0 == "--version") {
+            printf("%s %s\n", APP, VERSION);
+            exit(0);
+        }
+    }
     OS->init(argc, argv);
     return new App(argc, argv);
 }
