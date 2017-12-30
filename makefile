@@ -1,7 +1,25 @@
 APP := numptyphysics
 
+ifneq ($(shell echo),)
+	CMD_EXE = 1
+endif
+
+ifdef CMD_EXE
+	NULLDEV = nul:
+else
+	NULLDEV = /dev/null
+endif
+
+ifndef VERSION
+	VERSION := $(shell git describe --tags HEAD 2> $(NULLDEV) )
+	ifneq ($(words $(VERSION)),1)
+		VERSION := "N/A"
+	endif
+endif
+$(info VERSION: $(VERSION))
+
 SOURCES := $(wildcard src/*.cpp)
-CXXFLAGS += -std=c++11 -Isrc -Wall -Wno-sign-compare
+CXXFLAGS += -std=c++11 -Isrc -Wall -Wno-sign-compare -DAPP=\"$(APP)\" -DVERSION=\"$(VERSION)\"
 
 all: app
 
