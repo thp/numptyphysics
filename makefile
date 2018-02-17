@@ -21,6 +21,10 @@ $(info VERSION: $(VERSION))
 SOURCES := $(wildcard src/*.cpp)
 CXXFLAGS += -std=c++11 -Isrc -Wall -Wno-sign-compare -DAPP=\"$(APP)\" -DVERSION=\"$(VERSION)\"
 
+ifdef DEBUG
+	CXXFLAGS += -g
+endif
+
 all: app
 
 include mk/top.mk
