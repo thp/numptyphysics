@@ -47,3 +47,18 @@ and at least one yellow item (goal item).
 Token strokes will only join to other token strokes. Goal strokes will only
 join to goal strokes. Other strokes will happily join to any non-token non-goal
 strokes.
+
+
+Compilation Instructions
+------------------------
+
+On a Debian based system, you may install required packages like this:
+
+	apt-get install build-essential libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+
+to compile, you simply issue:
+
+	make
+
+if all goes well, you should end up with the `numptyphysics` binary.
+
