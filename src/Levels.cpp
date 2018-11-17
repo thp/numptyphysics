@@ -247,7 +247,7 @@ Collection &Levels::getCollection(const std::string &file)
 
 bool Levels::scanCollection(const std::string &file)
 {
-    std::string collectionName = file.substr(file.find_last_of('/')+1);
+    std::string collectionName = file.substr(file.find_last_of(Os::pathSep)+1);
     DIR *dir = opendir(file.c_str());
     if (dir) {
         bool result = false;
@@ -256,7 +256,7 @@ bool Levels::scanCollection(const std::string &file)
                 continue;
             }
 
-            std::string filename = file + "/" + entry->d_name;
+            std::string filename = file + Os::pathSep + entry->d_name;
             std::string ext = fileExtension(filename);
             if (ext == ".nph" || ext == ".npsvg") {
                 if (addLevel(getCollection(collectionName), filename)) {

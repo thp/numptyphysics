@@ -29,6 +29,8 @@ TARGET ?= $(APP)
 
 app: $(TARGET)
 
+$(OBJECTS): $(GENERATED_HEADERS)
+
 $(TARGET): $(OBJECTS) $(LOCAL_LIBS)
 	$(SILENTMSG) "\tLD\t$@\n"
 	$(SILENTCMD) $(CXX) -o $@ $^ $(LIBS)

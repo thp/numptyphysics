@@ -23,6 +23,8 @@
 #    define GLASERL_GLSL_PRECISION_INFO "precision mediump float;\n"
 #elif defined(__APPLE__)
 #    include <OpenGL/gl.h>
+#elif defined(__WIN32__)
+#    include "gl.h"
 #else
 #    define GL_GLEXT_PROTOTYPES
 #    include <GL/gl.h>

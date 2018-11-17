@@ -23,6 +23,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#ifdef __WIN32__
+#include <windows.h>
+#undef DELETE
+#endif
 
 #include "thp_format.h"
 #include "petals_log.h"
@@ -169,7 +173,11 @@ bool Os::ensurePath(const std::string& path)
         if ( sep != std::string::npos && sep > 0 ) {
             ensurePath(path.substr(0,sep));
         }
+#ifdef __WIN32__
+	if (mkdir(path.c_str()) != 0 ) {
+#else
         if (mkdir(path.c_str(), 0755) != 0) {
+#endif
             LOG_WARNING("Failed to create dir: %s", path.c_str());
             return false;
         } else {
@@ -191,7 +199,11 @@ static Os *
 g_os = nullptr;
 
 const char
+#ifdef __WIN32__
+Os::pathSep = '\\';
+#else
 Os::pathSep = '/';
+#endif
 
 Os::Os()
 {
@@ -228,12 +240,16 @@ Os::init(int argc, char **argv)
     char buf[PATH_MAX];
 
     const char *progname = argv[0];
-    const char *slash = strrchr(progname, '/');
+    const char *slash = strrchr(progname, Os::pathSep);
 
     if (!slash) {
+#ifdef __WIN32__
+	if (GetModuleFileName(NULL, buf, sizeof(buf)) != -1) {
+#else
         if (readlink("/proc/self/exe", buf, sizeof(buf)) != -1) {
+#endif
             progname = buf;
-            slash = strrchr(progname, '/');
+            slash = strrchr(progname, Os::pathSep);
         }
     }
 
