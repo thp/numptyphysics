@@ -1,0 +1,29 @@
+# Platform build definition for SDL2
+# Will be processed by makefile
+
+APP := $(APP).exe
+GENERATED_HEADERS += external/glaserl/gl.h
+DISTCLEAN_FILES += external/glaserl/gl.[ch]
+
+external/glaserl/gl.h:
+	galogen gl.xml --ver 3.0 --profile compatibility
+	mv gl.[ch] external/glaserl
+
+add_platform(freedesktop)
+add_platform(gl)
+
+add_pkgconfig(sdl2)
+add_pkgconfig(SDL2_image)
+add_pkgconfig(gio-2.0)
+
+SOURCES += $(wildcard platform/sdl2/*.cpp)
+CXXFLAGS += -Iplatform/sdl2
+ifeq ($(wildcard $(patsubst %,%/SDL2_ttf.dll,platform/$(PLATFORM)/SDL2_ttf/.libs)),)
+add_pkgconfig(SDL2_ttf)
+else
+CXXFLAGS += -Iplatform/$(PLATFORM)/SDL2_ttf
+LIBS += -Lplatform/$(PLATFORM)/SDL2_ttf/.libs -lSDL2_ttf.dll
+endif
+
+include platform/gl/gl.mk
+include platform/freedesktop/install.mk

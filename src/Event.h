@@ -19,6 +19,9 @@
 
 #include "Common.h"
 
+#pragma push_macro("DELETE")
+#undef DELETE
+
 struct ToolkitEvent {
 public:
     enum Type {
@@ -166,5 +169,7 @@ enum NumptyKeySym {
     NUMPTYKEY_F7,
     NUMPTYKEY_F6,
 };
+
+#pragma pop_macro("DELETE")
 
 #endif //EVENT_H

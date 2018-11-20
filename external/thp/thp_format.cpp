@@ -13,6 +13,10 @@
  * General Public License for more details.
  */
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include "thp_format.h"
 
 #include <string>
