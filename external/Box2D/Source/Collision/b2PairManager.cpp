@@ -131,7 +131,8 @@ b2Pair* b2PairManager::AddPair(int32 proxyId1, int32 proxyId2)
 		return pair;
 	}
 
-	b2Assert(m_pairCount < b2_maxPairs && m_freePair != b2_nullPair);
+	b2Assert(m_pairCount < b2_maxPairs);
+	b2Assert(m_freePair != b2_nullPair);
 
 	uint16 pairIndex = m_freePair;
 	pair = m_pairs + pairIndex;
