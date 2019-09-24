@@ -17,6 +17,7 @@
 #define THP_FORMAT_H
 
 #include <functional>
+#include <string>
 
 namespace thp {
 
