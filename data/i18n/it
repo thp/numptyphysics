@@ -3,7 +3,7 @@
 %d while paused=%d durante la pausa
 BRAVO!!!=BRAVO!!!
 CHOOSE=SCEGLI
-Create jet stream=Jet stream erstellen
+Create jet stream=Crea stream
 Edit mode=Modalità Modifica
 Erase mode=Modalità di cancellazione
 Exit Editor=Esci dall'editor
@@ -26,7 +26,7 @@ erase=cancella
 exit=esci
 ground=terreno
 interactive=interattivo
-jetstream=jetstream
+jetstream=stream
 level=levello
 menu=menu
 move=sposta
