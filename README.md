@@ -1,6 +1,8 @@
 Numpty Physics
 ==============
 
+[![Build Status](https://travis-ci.org/thp/numptyphysics.svg?branch=master)](https://travis-ci.org/thp/numptyphysics)
+
 Harness gravity with your crayon and set about creating blocks, ramps, levers,
 pulleys and whatever else you fancy to get the little red thing to the little
 yellow thing.
