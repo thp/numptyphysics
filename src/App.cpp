@@ -54,7 +54,6 @@ public:
       OS->init();
       setEventMap(APP_MAP);
 
-      // FIXME: Figure out system language and load corresponding translation
       for (int i=0; i<argc; i++) {
           if (i < argc-1 && strcmp(argv[i], "--lang") == 0) {
               LOG_DEBUG("Trying to load translation for '%s'", argv[i+1]);

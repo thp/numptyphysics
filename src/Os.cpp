@@ -16,9 +16,13 @@
 
 #include "Os.h"
 
+#include "I18n.h"
+#include "Config.h"
+
 #include <sys/stat.h>
 #include <unistd.h>
 #include <limits.h>
+#include <locale.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -259,6 +263,21 @@ Os::init(int argc, char **argv)
 
     g_appName = slash + 1;
     g_appDir = std::string(progname, slash-progname);
+
+    const char *locale = setlocale(LC_MESSAGES, "");
+    char lang[3];
+    if (locale != 0 && locale[0] != '\0') {
+        lang[0] = ::tolower(locale[0]);
+        lang[1] = ::tolower(locale[1]);
+        lang[2] = '\0';
+        LOG_INFO("Got locale: \"%s\", using \"%s\"\n", locale, lang);
+        auto fn = thp::format("i18n/%s", lang);
+        if (!Config::readFile(fn).empty()) {
+            Tr::load(fn);
+        } else {
+            LOG_INFO("No translation file for %s, send a pull request", lang);
+        }
+    }
 }
 
 std::string
