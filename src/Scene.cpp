@@ -223,8 +223,8 @@ void Scene::resetWorld()
   delete m_world;
 
   b2AABB worldAABB;
-  worldAABB.lowerBound.Set(-100.0f, -100.0f);
-  worldAABB.upperBound.Set(100.0f, 100.0f);
+  worldAABB.lowerBound.Set(-1000.0f, -1000.0f);
+  worldAABB.upperBound.Set(1000.0f, 1000.0f);
     
   bool doSleep = true;
   m_world = new b2World(worldAABB, gravity, doSleep);
