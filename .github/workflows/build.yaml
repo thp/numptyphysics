@@ -58,12 +58,12 @@ jobs:
             fi
             $WRAPPER_SCRIPT make PLATFORM=${{ matrix.platform }} V=1
       - name: Package (mingw)
-        if: platform.platform == 'mingw'
+        if: matrix.platform == 'mingw'
         run: |
             mkdir -p dist
             zip -r dist/numptyphysics-win32 numptyphysics.exe data *.dll README.md AUTHORS COPYING
       - name: Package (emscripten)
-        if: platform.platform == 'emscripten'
+        if: matrix.platform == 'emscripten'
         run: |
             mkdir -p dist
             zip -r dist/numptyphysics-html5 numptyphysics.{html,js,wasm}
