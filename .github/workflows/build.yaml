@@ -28,6 +28,11 @@ jobs:
             sudo apt install -y \
                 libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libegl1-mesa-dev libgles2-mesa-dev \
                 libsdl1.2-dev libglib2.0-dev libgl1-mesa-dev
+      - name: Install MinGW build tools
+        if: matrix.platform == "mingw"
+        run: |
+            sudo apt install -y \
+                mingw-w64-i686-dev
       - name: Build from source
         run: |
             WRAPPER_SCRIPT=""
