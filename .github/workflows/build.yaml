@@ -32,7 +32,7 @@ jobs:
         if: matrix.platform == 'mingw'
         run: |
             sudo apt install -y \
-                mingw-w64-i686-dev
+                gcc-mingw-w64-i686
       - name: Build from source
         run: |
             WRAPPER_SCRIPT=""
@@ -51,8 +51,8 @@ jobs:
                 wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.5-mingw.tar.gz
                 tar xvf SDL2_image-devel-2.0.5-mingw.tar.gz
 
-                cp /usr/lib/gcc/i686-w64-mingw32/9.3-posix/libgcc_s_sjlj-1.dll .
-                cp /usr/lib/gcc/i686-w64-mingw32/9.3-win32/libstdc++-6.dll .
+                cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libgcc_s_sjlj-1.dll .
+                cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libstdc++-6.dll .
                 cp /usr/i686-w64-mingw32/lib/libwinpthread-1.dll .
                 cp SDL2-2.0.14/i686-w64-mingw32/bin/SDL2.dll .
                 cp SDL2_ttf-2.0.15/i686-w64-mingw32/bin/SDL2_ttf.dll .
