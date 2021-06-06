@@ -1,0 +1,28 @@
+name: Build from source
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - sdl1
+          - sdl2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+            sudo apt install -y \
+                libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libegl1-mesa-dev libgles2-mesa-dev \
+                libsdl1.2-dev libglib2.0-dev libgl1-mesa-dev
+      - name: Build from source
+        run: make PLATFORM=${{ matrix.platform }}
