@@ -264,7 +264,12 @@ Os::init(int argc, char **argv)
     g_appName = slash + 1;
     g_appDir = std::string(progname, slash-progname);
 
+#ifdef __WIN32__
+    // FIXME
+    const char *locale = "en";
+#else
     const char *locale = setlocale(LC_MESSAGES, "");
+#endif
     char lang[3];
     if (locale != 0 && locale[0] != '\0') {
         lang[0] = ::tolower(locale[0]);

@@ -1,29 +1,29 @@
-# Platform build definition for SDL2
+# Platform build definition for mingw
 # Will be processed by makefile
+
+CC := i686-w64-mingw32-gcc
+CXX := i686-w64-mingw32-g++
+
+export CC CXX
 
 APP := $(APP).exe
 GENERATED_HEADERS += external/glaserl/gl.h
 DISTCLEAN_FILES += external/glaserl/gl.[ch]
 
-external/glaserl/gl.h:
-	galogen gl.xml --ver 3.0 --profile compatibility
-	mv gl.[ch] external/glaserl
-
 add_platform(freedesktop)
 add_platform(gl)
 
-add_pkgconfig(sdl2)
-add_pkgconfig(SDL2_image)
-add_pkgconfig(gio-2.0)
+CXXFLAGS += -ISDL2_ttf-2.0.15/i686-w64-mingw32/include/SDL2
+LIBS += -LSDL2_ttf-2.0.15/i686-w64-mingw32/lib -lSDL2_ttf.dll
+
+CXXFLAGS += -ISDL2_image-2.0.5/i686-w64-mingw32/include/SDL2
+LIBS += -LSDL2_image-2.0.5/i686-w64-mingw32/lib -lSDL2_image.dll
+
+CXXFLAGS += -ISDL2-2.0.14/i686-w64-mingw32/include/SDL2
+LIBS += -LSDL2-2.0.14/i686-w64-mingw32/lib -lmingw32 -lSDL2main -lSDL2.dll
 
 SOURCES += $(wildcard platform/sdl2/*.cpp)
 CXXFLAGS += -Iplatform/sdl2
-ifeq ($(wildcard $(patsubst %,%/SDL2_ttf.dll,platform/$(PLATFORM)/SDL2_ttf/.libs)),)
-add_pkgconfig(SDL2_ttf)
-else
-CXXFLAGS += -Iplatform/$(PLATFORM)/SDL2_ttf
-LIBS += -Lplatform/$(PLATFORM)/SDL2_ttf/.libs -lSDL2_ttf.dll
-endif
 
 include platform/gl/gl.mk
 include platform/freedesktop/install.mk

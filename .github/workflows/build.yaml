@@ -18,6 +18,7 @@ jobs:
           - sdl1
           - sdl2
           - emscripten
+          - mingw
     steps:
       - uses: actions/checkout@v2
       - uses: mymindstorm/setup-emsdk@v9
@@ -31,5 +32,26 @@ jobs:
             WRAPPER_SCRIPT=""
             if [[ "${{ matrix.platform }}" == "emscripten" ]]; then
                 WRAPPER_SCRIPT=emmake
+            elif [[ "${{ matrix.platform }}" == "mingw" ]]; then
+                wget https://galogen.gpfault.net/releases/1.0/galogen-1.0-linux-x86_64.zip
+                unzip galogen-1.0-linux-x86_64.zip
+                chmod +x galogen
+                ./galogen gl.xml --ver 3.0 --profile compatibility
+                mv gl.[ch] external/glaserl
+                wget http://libsdl.org/release/SDL2-devel-2.0.14-mingw.tar.gz
+                tar xvf SDL2-devel-2.0.14-mingw.tar.gz
+                wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.0.15-mingw.tar.gz
+                tar xvf SDL2_ttf-devel-2.0.15-mingw.tar.gz
+                wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.5-mingw.tar.gz
+                tar xvf SDL2_image-devel-2.0.5-mingw.tar.gz
+
+                cp /usr/lib/gcc/i686-w64-mingw32/9.3-posix/libgcc_s_sjlj-1.dll .
+                cp /usr/lib/gcc/i686-w64-mingw32/9.3-win32/libstdc++-6.dll .
+                cp /usr/i686-w64-mingw32/lib/libwinpthread-1.dll .
+                cp SDL2-2.0.14/i686-w64-mingw32/bin/SDL2.dll .
+                cp SDL2_ttf-2.0.15/i686-w64-mingw32/bin/SDL2_ttf.dll .
+                cp SDL2_ttf-2.0.15/i686-w64-mingw32/bin/zlib.dll .
+                cp SDL2_ttf-2.0.15/i686-w64-mingw32/bin/libfreetype-6.dll .
+                cp SDL2_image-2.0.5/i686-w64-mingw32/bin/SDL2_image.dll .
             fi
             $WRAPPER_SCRIPT make PLATFORM=${{ matrix.platform }} V=1
