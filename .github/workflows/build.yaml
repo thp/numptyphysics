@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - '**'
   pull_request:
     branches:
       - master
@@ -72,3 +74,10 @@ jobs:
           name: build-result
           path: dist/*
           if-no-files-found: ignore
+      - name: Upload Release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+            gh release create "${GITHUB_REF#refs/tags/}" || true
+            gh release upload "${GITHUB_REF#refs/tags/}" dist/* || true
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
