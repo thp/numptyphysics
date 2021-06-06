@@ -32,7 +32,7 @@ jobs:
         if: matrix.platform == 'mingw'
         run: |
             sudo apt install -y \
-                gcc-mingw-w64-i686
+                gcc-mingw-w64-i686 g++-mingw-w64-i686
       - name: Build from source
         run: |
             WRAPPER_SCRIPT=""
