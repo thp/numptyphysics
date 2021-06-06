@@ -54,6 +54,7 @@ jobs:
                 cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libgcc_s_sjlj-1.dll .
                 cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libstdc++-6.dll .
                 cp /usr/i686-w64-mingw32/lib/libwinpthread-1.dll .
+                rm -f SDL2_image-2.0.5/i686-w64-mingw32/bin/zlib1.dll
                 cp -v SDL2*/i686-w64-mingw32/bin/*.dll .
             fi
             $WRAPPER_SCRIPT make PLATFORM=${{ matrix.platform }} V=1
