@@ -17,6 +17,7 @@
 
 #include "Os.h"
 
+#ifndef _WIN32
 #include <gio/gio.h>
 
 
@@ -31,6 +32,8 @@ private:
     gchar *value;
 };
 
+#endif
+
 
 class OsFreeDesktop : public Os {
 public:
@@ -39,6 +42,7 @@ public:
     {
     }
 
+#ifndef _WIN32
     virtual bool openBrowser(const char *url)
     {
         return g_app_info_launch_default_for_uri (url, NULL, NULL) == TRUE;
@@ -48,4 +52,17 @@ public:
     {
         return GLibString(g_build_filename(g_get_user_data_dir(), appName().c_str(), NULL));
     }
+#else
+    virtual bool openBrowser(const char *url)
+    {
+        // TODO
+        return false;
+    }
+
+    virtual std::string userDataDir()
+    {
+        // TODO
+        return ".";
+    }
+#endif
 };

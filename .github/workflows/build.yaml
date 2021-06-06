@@ -1,0 +1,83 @@
+name: Build from source
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '**'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - sdl1
+          - sdl2
+          - emscripten
+          - mingw
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mymindstorm/setup-emsdk@v9
+        if: matrix.platform == 'emscripten'
+      - name: Install dependencies
+        run: |
+            sudo apt install -y \
+                libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libegl1-mesa-dev libgles2-mesa-dev \
+                libsdl1.2-dev libglib2.0-dev libgl1-mesa-dev
+      - name: Install MinGW build tools and dependencies
+        if: matrix.platform == 'mingw'
+        run: |
+            sudo apt install -y \
+                gcc-mingw-w64-i686 g++-mingw-w64-i686
+            wget https://galogen.gpfault.net/releases/1.0/galogen-1.0-linux-x86_64.zip
+            unzip galogen-1.0-linux-x86_64.zip
+            chmod +x galogen
+            ./galogen gl.xml --ver 3.0 --profile compatibility
+            mv gl.[ch] external/glaserl
+            wget http://libsdl.org/release/SDL2-devel-2.0.14-mingw.tar.gz
+            tar xvf SDL2-devel-2.0.14-mingw.tar.gz
+            wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.0.15-mingw.tar.gz
+            tar xvf SDL2_ttf-devel-2.0.15-mingw.tar.gz
+            wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.5-mingw.tar.gz
+            tar xvf SDL2_image-devel-2.0.5-mingw.tar.gz
+
+            cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libgcc_s_sjlj-1.dll .
+            cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libstdc++-6.dll .
+            cp /usr/i686-w64-mingw32/lib/libwinpthread-1.dll .
+            rm -f SDL2_image-2.0.5/i686-w64-mingw32/bin/zlib1.dll
+            cp -v SDL2*/i686-w64-mingw32/bin/*.dll .
+      - name: Build from source
+        run: |
+            WRAPPER_SCRIPT=""
+            if [[ "${{ matrix.platform }}" == "emscripten" ]]; then
+                WRAPPER_SCRIPT=emmake
+            fi
+            $WRAPPER_SCRIPT make PLATFORM=${{ matrix.platform }} V=1
+      - name: Package (mingw)
+        if: matrix.platform == 'mingw'
+        run: |
+            mkdir -p dist
+            zip -r dist/numptyphysics-win32 numptyphysics.exe data *.dll README.md AUTHORS COPYING
+      - name: Package (emscripten)
+        if: matrix.platform == 'emscripten'
+        run: |
+            mkdir -p dist
+            zip -r dist/numptyphysics-html5 numptyphysics.{html,js,wasm}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-result
+          path: dist/*
+          if-no-files-found: ignore
+      - name: Upload Release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+            gh release create "${GITHUB_REF#refs/tags/}" || true
+            gh release upload "${GITHUB_REF#refs/tags/}" dist/* || true
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
